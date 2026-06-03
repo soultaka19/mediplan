@@ -1,0 +1,31 @@
+flowchart LR
+    Patient(("👤 Patient"))
+    Medecin(("👨‍⚕️ Médecin"))
+    Admin(("🧑‍💼 Admin clinique"))
+    Super(("🛠️ Super admin"))
+
+    subgraph Auth["Module Authentification & Comptes"]
+        direction TB
+        UC1(["S'inscrire"])
+        UC2(["Se connecter"])
+        UC3(["Se déconnecter"])
+        UC4(["Réinitialiser le mot de passe"])
+        UC5(["Modifier son profil"])
+        UC6(["Vérifier les permissions (RBAC)"])
+        UC7(["Verrouiller le compte après N échecs"])
+    end
+
+    Patient --- UC1
+    Patient --- UC2
+    Patient --- UC3
+    Patient --- UC4
+    Patient --- UC5
+
+    Medecin --- UC2
+    Medecin --- UC5
+    Admin --- UC2
+    Admin --- UC5
+    Super --- UC2
+
+    UC2 -. include .-> UC6
+    UC2 -. extend .-> UC7

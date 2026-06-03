@@ -1,0 +1,26 @@
+flowchart LR
+    Super(("🛠️ Super admin"))
+    Admin(("🧑‍💼 Admin clinique"))
+
+    subgraph Cli["Module Administration des cliniques"]
+        direction TB
+        UC1(["Créer une clinique"])
+        UC2(["Configurer heures d'ouverture & spécialités"])
+        UC3(["Activer / désactiver une clinique"])
+        UC4(["Créer / rattacher des comptes admin & médecins"])
+        UC5(["Attribuer les rôles (RBAC)"])
+        UC6(["Gérer les utilisateurs de sa clinique"])
+        UC7(["Consulter les journaux d'audit"])
+    end
+
+    Super --- UC1
+    Super --- UC2
+    Super --- UC3
+    Super --- UC4
+    Super --- UC5
+    Super --- UC7
+
+    Admin --- UC6
+
+    UC1 -. include .-> UC2
+    UC4 -. include .-> UC5

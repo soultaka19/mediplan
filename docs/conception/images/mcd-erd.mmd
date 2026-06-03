@@ -1,0 +1,90 @@
+erDiagram
+    USER ||--o{ NOTIFICATION : reçoit
+    USER ||--o{ AUDIT_LOG : génère
+    CLINIC ||--o{ USER : rattache
+    CLINIC ||--o{ SPECIALTY : propose
+    CLINIC ||--o{ DOCTOR_SPECIALTY : "offre via"
+    USER ||--o{ AVAILABILITY : "définit (médecin)"
+    USER ||--o{ DOCTOR_SPECIALTY : "possède (médecin)"
+    SPECIALTY ||--o{ DOCTOR_SPECIALTY : classe
+    AVAILABILITY ||--o{ APPOINTMENT_SLOT : génère
+    USER ||--o{ APPOINTMENT_SLOT : "offre (médecin)"
+    APPOINTMENT_SLOT ||--o| APPOINTMENT : occupe
+    USER ||--o{ APPOINTMENT : "réserve (patient)"
+    APPOINTMENT ||--o{ NOTIFICATION : déclenche
+
+    USER {
+        uuid id PK
+        string email UK
+        string password_hash
+        string first_name
+        string last_name
+        enum role
+        uuid clinic_id FK
+        bool is_active
+        int failed_login_attempts
+        timestamp locked_until
+        timestamp created_at
+    }
+    CLINIC {
+        uuid id PK
+        string name
+        string address
+        time opening_hour
+        time closing_hour
+        bool is_active
+    }
+    SPECIALTY {
+        uuid id PK
+        uuid clinic_id FK
+        string name
+        string description
+    }
+    DOCTOR_SPECIALTY {
+        uuid doctor_id FK
+        uuid specialty_id FK
+    }
+    AVAILABILITY {
+        uuid id PK
+        uuid doctor_id FK
+        enum recurrence_type
+        int weekday
+        time start_time
+        time end_time
+        date valid_from
+        date valid_to
+    }
+    APPOINTMENT_SLOT {
+        uuid id PK
+        uuid availability_id FK
+        uuid doctor_id FK
+        timestamp start_at
+        timestamp end_at
+        bool is_booked
+    }
+    APPOINTMENT {
+        uuid id PK
+        uuid slot_id FK "unique"
+        uuid patient_id FK
+        uuid doctor_id FK
+        enum status
+        string reason
+        string cancellation_reason
+        timestamp created_at
+    }
+    NOTIFICATION {
+        uuid id PK
+        uuid user_id FK
+        uuid appointment_id FK
+        enum type
+        string message
+        bool is_read
+        timestamp created_at
+    }
+    AUDIT_LOG {
+        uuid id PK
+        uuid actor_id FK
+        string action
+        jsonb metadata
+        timestamp created_at
+    }
