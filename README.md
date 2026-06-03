@@ -36,8 +36,9 @@ Quatre rôles interagissent avec la plateforme :
 ```
 .
 ├── docs/
-│   └── conception/          ← Dossier de conception (diagrammes UML, explications)
-├── Cahier_des_charges_MediPlan.docx
+│   ├── cahier-des-charges/   ← Cahier des charges (LIV-05)
+│   ├── consignes/            ← Consignes et énoncés du cours
+│   └── conception/           ← Dossier de conception (diagrammes UML, explications)
 └── README.md
 ```
 
