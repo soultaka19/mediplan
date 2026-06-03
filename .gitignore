@@ -22,3 +22,6 @@ Thumbs.db
 # Fichiers temporaires Office
 ~$*.docx
 ~$*.xlsx
+
+# Dossier personnel (brouillons, non versionné)
+creation-diagramme-cas-d'utilisation/
