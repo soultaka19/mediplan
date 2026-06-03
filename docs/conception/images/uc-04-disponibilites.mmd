@@ -1,0 +1,28 @@
+flowchart LR
+    Medecin(("👨‍⚕️ Médecin"))
+    Admin(("🧑‍💼 Admin clinique"))
+
+    subgraph Dispo["Module Médecins & Disponibilités"]
+        direction TB
+        UC1(["Créer / modifier une fiche médecin"])
+        UC2(["Affecter un médecin à une clinique"])
+        UC3(["Gérer les spécialités"])
+        UC4(["Définir des plages récurrentes"])
+        UC5(["Ajouter une disponibilité ponctuelle"])
+        UC6(["Déclarer une absence / un congé"])
+        UC7(["Déclarer une exception (fermeture)"])
+        UC8(["Générer les plages réservables"])
+    end
+
+    Admin --- UC1
+    Admin --- UC2
+    Admin --- UC3
+    Admin --- UC6
+    Admin --- UC7
+
+    Medecin --- UC4
+    Medecin --- UC5
+    Medecin --- UC6
+
+    UC4 -. include .-> UC8
+    UC5 -. include .-> UC8

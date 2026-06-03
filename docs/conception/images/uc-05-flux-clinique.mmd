@@ -1,0 +1,29 @@
+flowchart LR
+    Medecin(("👨‍⚕️ Médecin"))
+    Admin(("🧑‍💼 Admin clinique"))
+
+    subgraph Flux["Module Flux clinique du jour"]
+        direction TB
+        UC1(["Ouvrir la vue du jour"])
+        UC2(["Marquer un patient « arrivé »"])
+        UC3(["Marquer « en consultation »"])
+        UC4(["Marquer « terminé »"])
+        UC5(["Marquer « absent » (no-show)"])
+        UC6(["Décaler les RDV (action groupée)"])
+        UC7(["Mettre à jour les statistiques temps réel"])
+    end
+
+    Medecin --- UC1
+    Medecin --- UC2
+    Medecin --- UC3
+    Medecin --- UC4
+    Medecin --- UC5
+
+    Admin --- UC1
+    Admin --- UC5
+    Admin --- UC6
+
+    UC2 -. include .-> UC7
+    UC3 -. include .-> UC7
+    UC4 -. include .-> UC7
+    UC5 -. include .-> UC7

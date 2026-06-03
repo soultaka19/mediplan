@@ -1,0 +1,31 @@
+flowchart LR
+    Patient(("👤 Patient"))
+    Admin(("🧑‍💼 Admin clinique"))
+
+    subgraph Resa["Module Rendez-vous"]
+        direction TB
+        UC1(["Rechercher par spécialité / médecin"])
+        UC2(["Consulter les plages disponibles"])
+        UC3(["Réserver un rendez-vous"])
+        UC4(["Modifier / replanifier un rendez-vous"])
+        UC5(["Annuler un rendez-vous"])
+        UC6(["Vérifier l'unicité de la plage"])
+        UC7(["Contrôler le délai minimum d'annulation"])
+        UC8(["Forcer l'annulation avec motif"])
+    end
+
+    Patient --- UC1
+    Patient --- UC2
+    Patient --- UC3
+    Patient --- UC4
+    Patient --- UC5
+
+    Admin --- UC3
+    Admin --- UC4
+    Admin --- UC5
+    Admin --- UC8
+
+    UC3 -. include .-> UC6
+    UC4 -. include .-> UC7
+    UC5 -. include .-> UC7
+    UC8 -. extend .-> UC5
