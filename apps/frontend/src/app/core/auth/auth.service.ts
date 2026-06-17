@@ -8,6 +8,7 @@ import {
   ForgotPasswordPayload,
   LoginPayload,
   MessageResponse,
+  PublicUser,
   RegisterPayload,
   ResetPasswordPayload,
 } from './models/auth.models';
@@ -31,6 +32,17 @@ export class AuthService {
   /** Connexion (POST /auth/login → 200). */
   login(payload: LoginPayload): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, payload);
+  }
+
+  /**
+   * Profil de l'utilisateur courant (GET /users/me → 200).
+   *
+   * Source de vérité du profil (rôle/clinique inclus) ; affine l'utilisateur
+   * reconstruit depuis les claims du JWT au démarrage. Requiert le Bearer
+   * (ajouté par l'intercepteur).
+   */
+  me(): Observable<PublicUser> {
+    return this.http.get<PublicUser>(`${this.apiUrl}/users/me`);
   }
 
   /**

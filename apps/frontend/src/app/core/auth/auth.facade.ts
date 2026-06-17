@@ -47,9 +47,27 @@ export class AuthFacade {
     const user = userFromAccessToken(token);
     if (user) {
       this.userState.set(user);
+      // Le JWT est la source initiale ; /users/me affine le profil.
+      this.refreshCurrentUser();
     } else {
       this.tokenStorage.clear();
     }
+  }
+
+  /**
+   * Rafraîchit l'utilisateur courant depuis `/users/me`.
+   *
+   * Met à jour l'état en cas de succès. En cas d'erreur, on conserve l'état
+   * existant sans casser la session : l'expiration du jeton (401) est gérée par
+   * l'intercepteur, et la réhydratation JWT reste une source valable.
+   */
+  refreshCurrentUser(): void {
+    this.authService.me().subscribe({
+      next: (user) => this.userState.set(user),
+      error: () => {
+        /* Profil non rafraîchi : on garde l'état courant (cf. intercepteur 401). */
+      },
+    });
   }
 
   /** Inscription : enregistre le jeton et l'utilisateur en cas de succès. */
@@ -72,5 +90,7 @@ export class AuthFacade {
   private handleAuthSuccess(response: AuthResponse): void {
     this.tokenStorage.setToken(response.accessToken);
     this.userState.set(response.user);
+    // Confirme/affine le profil depuis la source de vérité serveur.
+    this.refreshCurrentUser();
   }
 }

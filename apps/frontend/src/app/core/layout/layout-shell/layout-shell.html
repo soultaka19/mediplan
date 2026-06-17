@@ -60,7 +60,7 @@
   >
     <nav aria-label="Navigation principale">
       <mat-nav-list>
-        @for (item of navItems; track item.label) {
+        @for (item of navItems(); track item.label) {
           @if (item.route) {
             <a
               mat-list-item

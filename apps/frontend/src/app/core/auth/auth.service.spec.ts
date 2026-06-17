@@ -68,6 +68,17 @@ describe('AuthService', () => {
     req.flush(fakeAuthResponse());
   });
 
+  it('GET /api/v1/users/me et renvoie le profil', () => {
+    let received: { id: string } | undefined;
+
+    service.me().subscribe((res) => (received = res));
+
+    const req = httpMock.expectOne('/api/v1/users/me');
+    expect(req.request.method).toBe('GET');
+    req.flush(fakeAuthResponse().user);
+    expect(received?.id).toBe('u1');
+  });
+
   it('POST /api/v1/auth/forgot-password avec { email }', () => {
     service.forgotPassword('patient@example.com').subscribe();
 

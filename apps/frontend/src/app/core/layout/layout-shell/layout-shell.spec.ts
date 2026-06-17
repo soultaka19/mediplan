@@ -110,6 +110,40 @@ describe('LayoutShell', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/login']);
   });
 
+  it('masque l’item « Utilisateurs » pour un patient', () => {
+    const fixture = setup(patient({ role: 'patient' }));
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.textContent).not.toContain('Utilisateurs');
+    // 1 actif + 2 désactivés (Rendez-vous, Profil) ; « Utilisateurs » masqué.
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
+  });
+
+  it('masque l’item « Utilisateurs » pour un médecin', () => {
+    const fixture = setup(patient({ role: 'doctor' }));
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.textContent).not.toContain('Utilisateurs');
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
+  });
+
+  it('affiche l’item « Utilisateurs » pour un administrateur de clinique', () => {
+    const fixture = setup(patient({ role: 'clinic_admin' }));
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.textContent).toContain('Utilisateurs');
+    // « Utilisateurs » est un placeholder désactivé (route: null) → 3 désactivés.
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(3);
+  });
+
+  it('affiche l’item « Utilisateurs » pour un super administrateur', () => {
+    const fixture = setup(patient({ role: 'super_admin' }));
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.textContent).toContain('Utilisateurs');
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(3);
+  });
+
   it('le burger bascule l’ouverture du sidenav', () => {
     const fixture = setup();
     const component = fixture.componentInstance;
