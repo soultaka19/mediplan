@@ -58,4 +58,26 @@ describe('authErrorInterceptor', () => {
 
     expect(router.navigate).not.toHaveBeenCalled();
   });
+
+  it('sur 423 du login : ne déconnecte pas, ne redirige pas, propage l\'erreur', () => {
+    const facade = TestBed.inject(AuthFacade);
+    const logoutSpy = vi.spyOn(facade, 'logout');
+    let propagatedStatus: number | undefined;
+
+    http.post('/api/v1/auth/login', {}).subscribe({
+      error: (error: unknown) => {
+        propagatedStatus = (error as { status?: number }).status;
+      },
+    });
+    httpMock
+      .expectOne('/api/v1/auth/login')
+      .flush(
+        { message: 'Compte temporairement verrouillé suite à trop de tentatives. Réessayez plus tard.' },
+        { status: 423, statusText: 'Locked' },
+      );
+
+    expect(logoutSpy).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(propagatedStatus).toBe(423);
+  });
 });
