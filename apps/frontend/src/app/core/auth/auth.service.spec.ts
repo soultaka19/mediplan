@@ -67,4 +67,22 @@ describe('AuthService', () => {
     expect(req.request.body).toEqual(payload);
     req.flush(fakeAuthResponse());
   });
+
+  it('POST /api/v1/auth/forgot-password avec { email }', () => {
+    service.forgotPassword('patient@example.com').subscribe();
+
+    const req = httpMock.expectOne('/api/v1/auth/forgot-password');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'patient@example.com' });
+    req.flush(null, { status: 202, statusText: 'Accepted' });
+  });
+
+  it('POST /api/v1/auth/reset-password avec { token, newPassword }', () => {
+    service.resetPassword('reset-token-123', 'Str0ng!Pass').subscribe();
+
+    const req = httpMock.expectOne('/api/v1/auth/reset-password');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ token: 'reset-token-123', newPassword: 'Str0ng!Pass' });
+    req.flush({ message: 'Mot de passe réinitialisé.' });
+  });
 });
