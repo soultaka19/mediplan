@@ -53,6 +53,28 @@
 }
 
 // --- Navigation --------------------------------------------------------------
+// Espacement propre : marge autour de la liste, intervalle vertical entre
+// items, et coins arrondis pour que l'item actif/au survol forme une « pilule ».
+.mp-sidenav nav {
+  padding: var(--mp-space-2);
+}
+
+.mp-sidenav mat-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+  padding: 0;
+}
+
+.mp-sidenav mat-nav-list [mat-list-item] {
+  border-radius: var(--mp-radius-md);
+
+  // Affordance au survol des items actionnables (pas les désactivés).
+  &:not(.mp-nav--disabled):hover {
+    background: var(--mp-color-surface-variant);
+  }
+}
+
 .mp-nav--active {
   --mat-list-active-indicator-color: var(--mp-color-primary-container);
 
