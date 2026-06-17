@@ -12,7 +12,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter, map } from 'rxjs';
 
 import { AuthFacade } from '@core/auth';
-import { NAV_ITEMS } from '../nav-items';
+import { NAV_ITEMS, visibleNavItems } from '../nav-items';
 
 /** Largeur max au-delà de laquelle le sidenav est en mode `side` (pivot md). */
 const MOBILE_QUERY = '(max-width: 959.98px)';
@@ -52,11 +52,17 @@ export class LayoutShell {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthFacade);
 
-  /** Items de navigation (2 sur 3 désactivés tant que l'écran n'existe pas). */
-  protected readonly navItems = NAV_ITEMS;
-
   /** Utilisateur courant (signal lecture seule) pour le menu utilisateur. */
   readonly user = this.auth.currentUser;
+
+  /**
+   * Items de navigation visibles selon le rôle courant (réactif au changement
+   * d'utilisateur). Les items réservés (ex. « Utilisateurs ») n'apparaissent que
+   * pour les rôles autorisés.
+   */
+  protected readonly navItems = computed(() =>
+    visibleNavItems(NAV_ITEMS, this.user()?.role ?? null),
+  );
 
   /** Vrai sous le pivot md (mode overlay). Initialisé à l'état courant. */
   readonly isMobile = toSignal(
