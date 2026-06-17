@@ -1,0 +1,77 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 26rem;
+  padding: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+
+label {
+  margin-bottom: 0.375rem;
+  font-weight: 500;
+}
+
+input {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #bdbdbd;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+input[aria-invalid='true'] {
+  border-color: #c62828;
+}
+
+.field-error {
+  margin-top: 0.375rem;
+  color: #c62828;
+  font-size: 0.875rem;
+}
+
+.auth-error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: #fdecea;
+  color: #b71c1c;
+}
+
+button[type='submit'] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #1565c0;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-switch {
+  margin-top: 1.5rem;
+  text-align: center;
+}
