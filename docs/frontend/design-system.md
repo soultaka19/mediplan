@@ -49,6 +49,7 @@ Convention de nommage : préfixe `--mp-` (MediPlan) + catégorie + rôle. On dis
 | `--mp-color-accent` | `var(--mp-teal-600)` | Accent secondaire (badges, focus secondaire) |
 | `--mp-color-on-accent` | `#FFFFFF` | Texte/icône sur accent |
 | `--mp-color-background` | `var(--mp-bg)` | Fond de page / zone contenu |
+| `--mp-color-auth-bg-tint` | `color-mix(in srgb, var(--mp-color-primary) 4%, transparent)` | Teinte primaire **très basse** (≤ 4 %) du dégradé d'arrière-plan des écrans d'auth (jamais sur du texte ni des données — cf. roadmap §3.2/§3.7) |
 | `--mp-color-surface` | `var(--mp-surface)` | Cartes, toolbar, sidenav, dialogs |
 | `--mp-color-surface-variant` | `#F1F5F9` | Surfaces alternées (lignes, en-têtes de table) |
 | `--mp-color-text` | `var(--mp-ink-900)` | Texte principal |
@@ -103,14 +104,18 @@ Règles : pas de `text-transform: uppercase` sur les boutons (lisibilité). Line
 
 ### 1.6 Ombres / élévations
 
-Ombres douces et basses (registre médical = calme, pas d'effet « flottant » marqué).
+Échelle **feuilletée mais sobre** : deux couches par niveau (ombre ambiante diffuse + ombre directionnelle courte) pour créer une perception de profondeur premium **sans couleur**. Registre médical = calme : opacité d'ombre **plafonnée à ~14 %**, aucun effet « carte qui lévite » (cf. roadmap UX §3.1, constat T1).
 
 | Variable | Valeur | Usage |
 |---|---|---|
 | `--mp-elevation-0` | `none` | Surfaces à plat (séparées par bordure) |
-| `--mp-elevation-1` | `0 1px 2px rgba(26,34,51,.06), 0 1px 3px rgba(26,34,51,.08)` | Cartes, toolbar |
-| `--mp-elevation-2` | `0 2px 6px rgba(26,34,51,.08), 0 4px 12px rgba(26,34,51,.06)` | Menus, sidenav overlay mobile |
-| `--mp-elevation-3` | `0 8px 24px rgba(26,34,51,.12)` | Dialogs |
+| `--mp-elevation-1` | `0 1px 2px rgba(26,34,51,.08), 0 2px 6px rgba(26,34,51,.06)` | Cartes au repos, toolbar |
+| `--mp-elevation-2` | `0 2px 4px rgba(26,34,51,.08), 0 8px 20px rgba(26,34,51,.10)` | Cartes flottantes (auth), menus, sidenav overlay mobile |
+| `--mp-elevation-3` | `0 8px 16px rgba(26,34,51,.10), 0 24px 48px rgba(26,34,51,.14)` | Dialogs |
+| `--mp-elevation-hover` | `0 4px 8px rgba(26,34,51,.10), 0 12px 28px rgba(26,34,51,.12)` | Élévation interactive au survol (transition cartes) |
+
+> **Surfaces feuilletées** : fond `--mp-color-background` (#F7F9FC) → cartes `--mp-color-surface` (#FFF) en `elevation-1` → carte mise en avant en `elevation-2`. La hiérarchie de plans crée la perception premium sans ajouter de couleur.
+> **Garde-fou** : on ne dépasse pas ~14 % d'opacité d'ombre.
 
 ### 1.7 Breakpoints responsive
 

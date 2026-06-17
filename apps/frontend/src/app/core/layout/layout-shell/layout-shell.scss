@@ -68,6 +68,10 @@
 
 .mp-sidenav mat-nav-list [mat-list-item] {
   border-radius: var(--mp-radius-md);
+  // Transition douce du fond et du filet d'accent (hover → actif) (S3 / §3.5).
+  transition:
+    background-color 140ms var(--mp-ease-standard, ease),
+    box-shadow 140ms var(--mp-ease-standard, ease);
 
   // Affordance au survol des items actionnables (pas les désactivés).
   &:not(.mp-nav--disabled):hover {
@@ -79,11 +83,21 @@
   --mat-list-active-indicator-color: var(--mp-color-primary-container);
 
   background: var(--mp-color-primary-container);
+  // Filet d'accent teal décoratif (jamais de texte sur teal → AA préservé) (S3).
+  // box-shadow inset gauche : ne décale pas le contenu (vs border-left).
+  box-shadow: inset 3px 0 0 0 var(--mp-color-accent);
 
   .mat-mdc-list-item-icon,
   span[matListItemTitle] {
     color: var(--mp-color-primary);
     font-weight: 600;
+  }
+}
+
+// Respect de prefers-reduced-motion : pas de transition sur le changement d'état.
+@media (prefers-reduced-motion: reduce) {
+  .mp-sidenav mat-nav-list [mat-list-item] {
+    transition: none;
   }
 }
 

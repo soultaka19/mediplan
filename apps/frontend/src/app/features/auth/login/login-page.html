@@ -1,10 +1,11 @@
-<mat-card class="auth-card" appearance="outlined" aria-labelledby="login-title">
+<mat-card class="auth-card" appearance="raised" aria-labelledby="login-title">
   @if (loading()) {
     <mat-progress-bar mode="indeterminate" class="auth-card__progress" />
   }
 
   <mat-card-content>
     <h1 id="login-title" class="auth-card__title">Connexion</h1>
+    <p class="auth-card__subtitle">Accédez à votre espace de gestion des rendez-vous.</p>
 
     <!-- Erreur serveur : bandeau inline annoncé (role="alert" dans Alert) -->
     @if (errorMessage(); as message) {
@@ -36,11 +37,22 @@
         <mat-label>Mot de passe</mat-label>
         <input
           matInput
-          type="password"
+          [type]="showPassword() ? 'text' : 'password'"
           formControlName="password"
           autocomplete="current-password"
           data-testid="login-password"
         />
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          data-testid="login-password-toggle"
+          [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+          [attr.aria-pressed]="showPassword()"
+          (click)="togglePassword()"
+        >
+          <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
         @if (password.touched && password.invalid) {
           <mat-error>Le mot de passe est requis.</mat-error>
         }

@@ -38,6 +38,9 @@
   --mp-color-accent: var(--mp-teal-600);
   --mp-color-on-accent: #ffffff;
   --mp-color-background: var(--mp-bg);
+  // Teinte primaire très basse (≤ 4 %) pour le dégradé de fond des écrans auth.
+  // Jamais sur du texte/données (cf. design-system §1.2 / §3.7).
+  --mp-color-auth-bg-tint: color-mix(in srgb, var(--mp-color-primary) 4%, transparent);
   --mp-color-surface: var(--mp-surface);
   --mp-color-surface-variant: #f1f5f9;
   --mp-color-text: var(--mp-ink-900);
@@ -69,10 +72,14 @@
   --mp-radius-full: 9999px;
 
   // --- 6) Élévations §1.6 ----------------------------------------------------
+  // Échelle « feuilletée mais sobre » : 2 couches (ambiante + directionnelle),
+  // opacité plafonnée à ~14 % (registre médical). Cf. design-system §1.6 / T1.
   --mp-elevation-0: none;
-  --mp-elevation-1: 0 1px 2px rgba(26, 34, 51, 0.06), 0 1px 3px rgba(26, 34, 51, 0.08);
-  --mp-elevation-2: 0 2px 6px rgba(26, 34, 51, 0.08), 0 4px 12px rgba(26, 34, 51, 0.06);
-  --mp-elevation-3: 0 8px 24px rgba(26, 34, 51, 0.12);
+  --mp-elevation-1: 0 1px 2px rgba(26, 34, 51, 0.08), 0 2px 6px rgba(26, 34, 51, 0.06);
+  --mp-elevation-2: 0 2px 4px rgba(26, 34, 51, 0.08), 0 8px 20px rgba(26, 34, 51, 0.1);
+  --mp-elevation-3: 0 8px 16px rgba(26, 34, 51, 0.1), 0 24px 48px rgba(26, 34, 51, 0.14);
+  // Élévation interactive au survol (transition cartes).
+  --mp-elevation-hover: 0 4px 8px rgba(26, 34, 51, 0.1), 0 12px 28px rgba(26, 34, 51, 0.12);
 }
 
 // --- Thème Material 3 (clair) ------------------------------------------------

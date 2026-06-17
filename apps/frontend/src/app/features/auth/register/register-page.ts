@@ -3,6 +3,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
@@ -28,6 +29,7 @@ import { authErrorMessage } from '@shared/http/http-error-message';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
     MatProgressBarModule,
     Alert,
   ],
@@ -44,6 +46,8 @@ export class RegisterPage {
 
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  /** Affiche le mot de passe en clair (toggle accessible, A5). */
+  readonly showPassword = signal(false);
 
   /** Formulaire réactif typé. Prénom/nom optionnels (alignés sur le DTO). */
   readonly form = this.fb.group({
@@ -67,6 +71,11 @@ export class RegisterPage {
 
   get password() {
     return this.form.controls.password;
+  }
+
+  /** Bascule l'affichage du mot de passe (clair ↔ masqué). */
+  togglePassword(): void {
+    this.showPassword.update((visible) => !visible);
   }
 
   /** Soumet le formulaire d'inscription. */

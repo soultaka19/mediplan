@@ -1,10 +1,11 @@
-<mat-card class="auth-card" appearance="outlined" aria-labelledby="register-title">
+<mat-card class="auth-card" appearance="raised" aria-labelledby="register-title">
   @if (loading()) {
     <mat-progress-bar mode="indeterminate" class="auth-card__progress" />
   }
 
   <mat-card-content>
     <h1 id="register-title" class="auth-card__title">Créer un compte</h1>
+    <p class="auth-card__subtitle">Créez votre compte patient en quelques secondes.</p>
 
     @if (errorMessage(); as message) {
       <app-alert variant="error" [message]="message" data-testid="register-error" />
@@ -57,11 +58,22 @@
         <mat-label>Mot de passe</mat-label>
         <input
           matInput
-          type="password"
+          [type]="showPassword() ? 'text' : 'password'"
           formControlName="password"
           autocomplete="new-password"
           data-testid="register-password"
         />
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          data-testid="register-password-toggle"
+          [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+          [attr.aria-pressed]="showPassword()"
+          (click)="togglePassword()"
+        >
+          <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
         <mat-hint>
           Au moins {{ passwordMinLength }} caractères et 3 types parmi : minuscule, majuscule,
           chiffre, caractère spécial.

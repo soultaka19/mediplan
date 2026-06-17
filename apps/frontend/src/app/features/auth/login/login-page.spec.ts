@@ -68,6 +68,31 @@ describe('LoginPage', () => {
     expect(component.loading()).toBe(false);
   });
 
+  it('bascule la visibilité du mot de passe via le toggle (type + ARIA)', () => {
+    const fixture = setup();
+    const root = fixture.nativeElement as HTMLElement;
+    const input = byTestId<HTMLInputElement>(root, 'login-password');
+    const toggle = byTestId<HTMLButtonElement>(root, 'login-password-toggle');
+
+    // État initial : masqué.
+    expect(input.getAttribute('type')).toBe('password');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    expect(toggle.getAttribute('aria-label')).toBe('Afficher le mot de passe');
+
+    // Clic → affiché.
+    toggle.click();
+    fixture.detectChanges();
+    expect(input.getAttribute('type')).toBe('text');
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(toggle.getAttribute('aria-label')).toBe('Masquer le mot de passe');
+
+    // Re-clic → masqué.
+    toggle.click();
+    fixture.detectChanges();
+    expect(input.getAttribute('type')).toBe('password');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+  });
+
   it("affiche un message d'erreur sur 401", () => {
     const fixture = setup();
     const component = fixture.componentInstance;
