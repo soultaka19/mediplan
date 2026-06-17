@@ -23,9 +23,10 @@ import { UserRole } from './user-role.enum';
  * - FK `clinicId` → clinic.id ON DELETE RESTRICT (on ne supprime pas une clinique
  *   tant qu'elle rattache des utilisateurs).
  *
- * Donnée sensible : ne JAMAIS exposer `passwordHash`, `failedLoginAttempts`,
- * `lockedUntil` dans une réponse API. Filtrage en place via `select:false` sur
- * `passwordHash` + le DTO de sortie `toPublicUser` (voir auth-response.dto.ts).
+ * Donnée sensible : ne JAMAIS exposer `passwordHash`, `passwordResetTokenHash`,
+ * `failedLoginAttempts`, `lockedUntil` dans une réponse API. Filtrage en place
+ * via `select:false` sur `passwordHash` / `passwordResetTokenHash` + le DTO de
+ * sortie `toPublicUser` (voir auth-response.dto.ts).
  */
 @Entity('user')
 export class User {
@@ -71,6 +72,20 @@ export class User {
 
   @Column({ type: 'timestamptz', nullable: true })
   lockedUntil: Date | null;
+
+  /**
+   * Hash SHA-256 du jeton de réinitialisation de mot de passe (MEDIPLAN-16).
+   *
+   * On stocke le HASH du jeton, jamais le jeton en clair : une fuite de la base
+   * ne permet pas de réinitialiser un mot de passe. `select:false` aligne ce
+   * champ sur `passwordHash` (ne sort jamais d'une requête sans demande explicite).
+   */
+  @Column({ type: 'text', nullable: true, select: false })
+  passwordResetTokenHash: string | null;
+
+  /** Expiration du jeton de réinitialisation (MEDIPLAN-16). NULL = aucun jeton actif. */
+  @Column({ type: 'timestamptz', nullable: true })
+  passwordResetExpiresAt: Date | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
