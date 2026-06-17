@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  padding: 2rem 1rem;
+}
+
+.dashboard-card {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+}
+
+.welcome {
+  margin: 0 0 1.5rem;
+}
+
+.user-info {
+  margin: 0 0 1.5rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.user-info dt {
+  font-weight: 600;
+  color: #555;
+}
+
+.user-info dd {
+  margin: 0;
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: #1565c0;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0d47a1;
+}

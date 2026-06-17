@@ -59,7 +59,7 @@ describe('LoginPage', () => {
       email: 'patient@example.com',
       password: 'Str0ng!Pass',
     });
-    expect(navigateSpy).toHaveBeenCalledWith(['/']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
     expect(component.loading()).toBe(false);
   });
 

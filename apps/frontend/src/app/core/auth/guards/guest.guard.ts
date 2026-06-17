@@ -6,7 +6,7 @@ import { AuthFacade } from '../auth.facade';
 /**
  * Empêche l'accès aux écrans publics (login/register) si déjà connecté.
  *
- * Redirige l'utilisateur authentifié vers l'accueil applicatif.
+ * Redirige l'utilisateur authentifié vers le tableau de bord.
  */
 export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthFacade);
@@ -15,5 +15,5 @@ export const guestGuard: CanActivateFn = () => {
   if (!auth.isAuthenticated()) {
     return true;
   }
-  return router.createUrlTree(['/']);
+  return router.createUrlTree(['/dashboard']);
 };

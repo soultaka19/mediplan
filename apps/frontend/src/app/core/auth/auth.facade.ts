@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
+import { userFromAccessToken } from './access-token';
 import { AuthService } from './auth.service';
 import { AuthResponse, LoginPayload, PublicUser, RegisterPayload } from './models/auth.models';
 import { TokenStorage } from './token-storage';
@@ -23,8 +24,33 @@ export class AuthFacade {
   /** Utilisateur courant (lecture seule). */
   readonly currentUser = this.userState.asReadonly();
 
-  /** Vrai si un jeton est présent (état dérivé). */
+  /** Vrai si un utilisateur est authentifié (état dérivé). */
   readonly isAuthenticated = computed(() => this.userState() !== null);
+
+  constructor() {
+    this.restoreSession();
+  }
+
+  /**
+   * Réhydrate la session au démarrage à partir du jeton persistant.
+   *
+   * Faute d'endpoint `/me`, on reconstruit l'utilisateur depuis les claims du
+   * JWT. Un jeton absent, mal formé ou expiré ne crée pas de session (et est
+   * purgé le cas échéant). Permet à `isAuthenticated` de survivre à un
+   * rechargement de page.
+   */
+  private restoreSession(): void {
+    const token = this.tokenStorage.getToken();
+    if (!token) {
+      return;
+    }
+    const user = userFromAccessToken(token);
+    if (user) {
+      this.userState.set(user);
+    } else {
+      this.tokenStorage.clear();
+    }
+  }
 
   /** Inscription : enregistre le jeton et l'utilisateur en cas de succès. */
   register(payload: RegisterPayload): Observable<AuthResponse> {

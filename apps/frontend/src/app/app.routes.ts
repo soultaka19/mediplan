@@ -1,15 +1,18 @@
 import { Routes } from '@angular/router';
 
-import { guestGuard } from '@core/auth';
+import { authGuard, guestGuard } from '@core/auth';
 
 /**
  * Routes applicatives.
  *
- * Écrans publics (login/register) protégés par `guestGuard` (interdits si déjà
- * connecté). La route racine redirige (placeholder) vers `/login` en attendant
- * le tableau de bord. `authGuard` est exporté et testé, prêt à être appliqué
- * sur le premier écran protégé réel — il ne peut pas être combiné à `redirectTo`
- * sur la même route (Angular exécute les redirections avant les guards).
+ * - `login`/`register` : écrans publics protégés par `guestGuard` (interdits si
+ *   déjà connecté → redirigés vers `/dashboard`).
+ * - `dashboard` : écran protégé par `authGuard` (un visiteur non authentifié est
+ *   renvoyé vers `/login`). Cible de redirection après connexion/inscription.
+ * - `''` et `**` redirigent vers `/dashboard` ; `authGuard` aiguille ensuite
+ *   vers `/login` si la session n'est pas valide. (On ne combine jamais
+ *   `redirectTo` et `canActivate` sur une même route : Angular évalue les
+ *   redirections avant les guards.)
  */
 export const routes: Routes = [
   {
@@ -24,14 +27,18 @@ export const routes: Routes = [
       import('@features/auth/register/register-page').then((m) => m.RegisterPage),
   },
   {
-    // Aucun écran réel dans ce ticket : on redirige vers login en attendant
-    // le tableau de bord (qui portera alors `authGuard`).
+    path: 'dashboard',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@features/dashboard/dashboard-page').then((m) => m.DashboardPage),
+  },
+  {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'login',
+    redirectTo: 'dashboard',
   },
   {
     path: '**',
-    redirectTo: 'login',
+    redirectTo: 'dashboard',
   },
 ];

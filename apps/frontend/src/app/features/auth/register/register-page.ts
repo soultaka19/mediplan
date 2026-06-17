@@ -67,7 +67,7 @@ export class RegisterPage {
     this.auth.register(this.buildPayload()).subscribe({
       next: () => {
         this.loading.set(false);
-        void this.router.navigate(['/']);
+        void this.router.navigate(['/dashboard']);
       },
       error: (error: unknown) => {
         this.loading.set(false);

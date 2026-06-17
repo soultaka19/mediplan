@@ -1,0 +1,19 @@
+<section class="dashboard-card" aria-labelledby="dashboard-title">
+  <h1 id="dashboard-title">Tableau de bord</h1>
+
+  @if (user(); as currentUser) {
+    <p class="welcome" data-testid="dashboard-welcome">
+      Bienvenue, <strong>{{ displayName() }}</strong>.
+    </p>
+
+    <dl class="user-info">
+      <dt>Adresse e-mail</dt>
+      <dd data-testid="dashboard-email">{{ currentUser.email }}</dd>
+
+      <dt>Rôle</dt>
+      <dd data-testid="dashboard-role">{{ roleLabel() }}</dd>
+    </dl>
+  }
+
+  <button type="button" data-testid="dashboard-logout" (click)="logout()">Se déconnecter</button>
+</section>
