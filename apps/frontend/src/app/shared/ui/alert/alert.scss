@@ -1,0 +1,44 @@
+.mp-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mp-space-2);
+  padding: var(--mp-space-3) var(--mp-space-4);
+  border-radius: var(--mp-radius-md);
+  border: 1px solid currentColor;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.mp-alert__icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 20px;
+}
+
+.mp-alert__text {
+  // Texte en couleur d'encre pleine (contraste AA), le ton sémantique reste sur
+  // l'icône/bordure/fond.
+  color: var(--mp-color-text);
+}
+
+.mp-alert--error {
+  color: var(--mp-color-error);
+  background: #fdecea;
+}
+
+.mp-alert--success {
+  color: var(--mp-color-success);
+  background: var(--mp-teal-50);
+}
+
+.mp-alert--warning {
+  color: var(--mp-color-warning);
+  background: #fef3e2;
+}
+
+.mp-alert--info {
+  color: var(--mp-color-info);
+  background: var(--mp-color-primary-container);
+}

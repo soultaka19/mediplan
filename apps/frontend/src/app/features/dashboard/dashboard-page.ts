@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
 
 import { AuthFacade, UserRole } from '@core/auth';
 
@@ -12,21 +12,22 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 /**
- * Tableau de bord (écran protégé par `authGuard`).
+ * Tableau de bord (écran protégé par `authGuard`, rendu dans le shell).
  *
  * Cible de redirection après connexion/inscription. Affiche l'utilisateur
- * courant exposé par l'AuthFacade et permet de se déconnecter. Aucun appel HTTP
+ * courant exposé par l'AuthFacade. La déconnexion vit désormais dans le menu
+ * utilisateur du header (LayoutShell) — plus de bouton ici. Aucun appel HTTP
  * direct : tout passe par la façade.
  */
 @Component({
   selector: 'app-dashboard-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatCardModule],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
 })
 export class DashboardPage {
   private readonly auth = inject(AuthFacade);
-  private readonly router = inject(Router);
 
   /** Utilisateur connecté (signal en lecture seule). */
   readonly user = this.auth.currentUser;
@@ -46,10 +47,4 @@ export class DashboardPage {
     const role = this.user()?.role;
     return role ? ROLE_LABELS[role] : '';
   });
-
-  /** Déconnecte l'utilisateur et le renvoie vers l'écran de connexion. */
-  logout(): void {
-    this.auth.logout();
-    void this.router.navigate(['/login']);
-  }
 }

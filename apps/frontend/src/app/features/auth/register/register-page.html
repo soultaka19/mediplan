@@ -1,92 +1,100 @@
-<section class="auth-card" aria-labelledby="register-title">
-  <h1 id="register-title">Créer un compte</h1>
-
-  @if (errorMessage()) {
-    <p class="auth-error" role="alert" data-testid="register-error">{{ errorMessage() }}</p>
+<mat-card class="auth-card" appearance="outlined" aria-labelledby="register-title">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" class="auth-card__progress" />
   }
 
-  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-    <div class="form-field">
-      <label for="register-firstName">Prénom <span class="optional">(optionnel)</span></label>
-      <input
-        id="register-firstName"
-        type="text"
-        formControlName="firstName"
-        autocomplete="given-name"
-        data-testid="register-firstName"
-      />
-    </div>
+  <mat-card-content>
+    <h1 id="register-title" class="auth-card__title">Créer un compte</h1>
 
-    <div class="form-field">
-      <label for="register-lastName">Nom <span class="optional">(optionnel)</span></label>
-      <input
-        id="register-lastName"
-        type="text"
-        formControlName="lastName"
-        autocomplete="family-name"
-        data-testid="register-lastName"
-      />
-    </div>
+    @if (errorMessage(); as message) {
+      <app-alert variant="error" [message]="message" data-testid="register-error" />
+    }
 
-    <div class="form-field">
-      <label for="register-email">Adresse e-mail</label>
-      <input
-        id="register-email"
-        type="email"
-        formControlName="email"
-        autocomplete="email"
-        data-testid="register-email"
-        [attr.aria-invalid]="email.touched && email.invalid ? 'true' : null"
-        aria-describedby="register-email-error"
-      />
-      @if (email.touched && email.invalid) {
-        <span id="register-email-error" class="field-error" role="alert">
-          @if (email.errors?.['required']) {
-            L'adresse e-mail est requise.
-          } @else if (email.errors?.['email']) {
-            Format d'adresse e-mail invalide.
-          }
-        </span>
-      }
-    </div>
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="auth-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Prénom (optionnel)</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="firstName"
+          autocomplete="given-name"
+          data-testid="register-firstName"
+        />
+      </mat-form-field>
 
-    <div class="form-field">
-      <label for="register-password">Mot de passe</label>
-      <input
-        id="register-password"
-        type="password"
-        formControlName="password"
-        autocomplete="new-password"
-        data-testid="register-password"
-        [attr.aria-invalid]="password.touched && password.invalid ? 'true' : null"
-        aria-describedby="register-password-help register-password-error"
-      />
-      <span id="register-password-help" class="field-help">
-        Au moins {{ passwordMinLength }} caractères et 3 types parmi : minuscule, majuscule,
-        chiffre, caractère spécial.
-      </span>
-      @if (password.touched && password.invalid) {
-        <span id="register-password-error" class="field-error" role="alert">
-          @if (password.errors?.['required']) {
-            Le mot de passe est requis.
-          } @else if (password.errors?.['weakPassword']) {
-            Le mot de passe ne respecte pas la politique de sécurité.
-          }
-        </span>
-      }
-    </div>
+      <mat-form-field appearance="outline">
+        <mat-label>Nom (optionnel)</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="lastName"
+          autocomplete="family-name"
+          data-testid="register-lastName"
+        />
+      </mat-form-field>
 
-    <button type="submit" data-testid="register-submit" [disabled]="loading()">
-      @if (loading()) {
-        Création…
-      } @else {
-        Créer mon compte
-      }
-    </button>
-  </form>
+      <mat-form-field appearance="outline">
+        <mat-label>Adresse e-mail</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          data-testid="register-email"
+        />
+        @if (email.touched && email.invalid) {
+          <mat-error>
+            @if (email.errors?.['required']) {
+              L'adresse e-mail est requise.
+            } @else if (email.errors?.['email']) {
+              Format d'adresse e-mail invalide.
+            }
+          </mat-error>
+        }
+      </mat-form-field>
 
-  <p class="auth-switch">
-    Déjà inscrit ?
-    <a routerLink="/login" data-testid="register-to-login">Se connecter</a>
-  </p>
-</section>
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+          data-testid="register-password"
+        />
+        <mat-hint>
+          Au moins {{ passwordMinLength }} caractères et 3 types parmi : minuscule, majuscule,
+          chiffre, caractère spécial.
+        </mat-hint>
+        @if (password.touched && password.invalid) {
+          <mat-error>
+            @if (password.errors?.['required']) {
+              Le mot de passe est requis.
+            } @else if (password.errors?.['weakPassword']) {
+              Le mot de passe ne respecte pas la politique de sécurité.
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <button
+        matButton="filled"
+        type="submit"
+        class="auth-form__submit"
+        data-testid="register-submit"
+        [disabled]="loading()"
+      >
+        @if (loading()) {
+          Création…
+        } @else {
+          Créer mon compte
+        }
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Déjà inscrit ?
+      <a matButton routerLink="/login" data-testid="register-to-login">Se connecter</a>
+    </p>
+  </mat-card-content>
+</mat-card>

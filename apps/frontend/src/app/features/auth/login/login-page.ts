@@ -1,8 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthFacade } from '@core/auth';
+import { Alert } from '@shared/ui';
 import { authErrorMessage } from '@shared/http/http-error-message';
 
 /**
@@ -14,7 +20,16 @@ import { authErrorMessage } from '@shared/http/http-error-message';
 @Component({
   selector: 'app-login-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatProgressBarModule,
+    Alert,
+  ],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',
 })
