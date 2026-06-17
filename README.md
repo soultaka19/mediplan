@@ -46,13 +46,15 @@ Monorepo géré avec **Turborepo + pnpm workspaces** :
 ├── package.json    ← Scripts racine (délégués à Turbo)
 ├── pnpm-workspace.yaml
 ├── turbo.json      ← Pipelines de tâches (build/lint/test/dev)
+├── docker-compose.yml ← Orchestration locale (postgres + backend + frontend)
+├── docker/         ← Dockerfiles (backend, frontend) + config nginx
 ├── .env.example    ← Modèle de configuration (copier en .env)
 └── README.md
 ```
 
 ## Démarrage (développement local)
 
-> Prérequis : **Node.js ≥ 20** et **pnpm** (via Corepack : `corepack enable`, sinon `npm i -g pnpm`).
+> Prérequis : **Node.js ≥ 22.22 (ou ≥ 24.15)** — requis par Angular 22 — et **pnpm** (via Corepack : `corepack enable`, sinon `npm i -g pnpm`).
 
 ```bash
 # 1. Installer les dépendances de tout le monorepo
@@ -71,7 +73,30 @@ pnpm test          # tests
 pnpm format        # formatage Prettier
 ```
 
-> La conteneurisation Docker Compose (« tout en une commande ») est suivie par MEDIPLAN-29.
+## Démarrage avec Docker (« une commande »)
+
+> Prérequis : **Docker Desktop** (ou Docker Engine + Compose v2).
+
+```bash
+# Copier la configuration (des valeurs de dev par défaut existent sinon)
+cp .env.example .env
+
+# Construire et lancer postgres + backend + frontend
+docker compose up -d --build
+```
+
+| Service          | URL                                                                    |
+| ---------------- | ---------------------------------------------------------------------- |
+| Frontend (nginx) | http://localhost:4200                                                  |
+| API backend      | http://localhost:4200/api/v1 (proxy) — ou http://localhost:3000/api/v1 |
+| Santé backend    | http://localhost:3000/health                                           |
+| PostgreSQL       | localhost:5432                                                         |
+
+```bash
+docker compose ps        # état des conteneurs
+docker compose logs -f   # journaux
+docker compose down      # arrêter (le volume de données est conservé)
+```
 
 ## Dossier de conception
 

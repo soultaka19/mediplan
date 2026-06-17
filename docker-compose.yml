@@ -1,0 +1,60 @@
+# MediPlan — environnement de développement local (une commande : `docker compose up`)
+# Les variables proviennent du fichier .env (voir .env.example) ; des valeurs par défaut
+# de développement sont fournies pour permettre un démarrage immédiat.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: mediplan-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-mediplan}
+      POSTGRES_USER: ${DB_USER:-mediplan_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_me}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - mediplan_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-mediplan_app} -d ${DB_NAME:-mediplan}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: mediplan-backend
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-mediplan}
+      DB_USER: ${DB_USER:-mediplan_app}
+      DB_PASSWORD: ${DB_PASSWORD:-change_me}
+      JWT_SECRET: ${JWT_SECRET:-dev_secret_change_me_min_32_chars_long}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-60m}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      BACKEND_PORT: 3000
+    ports:
+      - '${BACKEND_PORT:-3000}:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: mediplan-frontend
+    ports:
+      - '${FRONTEND_PORT:-4200}:80'
+    depends_on:
+      - backend
+
+volumes:
+  mediplan_pgdata:
