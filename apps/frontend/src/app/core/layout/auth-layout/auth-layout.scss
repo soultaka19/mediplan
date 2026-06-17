@@ -1,0 +1,19 @@
+// Layout auth : le layout (flex/centrage) est porté par Tailwind dans le
+// template ; ici, uniquement l'identité visuelle de la marque.
+.mp-auth {
+  background: var(--mp-color-background);
+}
+
+.mp-auth__logo {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+  line-height: 32px;
+  color: var(--mp-color-primary);
+}
+
+.mp-auth__name {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--mp-color-text);
+}

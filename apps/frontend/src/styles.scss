@@ -1,1 +1,54 @@
-/* You can add global styles to this file, and also import other style files */
+// Styles globaux MediPlan.
+// - Thème (tokens `--mp-*` + Material 3 + pont system tokens) : voir _theme.scss.
+// - Tailwind v4 : isolé dans styles/tailwind.css (référencé dans angular.json).
+@use 'styles/theme';
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--mp-color-background);
+  color: var(--mp-color-text);
+  font-family: var(--mp-font-family);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+// Icônes Material Symbols (variante outlined, auto-hébergée via _theme.scss).
+.material-symbols-outlined,
+mat-icon {
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+// Focus clavier toujours visible (§6.2) — ne jamais supprimer sans alternative.
+:focus-visible {
+  outline: 2px solid var(--mp-color-focus-ring);
+  outline-offset: 2px;
+}
+
+// Lien d'évitement « Aller au contenu » (§6.4) : hors écran, visible au focus.
+.skip-link {
+  position: absolute;
+  left: var(--mp-space-2);
+  top: -100px;
+  z-index: 1000;
+  padding: var(--mp-space-2) var(--mp-space-4);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-surface);
+  color: var(--mp-color-primary);
+  font-weight: 600;
+  box-shadow: var(--mp-elevation-2);
+  transition: top 0.15s ease-in-out;
+
+  &:focus {
+    top: var(--mp-space-2);
+  }
+}

@@ -1,0 +1,128 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+// --- Toolbar -----------------------------------------------------------------
+.mp-toolbar {
+  position: relative;
+  z-index: 2;
+  gap: var(--mp-space-2);
+  background: var(--mp-color-surface);
+  color: var(--mp-color-text);
+  box-shadow: var(--mp-elevation-1);
+}
+
+.mp-toolbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+}
+
+.mp-toolbar__logo {
+  color: var(--mp-color-primary);
+}
+
+.mp-toolbar__name {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.mp-toolbar__user {
+  gap: var(--mp-space-1);
+}
+
+// Le nom est masqué sur petit écran (gardé accessible via aria-label du bouton).
+@media (max-width: 599.98px) {
+  .mp-toolbar__user-name {
+    display: none;
+  }
+}
+
+// --- Conteneur shell ---------------------------------------------------------
+.mp-shell {
+  flex: 1 1 auto;
+  background: var(--mp-color-background);
+}
+
+.mp-sidenav {
+  width: 256px;
+  background: var(--mp-color-surface);
+  border-right: 1px solid var(--mp-color-border);
+}
+
+// --- Navigation --------------------------------------------------------------
+// Espacement propre : marge autour de la liste, intervalle vertical entre
+// items, et coins arrondis pour que l'item actif/au survol forme une « pilule ».
+.mp-sidenav nav {
+  padding: var(--mp-space-2);
+}
+
+.mp-sidenav mat-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+  padding: 0;
+}
+
+.mp-sidenav mat-nav-list [mat-list-item] {
+  border-radius: var(--mp-radius-md);
+
+  // Affordance au survol des items actionnables (pas les désactivés).
+  &:not(.mp-nav--disabled):hover {
+    background: var(--mp-color-surface-variant);
+  }
+}
+
+.mp-nav--active {
+  --mat-list-active-indicator-color: var(--mp-color-primary-container);
+
+  background: var(--mp-color-primary-container);
+
+  .mat-mdc-list-item-icon,
+  span[matListItemTitle] {
+    color: var(--mp-color-primary);
+    font-weight: 600;
+  }
+}
+
+.mp-nav__soon {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--mp-color-text-disabled);
+}
+
+// --- Zone de contenu ---------------------------------------------------------
+.mp-content {
+  background: var(--mp-color-background);
+}
+
+.mp-content__inner {
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--mp-space-5);
+
+  // Le contenu reçoit le focus via le skip link sans anneau parasite.
+  &:focus {
+    outline: none;
+  }
+}
+
+// --- Menu utilisateur --------------------------------------------------------
+.mp-user-menu__header {
+  // En-tête non interactif : annule l'apparence « cliquable » de mat-menu-item.
+  cursor: default;
+  opacity: 1 !important;
+}
+
+.mp-user-menu__name {
+  font-weight: 600;
+  color: var(--mp-color-text);
+}
+
+.mp-user-menu__email {
+  font-size: 12px;
+  color: var(--mp-color-text-secondary);
+}

@@ -1,6 +1,5 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
 
 import { AuthFacade, PublicUser } from '@core/auth';
 import { DashboardPage } from './dashboard-page';
@@ -19,7 +18,12 @@ function patient(overrides: Partial<PublicUser> = {}): PublicUser {
   };
 }
 
-/** Fake d'AuthFacade : utilisateur courant contrôlable + logout espionné. */
+/**
+ * Fake d'AuthFacade : utilisateur courant contrôlable.
+ *
+ * Note : la déconnexion a migré vers le menu utilisateur du header
+ * (LayoutShell) ; elle n'est donc plus testée ici (voir layout-shell.spec.ts).
+ */
 function createFakeFacade(user: PublicUser | null) {
   const currentUser = signal(user);
   return {
@@ -40,7 +44,7 @@ describe('DashboardPage', () => {
     const facade = createFakeFacade(user);
     TestBed.configureTestingModule({
       imports: [DashboardPage],
-      providers: [provideRouter([]), { provide: AuthFacade, useValue: facade }],
+      providers: [{ provide: AuthFacade, useValue: facade }],
     });
     const fixture = TestBed.createComponent(DashboardPage);
     fixture.detectChanges();
@@ -62,15 +66,10 @@ describe('DashboardPage', () => {
     expect(byTestId(root, 'dashboard-welcome').textContent).toContain('Ada Lovelace');
   });
 
-  it('déconnecte et redirige vers /login', () => {
-    const { fixture, facade } = setup(patient());
-    const router = TestBed.inject(Router);
-    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+  it('ne contient plus de bouton de déconnexion (migré vers le header)', () => {
+    const { fixture } = setup(patient());
     const root = fixture.nativeElement as HTMLElement;
 
-    byTestId<HTMLButtonElement>(root, 'dashboard-logout').click();
-
-    expect(facade.logout).toHaveBeenCalled();
-    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
+    expect(root.querySelector('[data-testid="dashboard-logout"]')).toBeNull();
   });
 });

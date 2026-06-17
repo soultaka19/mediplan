@@ -1,0 +1,13 @@
+.mp-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mp-space-3);
+  padding: var(--mp-space-6);
+}
+
+.mp-loading__label {
+  color: var(--mp-color-text-secondary);
+  font-size: 14px;
+}

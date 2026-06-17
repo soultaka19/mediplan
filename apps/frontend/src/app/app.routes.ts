@@ -3,39 +3,52 @@ import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from '@core/auth';
 
 /**
- * Routes applicatives.
+ * Routes applicatives (cf. design-system §7.2).
  *
- * - `login`/`register` : écrans publics protégés par `guestGuard` (interdits si
- *   déjà connecté → redirigés vers `/dashboard`).
- * - `dashboard` : écran protégé par `authGuard` (un visiteur non authentifié est
- *   renvoyé vers `/login`). Cible de redirection après connexion/inscription.
- * - `''` et `**` redirigent vers `/dashboard` ; `authGuard` aiguille ensuite
- *   vers `/login` si la session n'est pas valide. (On ne combine jamais
- *   `redirectTo` et `canActivate` sur une même route : Angular évalue les
- *   redirections avant les guards.)
+ * Deux layouts distincts :
+ * - `login`/`register` : écrans PUBLICS hors shell, dans `AuthLayout` (carte
+ *   centrée). Protégés par `guestGuard` (redirigés vers `/dashboard` si déjà
+ *   connecté).
+ * - écrans PROTÉGÉS : enfants d'une route parente portant `LayoutShell` (header
+ *   + sidenav), protégée par `authGuard` (visiteur non authentifié → `/login`).
+ *
+ * Règle respectée : on ne combine jamais `redirectTo` et `canActivate` sur une
+ * même route. La redirection `''` → `dashboard` vit DANS les enfants du shell,
+ * sous la protection de l'`authGuard` parent.
  */
 export const routes: Routes = [
   {
-    path: 'login',
+    path: '',
+    loadComponent: () => import('@core/layout').then((m) => m.AuthLayout),
     canActivate: [guestGuard],
-    loadComponent: () => import('@features/auth/login/login-page').then((m) => m.LoginPage),
-  },
-  {
-    path: 'register',
-    canActivate: [guestGuard],
-    loadComponent: () =>
-      import('@features/auth/register/register-page').then((m) => m.RegisterPage),
-  },
-  {
-    path: 'dashboard',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('@features/dashboard/dashboard-page').then((m) => m.DashboardPage),
+    children: [
+      {
+        path: 'login',
+        loadComponent: () => import('@features/auth/login/login-page').then((m) => m.LoginPage),
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('@features/auth/register/register-page').then((m) => m.RegisterPage),
+      },
+    ],
   },
   {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'dashboard',
+    loadComponent: () => import('@core/layout').then((m) => m.LayoutShell),
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('@features/dashboard/dashboard-page').then((m) => m.DashboardPage),
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard',
+      },
+    ],
   },
   {
     path: '**',

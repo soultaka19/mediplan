@@ -1,0 +1,10 @@
+/*
+ * Polices auto-hébergées — AUCUN appel réseau externe (pas de CDN).
+ * Roboto via @fontsource (poids 400/500/700) + Material Symbols (icônes).
+ * Fichier .css dédié référencé dans angular.json (styles[]) : dart-sass ne peut
+ * pas `@use` ces feuilles CSS tierces.
+ */
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+@import 'material-symbols/outlined.css';

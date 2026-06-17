@@ -1,0 +1,5 @@
+@let v = variant();
+<div class="mp-alert" [class]="'mp-alert--' + v" role="alert">
+  <mat-icon aria-hidden="true" class="mp-alert__icon">{{ icon[v] }}</mat-icon>
+  <span class="mp-alert__text">{{ message() }}</span>
+</div>

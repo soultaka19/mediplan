@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
@@ -28,7 +29,11 @@ describe('LoginPage', () => {
     facade = createFakeFacade();
     TestBed.configureTestingModule({
       imports: [LoginPage],
-      providers: [provideRouter([]), { provide: AuthFacade, useValue: facade }],
+      providers: [
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: AuthFacade, useValue: facade },
+      ],
     });
     const fixture = TestBed.createComponent(LoginPage);
     fixture.detectChanges();
