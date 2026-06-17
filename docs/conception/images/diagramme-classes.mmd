@@ -1,0 +1,146 @@
+classDiagram
+    direction LR
+
+    class User {
+        +UUID id
+        +string email
+        +string passwordHash
+        +string firstName
+        +string lastName
+        +Role role
+        +bool isActive
+        +int failedLoginAttempts
+        +datetime lockedUntil
+        +datetime createdAt
+        +login()
+        +logout()
+        +resetPassword()
+    }
+
+    class Role {
+        <<enumeration>>
+        PATIENT
+        DOCTOR
+        CLINIC_ADMIN
+        SUPER_ADMIN
+    }
+
+    class Patient {
+        +string phone
+        +date birthDate
+        +bookAppointment()
+        +cancelAppointment()
+    }
+
+    class Doctor {
+        +string licenseNumber
+        +manageAvailability()
+        +updateAppointmentStatus()
+    }
+
+    class ClinicAdmin {
+        +manageUsers()
+        +viewStatistics()
+    }
+
+    class SuperAdmin {
+        +configureClinic()
+        +assignRoles()
+    }
+
+    class Clinic {
+        +UUID id
+        +string name
+        +string address
+        +Time openingHour
+        +Time closingHour
+        +bool isActive
+        +activate()
+        +deactivate()
+    }
+
+    class Specialty {
+        +UUID id
+        +string name
+        +string description
+    }
+
+    class Availability {
+        +UUID id
+        +RecurrenceType type
+        +int weekday
+        +Time startTime
+        +Time endTime
+        +date validFrom
+        +date validTo
+        +generateSlots()
+    }
+
+    class AppointmentSlot {
+        +UUID id
+        +datetime startAt
+        +datetime endAt
+        +bool isBooked
+    }
+
+    class Appointment {
+        +UUID id
+        +AppointmentStatus status
+        +string reason
+        +string cancellationReason
+        +datetime createdAt
+        +confirm()
+        +cancel()
+        +reschedule()
+    }
+
+    class AppointmentStatus {
+        <<enumeration>>
+        RESERVED
+        ARRIVED
+        IN_CONSULTATION
+        DONE
+        ABSENT
+        CANCELLED
+    }
+
+    class Notification {
+        +UUID id
+        +NotificationType type
+        +string message
+        +bool isRead
+        +datetime createdAt
+        +markAsRead()
+    }
+
+    class AuditLog {
+        +UUID id
+        +string action
+        +UUID actorId
+        +datetime timestamp
+        +json metadata
+    }
+
+    User <|-- Patient
+    User <|-- Doctor
+    User <|-- ClinicAdmin
+    User <|-- SuperAdmin
+    User --> Role
+
+    Clinic "1" o-- "0..*" Doctor : emploie
+    Clinic "1" o-- "0..*" ClinicAdmin : gère
+    Clinic "1" o-- "0..*" Specialty : propose
+    Doctor "0..*" --> "1..*" Specialty : possède
+
+    Doctor "1" o-- "0..*" Availability : définit
+    Availability "1" --> "0..*" AppointmentSlot : génère
+    Doctor "1" --> "0..*" AppointmentSlot : offre
+
+    Patient "1" --> "0..*" Appointment : réserve
+    AppointmentSlot "1" --> "0..1" Appointment : occupe
+    Appointment --> AppointmentStatus
+    Doctor "1" --> "0..*" Appointment : assure
+
+    Appointment "1" --> "0..*" Notification : déclenche
+    User "1" --> "0..*" Notification : reçoit
+    User "1" --> "0..*" AuditLog : trace

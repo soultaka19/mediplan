@@ -27,11 +27,18 @@ diagramme **entité-association** (ERD) en appui de la base de données PostgreS
 | 6 | [Administration des cliniques](cas-utilisation/uc-06-administration.md) | EF-02 · SC-04 |
 | 7 | [Tableaux de bord et statistiques](cas-utilisation/uc-07-statistiques.md) | EF-08 · SC-05 |
 
-### 2. Diagramme entité-association (bonus)
-- [MCD / ERD de la base PostgreSQL](erd/mcd-erd.md)
+### 2. Diagramme de classes
+- [Diagramme de classes du domaine](classes/diagramme-classes.md)
 
-> ℹ️ Les diagrammes de **classes** et de **séquence** sont en cours de finalisation dans un
-> espace de travail séparé ; ils seront réintégrés dans ce dossier avant la remise finale.
+### 3. Diagrammes de séquence
+| # | Diagramme | Scénario |
+|---|-----------|----------|
+| 1 | [Réserver un rendez-vous](sequence/seq-01-reservation.md) | SC-01 (EF-05) |
+| 2 | [Annuler ou modifier un rendez-vous](sequence/seq-02-annulation.md) | SC-02 (EF-05) |
+| 3 | [Authentification (connexion JWT)](sequence/seq-03-authentification.md) | EF-01 |
+
+### 4. Diagramme entité-association (bonus)
+- [MCD / ERD de la base PostgreSQL](erd/mcd-erd.md)
 
 ## Correspondance avec le cahier des charges
 
