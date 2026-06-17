@@ -44,3 +44,25 @@ export interface LoginPayload {
   email: string;
   password: string;
 }
+
+/** Corps de la requête « mot de passe oublié » (POST /auth/forgot-password). */
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+/** Corps de la requête de réinitialisation (POST /auth/reset-password). */
+export interface ResetPasswordPayload {
+  /** Jeton de réinitialisation reçu par lien e-mail (query param `token`). */
+  token: string;
+  newPassword: string;
+}
+
+/**
+ * Réponse générique porteuse d'un message (ex. reset-password 200).
+ *
+ * `forgot-password` répond 202 sans garantie de corps : on type donc sa réponse
+ * comme partielle.
+ */
+export interface MessageResponse {
+  message: string;
+}
