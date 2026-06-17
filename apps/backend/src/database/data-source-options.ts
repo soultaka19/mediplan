@@ -1,6 +1,8 @@
-import { join } from 'path';
 import { DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { Clinic } from '../clinic/clinic.entity';
+import { User } from '../user/user.entity';
+import { InitAuthSchema1781674897611 } from './migrations/1781674897611-InitAuthSchema';
 
 /**
  * Construit les options TypeORM partagées entre :
@@ -10,8 +12,11 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
  * Un seul endroit décrit la connexion afin que runtime et CLI restent
  * strictement alignés (mêmes entités, migrations, stratégie de nommage).
  *
- * Les chemins d'entités/migrations sont en glob `.{ts,js}` pour fonctionner
- * aussi bien sous ts-node (CLI, sources .ts) qu'après `nest build` (dist/.js).
+ * Entités et migrations sont référencées par CLASSES explicites (et non par
+ * glob de répertoire) : c'est déterministe et compatible partout — ts-node
+ * (CLI), dist après `nest build`, et surtout l'environnement jest (le
+ * directory loader de TypeORM faisait des require dynamiques qui cassaient les
+ * tests e2e). Toute nouvelle entité/migration doit être ajoutée ici.
  */
 export interface DbEnv {
   DB_HOST?: string;
@@ -35,8 +40,8 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
     migrationsRun: false,
     // Les migrations ne s'exécutent que via la CLI explicite, jamais au boot.
 
-    entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
-    migrations: [join(__dirname, 'migrations', '*.{ts,js}')],
+    entities: [Clinic, User],
+    migrations: [InitAuthSchema1781674897611],
 
     namingStrategy: new SnakeNamingStrategy(),
     logging: ['error', 'warn', 'migration'],
