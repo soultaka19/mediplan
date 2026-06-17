@@ -43,7 +43,7 @@ le cours du 17 juin.
    ce qui reste à développer.
 4. **Agents en global** (`~/.claude/agents/`), au format des agents existants de l'utilisateur.
 
-## 4. L'équipe d'agents (13 agents)
+## 4. L'équipe d'agents (14 agents)
 
 Tous au format des agents existants : frontmatter (`name`, `description` avec blocs `<example>`,
 `model: opus`, `memory: user`), system prompt en français (Mission, Principes, Méthodologie,
@@ -65,6 +65,7 @@ Format de réponse, Auto-vérification), et bloc *Persistent Agent Memory* point
 | 11 | `mediplan-qa-tester` | QA / Testeur | Stratégie de tests, unitaires/e2e, plans de test, qualité |
 | 12 | `mediplan-code-reviewer` | Réviseur de code | Revue de PR, qualité, conventions, détection de bugs et simplifications |
 | 13 | `mediplan-tech-writer` | Rédacteur technique | Documentation, dossier de conception, README, guides de remise |
+| 14 | `mediplan-client-stakeholder` | Représentant du client | Voix du terrain (clinique + utilisateurs réels) ; challenge les besoins, priorise par valeur métier, fait des allers-retours |
 
 Chaque agent connaît le contexte MediPlan (stack, périmètre, équipe, références Jira/GitHub) et
 respecte le périmètre inclus/exclu du cahier des charges.
