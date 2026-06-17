@@ -1,15 +1,15 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, guestGuard } from '@core/auth';
+import { guestGuard } from '@core/auth';
 
 /**
  * Routes applicatives.
  *
  * Écrans publics (login/register) protégés par `guestGuard` (interdits si déjà
- * connecté). `authGuard` est câblé sur la route racine pour être prêt aux
- * écrans protégés à venir : tant qu'aucun écran réel n'existe, un utilisateur
- * non authentifié est redirigé vers `/login` par le guard, et un utilisateur
- * authentifié est redirigé (placeholder) vers `/login` également.
+ * connecté). La route racine redirige (placeholder) vers `/login` en attendant
+ * le tableau de bord. `authGuard` est exporté et testé, prêt à être appliqué
+ * sur le premier écran protégé réel — il ne peut pas être combiné à `redirectTo`
+ * sur la même route (Angular exécute les redirections avant les guards).
  */
 export const routes: Routes = [
   {
@@ -24,12 +24,10 @@ export const routes: Routes = [
       import('@features/auth/register/register-page').then((m) => m.RegisterPage),
   },
   {
-    // Point d'entrée protégé (cible de redirection après connexion). Aucun
-    // écran réel dans ce ticket : on redirige vers login en attendant le
-    // tableau de bord. `authGuard` reste appliqué pour valider son câblage.
+    // Aucun écran réel dans ce ticket : on redirige vers login en attendant
+    // le tableau de bord (qui portera alors `authGuard`).
     path: '',
     pathMatch: 'full',
-    canActivate: [authGuard],
     redirectTo: 'login',
   },
   {
