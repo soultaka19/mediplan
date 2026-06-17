@@ -21,6 +21,11 @@ RUN pnpm --filter frontend build
 
 # ===== Étape runtime (nginx) =====
 FROM nginx:alpine AS runtime
-COPY docker/frontend/nginx.conf /etc/nginx/conf.d/default.conf
+# Port d'écoute et cible du proxy configurables. Défauts = Docker Compose local ;
+# en cloud (Railway), PORT et BACKEND_ORIGIN sont surchargés par variables d'env.
+# Le template est rendu par envsubst au démarrage (mécanisme natif de l'image nginx).
+ENV PORT=80
+ENV BACKEND_ORIGIN=http://backend:3000
+COPY docker/frontend/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /repo/apps/frontend/dist/frontend/browser /usr/share/nginx/html
 EXPOSE 80

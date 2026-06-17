@@ -9,6 +9,7 @@ Turborepo + pnpm) — voir le [README racine](../README.md).
 | [conception/](conception/) | Dossier de conception (Sprint 1) : cas d'utilisation, diagramme de classes, ERD, diagrammes de séquence, explications écrites |
 | [consignes/](consignes/) | Énoncés et consignes du cours |
 | [presentation/](presentation/) | Supports de présentation d'avancement (sprint review) |
+| [deployment/](deployment/) | Guides de déploiement (Railway / cloud) |
 | [superpowers/specs/](superpowers/specs/) | Spécifications internes de cadrage (équipe d'agents, plan par phases) |
 | [PLAN-SPRINTS.md](PLAN-SPRINTS.md) | Découpage du backlog Jira en sprints |
 
