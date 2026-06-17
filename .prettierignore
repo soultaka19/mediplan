@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+coverage
+.angular
+.turbo
+pnpm-lock.yaml
+# La documentation (prose, dossier de conception) n'est pas gérée par Prettier
+docs/
