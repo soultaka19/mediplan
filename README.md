@@ -54,6 +54,8 @@ Monorepo géré avec **Turborepo + pnpm workspaces** :
 
 ## Démarrage (développement local)
 
+> 📖 **Nouveau sur le projet ?** Suivez le [**Guide du collaborateur** (`CONTRIBUTING.md`)](CONTRIBUTING.md) : prérequis détaillés, outils, configuration de l'environnement, migrations, workflow Git et dépannage.
+
 > Prérequis : **Node.js ≥ 22.22 (ou ≥ 24.15)** — requis par Angular 22 — et **pnpm** (via Corepack : `corepack enable`, sinon `npm i -g pnpm`).
 
 ```bash
