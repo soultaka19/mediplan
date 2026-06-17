@@ -18,7 +18,8 @@ import { UserRole } from './user-role.enum';
  * - `email` en `citext` (comparaison insensible à la casse) + unicité tolérant NULL.
  * - `passwordHash` nullable : prépare le futur « patient léger » (créé sans mot de passe).
  * - `role` = enum PostgreSQL natif `user_role`.
- * - `clinicId` nullable mais OBLIGATOIRE pour tout rôle ≠ super_admin (CHECK en base).
+ * - `clinicId` nullable pour les rôles globaux (super_admin, patient auto-inscrit) ;
+ *   OBLIGATOIRE pour les rôles rattachés à une clinique (clinic_admin, doctor) — CHECK en base.
  * - FK `clinicId` → clinic.id ON DELETE RESTRICT (on ne supprime pas une clinique
  *   tant qu'elle rattache des utilisateurs).
  *

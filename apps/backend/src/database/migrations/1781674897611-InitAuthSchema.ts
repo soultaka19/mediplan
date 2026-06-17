@@ -65,9 +65,12 @@ export class InitAuthSchema1781674897611 implements MigrationInterface {
         "created_at"            timestamptz NOT NULL DEFAULT now(),
         "updated_at"            timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "pk_user" PRIMARY KEY ("id"),
-        -- super_admin : clinic_id peut être NULL ; tout autre rôle : clinic_id obligatoire.
+        -- Rôles globaux (clinic_id peut être NULL) : super_admin et patient
+        -- (auto-inscrit en libre-service, non rattaché à une clinique — MEDIPLAN-15).
+        -- Rôles rattachés (clinic_id obligatoire) : clinic_admin, doctor.
+        -- NB : le patient léger créé par une clinique (MEDIPLAN-35) renseignera son clinic_id.
         CONSTRAINT "chk_user_clinic_required"
-          CHECK ("role" = 'super_admin' OR "clinic_id" IS NOT NULL),
+          CHECK ("role" IN ('super_admin', 'patient') OR "clinic_id" IS NOT NULL),
         CONSTRAINT "fk_user_clinic"
           FOREIGN KEY ("clinic_id") REFERENCES "clinic" ("id") ON DELETE RESTRICT
       );
