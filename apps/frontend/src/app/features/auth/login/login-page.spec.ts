@@ -83,4 +83,30 @@ describe('LoginPage', () => {
     expect(byTestId(root, 'login-error')).not.toBeNull();
     expect(component.errorMessage()).toBe('Adresse e-mail ou mot de passe incorrect.');
   });
+
+  it('affiche le message de verrouillage sur 423', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const lockMessage =
+      'Compte temporairement verrouillé suite à trop de tentatives. Réessayez plus tard.';
+    facade.login.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 423,
+            error: { message: lockMessage },
+          }),
+      ),
+    );
+
+    component.form.setValue({ email: 'patient@example.com', password: 'Str0ng!Pass' });
+    component.submit();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(byTestId(root, 'login-error')).not.toBeNull();
+    expect(component.errorMessage()).toBe(lockMessage);
+    // Distinct du message 401.
+    expect(component.errorMessage()).not.toBe('Adresse e-mail ou mot de passe incorrect.');
+  });
 });

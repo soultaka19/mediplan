@@ -21,8 +21,14 @@ export function authErrorMessage(error: unknown): string {
       case 409:
         return apiMessage ?? 'Cette adresse e-mail est déjà utilisée.';
       case 423:
+        // Compte verrouillé : on privilégie le message de l'API, sinon repli
+        // spécifique au verrouillage temporaire.
+        return (
+          apiMessage ??
+          'Compte temporairement verrouillé suite à trop de tentatives. Réessayez plus tard.'
+        );
       case 429:
-        // Messages contextuels (verrouillage / limitation) renvoyés par l'API.
+        // Trop de requêtes : message de limitation renvoyé par l'API si présent.
         return apiMessage ?? 'Compte temporairement indisponible. Réessayez plus tard.';
       default:
         return apiMessage ?? 'Une erreur est survenue. Veuillez réessayer.';
