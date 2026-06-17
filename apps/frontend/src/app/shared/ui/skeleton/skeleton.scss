@@ -1,0 +1,33 @@
+// Bloc de chargement avec shimmer sobre (gradient sur surface-variant).
+// Animation lente (~1.4s) figée si l'utilisateur réduit les animations.
+.mp-skeleton {
+  display: block;
+  border-radius: var(--mp-radius-sm);
+  background-color: var(--mp-color-surface-variant);
+  background-image: linear-gradient(
+    90deg,
+    var(--mp-color-surface-variant) 0%,
+    var(--mp-color-border) 50%,
+    var(--mp-color-surface-variant) 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: mp-skeleton-shimmer var(--mp-motion-shimmer) ease-in-out infinite;
+}
+
+@keyframes mp-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-skeleton {
+    animation: none;
+    background-image: none;
+  }
+}

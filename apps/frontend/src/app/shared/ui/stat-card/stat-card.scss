@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+// Carte de KPI : filet d'accent teal en bord supérieur (décoratif, AA-safe car
+// aucun texte n'est posé dessus). Le contenu reste sobre (registre médical).
+.mp-stat {
+  position: relative;
+  height: 100%;
+  border-radius: var(--mp-radius-md);
+  overflow: hidden;
+
+  // Filet d'accent teal (3px) en bord supérieur.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: var(--mp-color-accent);
+  }
+}
+
+.mp-stat__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+  padding-top: var(--mp-space-4);
+}
+
+.mp-stat__icon {
+  width: 28px;
+  height: 28px;
+  font-size: 28px;
+  line-height: 28px;
+  color: var(--mp-color-accent);
+}
+
+.mp-stat__value {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+  margin: var(--mp-space-1) 0 0;
+}
+
+.mp-stat__number {
+  font-size: var(--mp-font-kpi-size);
+  line-height: var(--mp-font-kpi-line);
+  font-weight: var(--mp-font-kpi-weight);
+  color: var(--mp-color-text);
+}
+
+.mp-stat__label {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--mp-color-text-secondary);
+}
+
+.mp-stat__hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--mp-color-text-disabled);
+}

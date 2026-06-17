@@ -2,34 +2,129 @@
   display: block;
 }
 
-.dashboard-title {
-  margin: 0 0 var(--mp-space-5);
-  font-size: 28px;
-  font-weight: 600;
+// Espacement vertical entre les blocs du dashboard.
+.dashboard-hero,
+.dashboard-stats,
+.dashboard-next,
+.dashboard-quick {
+  margin-bottom: var(--mp-space-6);
 }
 
-.dashboard-card {
-  max-width: 32rem;
+// --- Zone d'accueil ----------------------------------------------------------
+.dashboard-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-4);
+}
+
+.dashboard-hero__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--mp-space-3);
+  margin: 0;
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--mp-color-text);
+}
+
+.dashboard-hero__subtitle {
+  margin: var(--mp-space-1) 0 0;
+  color: var(--mp-color-text-secondary);
+}
+
+// --- Titres de section -------------------------------------------------------
+.dashboard-section-title {
+  margin: 0 0 var(--mp-space-3);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--mp-color-text);
+}
+
+// --- Grille de KPI -----------------------------------------------------------
+// 1 colonne en mobile ; 3 colonnes dès le pivot md (exploite la largeur 1200px).
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mp-space-4);
+}
+
+@media (min-width: 960px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.dashboard-next__card,
+.dashboard-account__card {
   border-radius: var(--mp-radius-md);
 }
 
-.welcome {
-  margin: 0 0 var(--mp-space-5);
+// --- Accès rapides -----------------------------------------------------------
+.dashboard-quick__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mp-space-4);
 }
 
-.user-info {
+@media (min-width: 960px) {
+  .dashboard-quick__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// Carte-action désactivée : affordance « bientôt » cohérente avec la nav.
+// Cible ≥ 44px, focus géré par le navigateur (bouton natif désactivé = inerte).
+.dashboard-quick__item {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3);
+  min-height: 56px;
+  padding: var(--mp-space-3) var(--mp-space-4);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-surface);
+  color: var(--mp-color-text-disabled);
+  font: inherit;
+  text-align: left;
+  cursor: not-allowed;
+}
+
+.dashboard-quick__icon {
+  flex: 0 0 auto;
+  color: var(--mp-color-text-disabled);
+}
+
+.dashboard-quick__label {
+  flex: 1 1 auto;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dashboard-quick__soon {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--mp-color-text-disabled);
+}
+
+// --- Carte « Mon compte » ----------------------------------------------------
+.dashboard-account__list {
   margin: 0;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: var(--mp-space-2) var(--mp-space-4);
 }
 
-.user-info dt {
+.dashboard-account__list dt {
   font-weight: 600;
   color: var(--mp-color-text-secondary);
 }
 
-.user-info dd {
+.dashboard-account__list dd {
   margin: 0;
   color: var(--mp-color-text);
 }

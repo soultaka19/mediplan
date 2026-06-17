@@ -12,6 +12,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter, map } from 'rxjs';
 
 import { AuthFacade } from '@core/auth';
+import { Avatar } from '@shared/ui';
 import { NAV_ITEMS, visibleNavItems } from '../nav-items';
 
 /** Largeur max au-delà de laquelle le sidenav est en mode `side` (pivot md). */
@@ -43,6 +44,7 @@ const MOBILE_QUERY = '(max-width: 959.98px)';
     MatButtonModule,
     MatMenuModule,
     MatDividerModule,
+    Avatar,
   ],
   templateUrl: './layout-shell.html',
   styleUrl: './layout-shell.scss',

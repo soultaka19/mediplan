@@ -1,0 +1,16 @@
+<mat-card class="mp-stat" appearance="outlined">
+  <mat-card-content class="mp-stat__content">
+    <mat-icon class="mp-stat__icon" aria-hidden="true">{{ icon() }}</mat-icon>
+
+    <!-- group : la valeur et le label sont annoncés ensemble (pas seulement la
+         couleur du filet). -->
+    <p class="mp-stat__value" role="group" [attr.aria-label]="value() + ' ' + label()">
+      <span class="mp-stat__number" aria-hidden="true">{{ value() }}</span>
+      <span class="mp-stat__label" aria-hidden="true">{{ label() }}</span>
+    </p>
+
+    @if (hint()) {
+      <p class="mp-stat__hint">{{ hint() }}</p>
+    }
+  </mat-card-content>
+</mat-card>

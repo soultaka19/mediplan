@@ -15,7 +15,7 @@
   </button>
 
   <span class="mp-toolbar__brand">
-    <mat-icon aria-hidden="true" class="mp-toolbar__logo">add_circle</mat-icon>
+    <mat-icon aria-hidden="true" class="mp-toolbar__logo">calendar_month</mat-icon>
     <span class="mp-toolbar__name">MediPlan</span>
   </span>
 
@@ -30,7 +30,7 @@
     aria-label="Menu utilisateur"
     data-testid="shell-user-menu-trigger"
   >
-    <mat-icon>account_circle</mat-icon>
+    <app-avatar [name]="displayName()" [email]="user()?.email ?? ''" size="sm" />
     <span class="mp-toolbar__user-name">{{ displayName() }}</span>
     <mat-icon>arrow_drop_down</mat-icon>
   </button>

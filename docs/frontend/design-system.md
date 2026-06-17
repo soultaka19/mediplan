@@ -79,6 +79,14 @@ Famille : **Roboto** (police par défaut Material, lisible, neutre, gratuite) av
 | `--mp-text-caption` | `12px / 16px, 400` | Légendes, aides, erreurs de champ |
 | `--mp-text-button` | `14px / 20px, 500` | Libellés de boutons (pas de majuscules forcées) |
 
+**Valeur de KPI** (StatCard du dashboard, cf. roadmap UX §3.3/§3.6). Token dédié pour ne pas coder la grande taille en dur dans le composant :
+
+| Variable | Valeur | Usage |
+|---|---|---|
+| `--mp-font-kpi-size` | `34px` | Taille de la valeur d'une StatCard (KPI) |
+| `--mp-font-kpi-line` | `40px` | Hauteur de ligne de la valeur de KPI |
+| `--mp-font-kpi-weight` | `700` | Graisse de la valeur de KPI |
+
 Règles : pas de `text-transform: uppercase` sur les boutons (lisibilité). Line-height jamais < 1.4 sur le corps de texte.
 
 ### 1.4 Espacement (échelle 4 px)
@@ -116,6 +124,18 @@ Règles : pas de `text-transform: uppercase` sur les boutons (lisibilité). Line
 
 > **Surfaces feuilletées** : fond `--mp-color-background` (#F7F9FC) → cartes `--mp-color-surface` (#FFF) en `elevation-1` → carte mise en avant en `elevation-2`. La hiérarchie de plans crée la perception premium sans ajouter de couleur.
 > **Garde-fou** : on ne dépasse pas ~14 % d'opacité d'ombre.
+
+### 1.6bis Motion (transitions & animations)
+
+Système de motion **discret, pro** (cf. roadmap UX §3.5). Toute animation respecte `@media (prefers-reduced-motion: reduce)` (translations désactivées, changements d'état instantanés). Garde-fou : aucune animation > 240 ms, aucun effet bounce/élastique.
+
+| Variable | Valeur | Usage |
+|---|---|---|
+| `--mp-motion-fast` | `120ms` | Hover, focus, ripple |
+| `--mp-motion-base` | `180ms` | Entrée de carte, expand |
+| `--mp-motion-slow` | `240ms` | Entrée de page, overlay |
+| `--mp-motion-shimmer` | `1400ms` | Boucle de shimmer des skeletons (lente, sobre) |
+| `--mp-ease-standard` | `cubic-bezier(.2, 0, 0, 1)` | Courbe Material standard |
 
 ### 1.7 Breakpoints responsive
 

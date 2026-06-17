@@ -1,0 +1,26 @@
+// Cercle tonal à initiales. Fond primary-container + texte primary :
+// contraste AA largement respecté (#1565C0 sur #E8F0FB), aucun texte sur teal.
+.mp-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-color-primary-container);
+  color: var(--mp-color-primary);
+  font-weight: 600;
+  line-height: 1;
+  user-select: none;
+}
+
+.mp-avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+}
+
+.mp-avatar--md {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
