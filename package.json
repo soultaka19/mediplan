@@ -1,0 +1,22 @@
+{
+  "name": "mediplan",
+  "version": "0.0.0",
+  "private": true,
+  "description": "MediPlan — plateforme web de gestion de rendez-vous médicaux (monorepo Turborepo + pnpm)",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "dev": "turbo run dev",
+    "format": "prettier --write \"**/*.{ts,html,scss,css,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,html,scss,css,json,md,yml,yaml}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "turbo": "^2.1.0"
+  }
+}
