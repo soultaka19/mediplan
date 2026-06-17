@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthenticatedUser, JwtPayload } from '../auth.types';
+import { requireJwtSecret } from '../jwt-secret.util';
 
 /**
  * Stratégie Passport-JWT : valide la signature/expiration du token (HS256) puis
@@ -14,11 +15,9 @@ import { AuthenticatedUser, JwtPayload } from '../auth.types';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
-    const secret = configService.get<string>('JWT_SECRET');
-    if (!secret) {
-      // Échec explicite au démarrage plutôt qu'un token signé avec un secret vide.
-      throw new Error('JWT_SECRET est manquant : configuration JWT invalide.');
-    }
+    // Échec explicite au démarrage si le secret est absent/faible, plutôt que de
+    // vérifier des tokens avec un secret vide (source unique : requireJwtSecret).
+    const secret = requireJwtSecret(configService);
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

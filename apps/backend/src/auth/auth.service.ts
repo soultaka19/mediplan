@@ -36,9 +36,14 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
-    this.bcryptRounds = Number(
-      this.configService.get<string>('BCRYPT_ROUNDS') ?? DEFAULT_BCRYPT_ROUNDS,
-    );
+    // Garde défensive : une valeur absente, non numérique ("douze") ou trop
+    // basse retombe sur le coût 12 (décision Phase 2) au lieu de produire un
+    // NaN (500 au premier hash) ou d'affaiblir silencieusement le hachage.
+    const configuredRounds = Number(this.configService.get<string>('BCRYPT_ROUNDS'));
+    this.bcryptRounds =
+      Number.isInteger(configuredRounds) && configuredRounds >= 10
+        ? configuredRounds
+        : DEFAULT_BCRYPT_ROUNDS;
     this.jwtExpiresIn = this.configService.get<string>('JWT_EXPIRES_IN') ?? '60m';
   }
 

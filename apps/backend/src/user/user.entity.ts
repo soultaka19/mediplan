@@ -24,7 +24,8 @@ import { UserRole } from './user-role.enum';
  *   tant qu'elle rattache des utilisateurs).
  *
  * Donnée sensible : ne JAMAIS exposer `passwordHash`, `failedLoginAttempts`,
- * `lockedUntil` dans une réponse API (à filtrer côté serializer au Lot 2).
+ * `lockedUntil` dans une réponse API. Filtrage en place via `select:false` sur
+ * `passwordHash` + le DTO de sortie `toPublicUser` (voir auth-response.dto.ts).
  */
 @Entity('user')
 export class User {
