@@ -1,6 +1,13 @@
-<div class="mp-empty">
+<div class="mp-empty" [class.mp-empty--dense]="dense()">
   <mat-icon aria-hidden="true" class="mp-empty__icon">{{ icon() }}</mat-icon>
-  <h2 class="mp-empty__title">{{ title() }}</h2>
+  @switch (headingLevel()) {
+    @case (3) {
+      <h3 class="mp-empty__title">{{ title() }}</h3>
+    }
+    @default {
+      <h2 class="mp-empty__title">{{ title() }}</h2>
+    }
+  }
   @if (description()) {
     <p class="mp-empty__desc">{{ description() }}</p>
   }

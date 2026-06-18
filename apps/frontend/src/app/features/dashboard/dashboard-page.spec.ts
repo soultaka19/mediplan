@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { AuthFacade, PublicUser, UserRole } from '@core/auth';
 import { DashboardPage } from './dashboard-page';
@@ -48,7 +49,7 @@ describe('DashboardPage', () => {
     const facade = createFakeFacade(user);
     TestBed.configureTestingModule({
       imports: [DashboardPage],
-      providers: [{ provide: AuthFacade, useValue: facade }],
+      providers: [provideRouter([]), { provide: AuthFacade, useValue: facade }],
     });
     const fixture = TestBed.createComponent(DashboardPage);
     fixture.detectChanges();
@@ -68,6 +69,15 @@ describe('DashboardPage', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(byTestId(root, 'dashboard-welcome').textContent).toContain('Ada Lovelace');
+  });
+
+  it('ne déverse pas l’e-mail complet dans le grand titre sans nom (partie locale)', () => {
+    const { fixture } = setup(makeUser({ firstName: null, lastName: null, email: 'admin@clinique.ca' }));
+    const root = fixture.nativeElement as HTMLElement;
+    const welcome = byTestId(root, 'dashboard-welcome').textContent ?? '';
+
+    expect(welcome).toContain('Bonjour, admin');
+    expect(welcome).not.toContain('@clinique.ca');
   });
 
   it('ne contient plus de bouton de déconnexion (migré vers le header)', () => {
@@ -104,6 +114,21 @@ describe('DashboardPage', () => {
       expect(root.textContent).toContain('Médecins actifs');
       expect(root.textContent).toContain('Taux de remplissage');
       expect(root.textContent).toContain('Utilisateurs');
+    },
+  );
+
+  it.each<UserRole>(['clinic_admin', 'super_admin'])(
+    'rend l’accès rapide « Utilisateurs » comme lien actif vers /admin/users pour %s',
+    (role) => {
+      const { fixture } = setup(makeUser({ role, email: 'admin@example.com' }));
+      const root = fixture.nativeElement as HTMLElement;
+
+      const link = byTestId<HTMLAnchorElement>(root, 'dashboard-quick-action-link');
+      expect(link).not.toBeNull();
+      expect(link.getAttribute('href')).toContain('/admin/users');
+      expect(link.textContent).toContain('Utilisateurs');
+      // Médecins + Disponibilités restent désactivés « bientôt ».
+      expect(allByTestId(root, 'dashboard-quick-action').length).toBe(2);
     },
   );
 

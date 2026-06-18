@@ -17,11 +17,15 @@
   gap: var(--mp-space-4);
 }
 
-.dashboard-hero__title {
+// Salutation + badge de rôle sur la même ligne (badge frère du <h1>, pas dedans).
+.dashboard-hero__heading {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--mp-space-3);
+}
+
+.dashboard-hero__title {
   margin: 0;
   font-family: var(--mp-font-display-family);
   font-size: var(--mp-font-display-size);
@@ -66,6 +70,13 @@
   border-radius: var(--mp-radius-md);
 }
 
+// Carte « prochain rendez-vous » : l'état vide compact (dense) gère déjà son
+// espacement interne ; on supprime le padding propre de mat-card pour une carte
+// équilibrée (plus de grande zone vide ~250px).
+.dashboard-next__card {
+  padding: 0;
+}
+
 // --- Accès rapides -----------------------------------------------------------
 .dashboard-quick__grid {
   display: grid;
@@ -96,6 +107,32 @@
   cursor: not-allowed;
 }
 
+// Carte-action active (l'écran existe) : lien cliquable, texte plein contraste,
+// affordance au survol cohérente avec la nav (surface-variant).
+.dashboard-quick__item--active {
+  color: var(--mp-color-text);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--mp-motion-base) var(--mp-ease-standard),
+    box-shadow var(--mp-motion-base) var(--mp-ease-standard);
+
+  .dashboard-quick__icon {
+    color: var(--mp-color-primary);
+  }
+
+  &:hover {
+    background: var(--mp-color-surface-variant);
+    box-shadow: var(--mp-elevation-1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-quick__item--active {
+    transition: none;
+  }
+}
+
 .dashboard-quick__icon {
   flex: 0 0 auto;
   color: var(--mp-color-text-disabled);
@@ -105,6 +142,12 @@
   flex: 1 1 auto;
   font-size: 14px;
   font-weight: 500;
+}
+
+// Chevron de l'action active (décoratif) : indique la navigation.
+.dashboard-quick__chevron {
+  flex: 0 0 auto;
+  color: var(--mp-color-text-secondary);
 }
 
 .dashboard-quick__soon {

@@ -34,8 +34,17 @@
   color: var(--mp-color-text);
 }
 
+// Menu utilisateur : avatar → nom → caret, dans cet ordre, avec un espacement
+// aéré (≥ --mp-space-2) pour décoller l'avatar du nom et le caret du nom.
 .mp-toolbar__user {
-  gap: var(--mp-space-1);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+}
+
+.mp-toolbar__user-name {
+  // Petit retrait pour ne pas coller l'avatar au nom (lisibilité).
+  margin-inline-start: var(--mp-space-1);
 }
 
 // Le nom est masqué sur petit écran (gardé accessible via aria-label du bouton).

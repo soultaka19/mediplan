@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterLink } from '@angular/router';
 
 import { AuthFacade } from '@core/auth';
 import { Avatar, EmptyState, RoleBadge, StatCard, roleLabel } from '@shared/ui';
@@ -11,10 +12,16 @@ interface StatSpec {
   readonly label: string;
 }
 
-/** Description d'un accès rapide (désactivé « bientôt » tant que l'écran manque). */
+/**
+ * Description d'un accès rapide.
+ *
+ * Si `route` est défini, l'action est rendue comme un lien actif (`routerLink`).
+ * Sinon, elle reste un bouton désactivé « bientôt » tant que l'écran manque.
+ */
 interface QuickAction {
   readonly icon: string;
   readonly label: string;
+  readonly route?: string;
 }
 
 /** KPI placeholder du patient. */
@@ -39,7 +46,8 @@ const PATIENT_ACTIONS: readonly QuickAction[] = [
 
 /** Accès rapides de l'administration. */
 const ADMIN_ACTIONS: readonly QuickAction[] = [
-  { icon: 'group', label: 'Utilisateurs' },
+  // L'écran de gestion des utilisateurs existe (/admin/users) → lien actif.
+  { icon: 'group', label: 'Utilisateurs', route: '/admin/users' },
   { icon: 'medical_services', label: 'Médecins' },
   { icon: 'event_note', label: 'Disponibilités' },
 ];
@@ -50,16 +58,18 @@ const ADMIN_ACTIONS: readonly QuickAction[] = [
  * Cible de redirection après connexion/inscription. Affiche un vrai tableau de
  * bord par rôle (cf. roadmap UX §3.8) : zone d'accueil (avatar + salutation +
  * badge), grille de KPI **placeholder**, zone « prochain RDV » en EmptyState,
- * accès rapides désactivés « bientôt », et carte « Mon compte » secondaire.
+ * accès rapides (liens actifs si l'écran existe, sinon « bientôt »), et carte
+ * « Mon compte » secondaire.
  *
  * ⚠️ UI pure : le backend RDV/stats n'existe pas encore. Aucune donnée n'est
- * inventée — les valeurs de KPI restent « — » et les actions sont inertes.
+ * inventée — les valeurs de KPI restent « — ». Seuls les accès rapides dont
+ * l'écran est déjà livré (ex. « Utilisateurs » → /admin/users) sont actifs.
  * Aucun appel HTTP : tout passe par la façade.
  */
 @Component({
   selector: 'app-dashboard-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatCardModule, MatIconModule, Avatar, RoleBadge, StatCard, EmptyState],
+  imports: [MatCardModule, MatIconModule, RouterLink, Avatar, RoleBadge, StatCard, EmptyState],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
 })
@@ -77,6 +87,31 @@ export class DashboardPage {
     }
     const fullName = [current.firstName, current.lastName].filter(Boolean).join(' ').trim();
     return fullName || current.email || '';
+  });
+
+  /**
+   * Nom de salutation pour le grand titre : prénom/nom si présents, sinon la
+   * partie locale de l'e-mail (avant `@`). On ne déverse jamais un e-mail
+   * complet dans le `<h1>` (cf. audit visuel — salutation « gracieuse »).
+   */
+  readonly greetingName = computed(() => {
+    const current = this.user();
+    if (!current) {
+      return '';
+    }
+    const fullName = [current.firstName, current.lastName].filter(Boolean).join(' ').trim();
+    if (fullName) {
+      return fullName;
+    }
+    const email = current.email?.trim() ?? '';
+    const local = email.split('@')[0]?.trim();
+    return local || '';
+  });
+
+  /** Salutation complète : « Bonjour, {nom} » ou « Bonjour 👋 » à défaut. */
+  readonly greeting = computed(() => {
+    const name = this.greetingName();
+    return name ? `Bonjour, ${name}` : 'Bonjour 👋';
   });
 
   /** Libellé français du rôle de l'utilisateur courant. */
@@ -97,7 +132,7 @@ export class DashboardPage {
     this.isPatient() ? PATIENT_STATS : ADMIN_STATS,
   );
 
-  /** Accès rapides (désactivés « bientôt ») selon le rôle. */
+  /** Accès rapides selon le rôle (lien actif si `route`, sinon « bientôt »). */
   readonly quickActions = computed<readonly QuickAction[]>(() =>
     this.isPatient() ? PATIENT_ACTIONS : ADMIN_ACTIONS,
   );

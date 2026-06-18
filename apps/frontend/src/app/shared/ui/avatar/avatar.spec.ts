@@ -47,4 +47,22 @@ describe('Avatar', () => {
     const host = fixture.nativeElement as HTMLElement;
     expect(host.textContent).toContain('AL');
   });
+
+  it('porte les classes socle + taille sur le host (garde-fou du binding)', () => {
+    const fixture = setup({ name: 'Ada Lovelace' });
+    fixture.componentRef.setInput('size', 'md');
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.classList.contains('mp-avatar')).toBe(true);
+    expect(host.classList.contains('mp-avatar--md')).toBe(true);
+  });
+
+  it('reflète la taille « sm » dans la classe du host', () => {
+    const fixture = setup({ name: 'Ada Lovelace' });
+    fixture.componentRef.setInput('size', 'sm');
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.classList.contains('mp-avatar')).toBe(true);
+    expect(host.classList.contains('mp-avatar--sm')).toBe(true);
+  });
 });

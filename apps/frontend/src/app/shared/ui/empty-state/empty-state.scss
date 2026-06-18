@@ -8,6 +8,25 @@
   color: var(--mp-color-text-secondary);
 }
 
+// Variante compacte : zone resserrée pour les conteneurs denses (ex. carte
+// « prochain rendez-vous »), évite une carte quasi vide trop haute.
+.mp-empty--dense {
+  gap: var(--mp-space-1);
+  padding: var(--mp-space-4) var(--mp-space-4);
+
+  .mp-empty__icon {
+    width: 36px;
+    height: 36px;
+    font-size: 36px;
+    line-height: 36px;
+  }
+
+  .mp-empty__title {
+    margin-top: var(--mp-space-1);
+    font-size: 16px;
+  }
+}
+
 .mp-empty__icon {
   width: 48px;
   height: 48px;

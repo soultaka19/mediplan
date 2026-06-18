@@ -65,6 +65,17 @@
   color: var(--mp-color-text);
 }
 
+// Placeholder « — » : style discret (texte atténué, poids/taille de corps) pour
+// ne pas ressembler à une barre de censure. La grande typo KPI est réservée aux
+// vraies valeurs.
+.mp-stat__number--placeholder {
+  font-family: var(--mp-font-family);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 400;
+  color: var(--mp-color-text-disabled);
+}
+
 .mp-stat__label {
   font-size: 14px;
   line-height: 20px;

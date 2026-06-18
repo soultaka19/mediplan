@@ -1,6 +1,12 @@
-// Cercle tonal à initiales. Fond primary-container + texte primary :
-// contraste AA largement respecté (#1565C0 sur #E8F0FB), aucun texte sur teal.
-.mp-avatar {
+// Cercle tonal à initiales. Fond primary-container + texte primary.
+// En encapsulation Emulated, les classes posées sur le HOST ne matchent pas un
+// sélecteur de classe « simple » au sein du composant : on cible donc le host
+// via `:host` (socle) et `:host(.mp-avatar--*)` (variantes de taille).
+//
+// Contraste AA :
+//  - Clair : texte #1565C0 sur fond #E8F0FB → ratio ~6.5:1 (AA large/normal OK).
+//  - Sombre : texte #5B9BE8 sur fond #1E3149 → ratio ~5.2:1 (AA OK).
+:host {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -13,13 +19,13 @@
   user-select: none;
 }
 
-.mp-avatar--sm {
+:host(.mp-avatar--sm) {
   width: 32px;
   height: 32px;
   font-size: 13px;
 }
 
-.mp-avatar--md {
+:host(.mp-avatar--md) {
   width: 48px;
   height: 48px;
   font-size: 18px;

@@ -31,6 +31,18 @@ describe('StatCard', () => {
     expect(number?.textContent?.trim()).toBe('24');
   });
 
+  it('marque le placeholder « — » comme discret (classe --placeholder)', () => {
+    const fixture = setup({ label: 'Rendez-vous à venir' });
+    const number = (fixture.nativeElement as HTMLElement).querySelector('.mp-stat__number');
+    expect(number?.classList.contains('mp-stat__number--placeholder')).toBe(true);
+  });
+
+  it('n’applique pas le style placeholder à une vraie valeur', () => {
+    const fixture = setup({ label: 'RDV du jour', value: '24' });
+    const number = (fixture.nativeElement as HTMLElement).querySelector('.mp-stat__number');
+    expect(number?.classList.contains('mp-stat__number--placeholder')).toBe(false);
+  });
+
   it('lie la valeur et le label dans un libellé accessible (pas seulement la couleur)', () => {
     const fixture = setup({ label: 'Rendez-vous à venir', value: '—' });
     const group = (fixture.nativeElement as HTMLElement).querySelector('[role="group"]');
