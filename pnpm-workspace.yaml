@@ -1,0 +1,13 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Autorise l'exécution des scripts de build des dépendances natives nécessaires
+# (esbuild pour les builds Angular/Nest, watcher de fichiers, etc.).
+allowBuilds:
+  '@parcel/watcher': true
+  bcrypt: true
+  esbuild: true
+  lmdb: true
+  msgpackr-extract: true
+  unrs-resolver: true

@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor U as Utilisateur
+    participant FE as Frontend Angular
+    participant API as API NestJS
+    participant DB as PostgreSQL
+
+    U->>FE: Saisit email + mot de passe
+    FE->>API: POST /auth/login {email, password}
+    API->>DB: SELECT user WHERE email = …
+    DB-->>API: Utilisateur (passwordHash, isActive, failedAttempts)
+
+    alt Compte verrouillé
+        API-->>FE: 423 Locked
+        FE-->>U: « Compte temporairement verrouillé »
+    else Identifiants valides
+        API->>API: Vérifie le hash (Argon2id)
+        API->>API: Génère access token (courte durée) + refresh token
+        API->>DB: Enregistre le refresh token + AuditLog (connexion)
+        API-->>FE: 200 OK {accessToken, refreshToken}
+        FE->>FE: Stocke les jetons + active l'intercepteur HTTP
+        FE-->>U: Redirige vers le tableau de bord du rôle
+    else Identifiants invalides
+        API->>DB: UPDATE failedLoginAttempts + 1
+        API->>DB: INSERT AuditLog (échec)
+        API-->>FE: 401 Unauthorized
+        FE-->>U: « Identifiants incorrects »
+    end
+
+    note over FE,API: Requêtes suivantes : Authorization: Bearer accessToken<br/>→ Guard RBAC vérifie le rôle sur chaque endpoint protégé

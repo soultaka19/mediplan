@@ -1,0 +1,45 @@
+/*
+ * Point d'entrée Tailwind v4 — ISOLÉ dans un fichier .css dédié.
+ *
+ * Pourquoi un .css et pas le styles.scss : `@import "tailwindcss";` est résolu
+ * par le plugin PostCSS `@tailwindcss/postcss` (cf. .postcssrc.json). Le placer
+ * dans un .scss forcerait dart-sass à tenter de résoudre cet import (échec).
+ * On le garde donc à part et on le référence dans angular.json (styles[]).
+ *
+ * Ordre des layers déclaré explicitement : `utilities` en dernier => les classes
+ * Tailwind ponctuelles priment sur `base`/`components` sans `!important`. Les
+ * styles des composants Material vivent hors layer (spécificité de classe
+ * normale) et restent prioritaires sur le reset `base` de Tailwind.
+ */
+@layer base, components, utilities;
+
+@import 'tailwindcss';
+
+/*
+ * Réexposition des tokens sémantiques MediPlan comme tokens Tailwind.
+ * Source unique = variables `--mp-*` définies dans styles/_theme.scss (:root).
+ * Résultat : `bg-surface`, `text-secondary`, `border-border`, etc. tirent des
+ * mêmes valeurs que Material. Changer une couleur = une seule variable à éditer.
+ */
+@theme {
+  --color-primary: var(--mp-color-primary);
+  --color-primary-hover: var(--mp-color-primary-hover);
+  --color-accent: var(--mp-color-accent);
+  --color-surface: var(--mp-color-surface);
+  --color-surface-variant: var(--mp-color-surface-variant);
+  --color-background: var(--mp-color-background);
+  --color-text: var(--mp-color-text);
+  --color-text-secondary: var(--mp-color-text-secondary);
+  --color-text-disabled: var(--mp-color-text-disabled);
+  --color-border: var(--mp-color-border);
+  --color-success: var(--mp-color-success);
+  --color-warning: var(--mp-color-warning);
+  --color-error: var(--mp-color-error);
+  --color-info: var(--mp-color-info);
+
+  --radius-sm: var(--mp-radius-sm);
+  --radius-md: var(--mp-radius-md);
+  --radius-lg: var(--mp-radius-lg);
+
+  --font-sans: var(--mp-font-family);
+}

@@ -1,0 +1,48 @@
+.mp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--mp-space-2);
+  padding: var(--mp-space-8) var(--mp-space-4);
+  color: var(--mp-color-text-secondary);
+}
+
+// Variante compacte : zone resserrée pour les conteneurs denses (ex. carte
+// « prochain rendez-vous »), évite une carte quasi vide trop haute.
+.mp-empty--dense {
+  gap: var(--mp-space-1);
+  padding: var(--mp-space-4) var(--mp-space-4);
+
+  .mp-empty__icon {
+    width: 36px;
+    height: 36px;
+    font-size: 36px;
+    line-height: 36px;
+  }
+
+  .mp-empty__title {
+    margin-top: var(--mp-space-1);
+    font-size: 16px;
+  }
+}
+
+.mp-empty__icon {
+  width: 48px;
+  height: 48px;
+  font-size: 48px;
+  line-height: 48px;
+  color: var(--mp-color-text-disabled);
+}
+
+.mp-empty__title {
+  margin: var(--mp-space-2) 0 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--mp-color-text);
+}
+
+.mp-empty__desc {
+  margin: 0 0 var(--mp-space-2);
+  max-width: 32rem;
+}

@@ -1,0 +1,28 @@
+// Layout auth : le layout (flex/centrage) est porté par Tailwind dans le
+// template ; ici, l'identité visuelle de la marque et le fond travaillé.
+//
+// Fond : dégradé tonal TRÈS sobre (teinte primaire ≤ 4 %, token
+// `--mp-color-auth-bg-tint`) vers le fond de page. Hors texte/données (A1/§3.7).
+.mp-auth {
+  background: radial-gradient(
+    ellipse at top,
+    var(--mp-color-auth-bg-tint) 0%,
+    var(--mp-color-background) 60%
+  );
+}
+
+.mp-auth__logo {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+  line-height: 32px;
+  color: var(--mp-color-primary);
+}
+
+.mp-auth__name {
+  font-family: var(--mp-font-display-family);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--mp-color-text);
+}

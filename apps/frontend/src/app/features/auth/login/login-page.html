@@ -1,0 +1,87 @@
+<mat-card class="auth-card" appearance="raised" aria-labelledby="login-title">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" class="auth-card__progress" />
+  }
+
+  <mat-card-content>
+    <h1 id="login-title" class="auth-card__title">Connexion</h1>
+    <p class="auth-card__subtitle">Accédez à votre espace de gestion des rendez-vous.</p>
+
+    <!-- Erreur serveur : bandeau inline annoncé (role="alert" dans Alert) -->
+    @if (errorMessage(); as message) {
+      <app-alert variant="error" [message]="message" data-testid="login-error" />
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="auth-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Adresse e-mail</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          data-testid="login-email"
+        />
+        @if (email.touched && email.invalid) {
+          <mat-error>
+            @if (email.errors?.['required']) {
+              L'adresse e-mail est requise.
+            } @else if (email.errors?.['email']) {
+              Format d'adresse e-mail invalide.
+            }
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe</mat-label>
+        <input
+          matInput
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+          data-testid="login-password"
+        />
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          data-testid="login-password-toggle"
+          [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+          [attr.aria-pressed]="showPassword()"
+          (click)="togglePassword()"
+        >
+          <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (password.touched && password.invalid) {
+          <mat-error>Le mot de passe est requis.</mat-error>
+        }
+      </mat-form-field>
+
+      <button
+        matButton="filled"
+        type="submit"
+        class="auth-form__submit"
+        data-testid="login-submit"
+        [disabled]="loading()"
+      >
+        @if (loading()) {
+          Connexion…
+        } @else {
+          Se connecter
+        }
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      <a matButton routerLink="/forgot-password" data-testid="login-to-forgot">
+        Mot de passe oublié ?
+      </a>
+    </p>
+
+    <p class="auth-switch">
+      Pas encore de compte ?
+      <a matButton routerLink="/register" data-testid="login-to-register">Créer un compte</a>
+    </p>
+  </mat-card-content>
+</mat-card>

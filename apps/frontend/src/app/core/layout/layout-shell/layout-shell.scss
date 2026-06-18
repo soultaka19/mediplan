@@ -1,0 +1,179 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+// --- Toolbar -----------------------------------------------------------------
+.mp-toolbar {
+  position: relative;
+  z-index: 2;
+  gap: var(--mp-space-2);
+  background: var(--mp-color-surface);
+  color: var(--mp-color-text);
+  box-shadow: var(--mp-elevation-1);
+}
+
+// Wordmark verrouillé : pictogramme + « MediPlan », espacement et poids fixes
+// (cf. roadmap UX §3.4). Pas d'asset SVG (KISS) — `mat-icon` Material Symbols.
+.mp-toolbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+}
+
+.mp-toolbar__logo {
+  color: var(--mp-color-primary);
+}
+
+.mp-toolbar__name {
+  font-family: var(--mp-font-display-family);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--mp-color-text);
+}
+
+// Menu utilisateur : avatar → nom → caret, dans cet ordre, avec un espacement
+// aéré (≥ --mp-space-2) pour décoller l'avatar du nom et le caret du nom.
+.mp-toolbar__user {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+}
+
+.mp-toolbar__user-name {
+  // Petit retrait pour ne pas coller l'avatar au nom (lisibilité).
+  margin-inline-start: var(--mp-space-1);
+}
+
+// Le nom est masqué sur petit écran (gardé accessible via aria-label du bouton).
+@media (max-width: 599.98px) {
+  .mp-toolbar__user-name {
+    display: none;
+  }
+}
+
+// --- Conteneur shell ---------------------------------------------------------
+.mp-shell {
+  flex: 1 1 auto;
+  background: var(--mp-color-background);
+}
+
+.mp-sidenav {
+  width: 256px;
+  background: var(--mp-color-surface);
+  border-right: 1px solid var(--mp-color-border);
+}
+
+// --- Navigation --------------------------------------------------------------
+// Espacement propre : marge autour de la liste, intervalle vertical entre
+// items, et coins arrondis pour que l'item actif/au survol forme une « pilule ».
+.mp-sidenav nav {
+  padding: var(--mp-space-2);
+}
+
+.mp-sidenav mat-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+  padding: 0;
+}
+
+.mp-sidenav mat-nav-list [mat-list-item] {
+  border-radius: var(--mp-radius-md);
+  // Transition douce du fond et du filet d'accent (hover → actif) (S3 / §3.5).
+  transition:
+    background-color 140ms var(--mp-ease-standard, ease),
+    box-shadow 140ms var(--mp-ease-standard, ease);
+
+  // Affordance au survol des items actionnables (pas les désactivés).
+  &:not(.mp-nav--disabled):hover {
+    background: var(--mp-color-surface-variant);
+  }
+}
+
+.mp-nav--active {
+  --mat-list-active-indicator-color: var(--mp-color-primary-container);
+
+  background: var(--mp-color-primary-container);
+  // Filet d'accent teal décoratif (jamais de texte sur teal → AA préservé) (S3).
+  // box-shadow inset gauche : ne décale pas le contenu (vs border-left).
+  box-shadow: inset 3px 0 0 0 var(--mp-color-accent);
+
+  .mat-mdc-list-item-icon,
+  span[matListItemTitle] {
+    color: var(--mp-color-primary);
+    font-weight: 600;
+  }
+}
+
+// Respect de prefers-reduced-motion : pas de transition sur le changement d'état.
+@media (prefers-reduced-motion: reduce) {
+  .mp-sidenav mat-nav-list [mat-list-item] {
+    transition: none;
+  }
+}
+
+.mp-nav__soon {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--mp-color-text-disabled);
+}
+
+// --- Zone de contenu ---------------------------------------------------------
+.mp-content {
+  background: var(--mp-color-background);
+}
+
+.mp-content__inner {
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--mp-space-5);
+
+  // Entrée de page discrète : fade + légère translation verticale au montage
+  // (§3.5). Durée --mp-motion-slow, courbe standard, aucun bounce.
+  animation: mp-page-enter var(--mp-motion-slow) var(--mp-ease-standard) both;
+
+  // Le contenu reçoit le focus via le skip link sans anneau parasite.
+  &:focus {
+    outline: none;
+  }
+}
+
+@keyframes mp-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// prefers-reduced-motion : pas d'animation d'entrée (contenu posé directement).
+@media (prefers-reduced-motion: reduce) {
+  .mp-content__inner {
+    animation: none;
+  }
+}
+
+// --- Menu utilisateur --------------------------------------------------------
+.mp-user-menu__header {
+  // En-tête non interactif : annule l'apparence « cliquable » de mat-menu-item.
+  cursor: default;
+  opacity: 1 !important;
+}
+
+.mp-user-menu__name {
+  font-weight: 600;
+  color: var(--mp-color-text);
+}
+
+.mp-user-menu__email {
+  font-size: 12px;
+  color: var(--mp-color-text-secondary);
+}

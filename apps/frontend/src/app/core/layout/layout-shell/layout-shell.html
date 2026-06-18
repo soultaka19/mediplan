@@ -1,0 +1,113 @@
+<!-- Lien d'évitement : premier élément focusable (§6.4) -->
+<a class="skip-link" href="#main-content">Aller au contenu</a>
+
+<mat-toolbar class="mp-toolbar">
+  <button
+    matIconButton
+    type="button"
+    class="mp-toolbar__burger"
+    (click)="toggleSidenav()"
+    [attr.aria-label]="toggleLabel()"
+    [attr.aria-expanded]="opened()"
+    data-testid="shell-burger"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <span class="mp-toolbar__brand">
+    <mat-icon aria-hidden="true" class="mp-toolbar__logo">calendar_month</mat-icon>
+    <span class="mp-toolbar__name">MediPlan</span>
+  </span>
+
+  <span class="grow"></span>
+
+  <!-- Bascule de thème clair/sombre -->
+  <button
+    matIconButton
+    type="button"
+    class="mp-toolbar__theme"
+    (click)="toggleTheme()"
+    [attr.aria-label]="themeToggleLabel()"
+    [attr.aria-pressed]="isDarkTheme()"
+    data-testid="shell-theme-toggle"
+  >
+    <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+
+  <!-- Menu utilisateur -->
+  <button
+    matButton
+    type="button"
+    [matMenuTriggerFor]="userMenu"
+    class="mp-toolbar__user"
+    aria-label="Menu utilisateur"
+    data-testid="shell-user-menu-trigger"
+  >
+    <app-avatar [name]="displayName()" [email]="user()?.email ?? ''" size="sm" />
+    <span class="mp-toolbar__user-name">{{ displayName() }}</span>
+    <mat-icon>arrow_drop_down</mat-icon>
+  </button>
+
+  <mat-menu #userMenu="matMenu">
+    @if (user(); as currentUser) {
+      <div class="mp-user-menu__header" mat-menu-item disabled>
+        <div class="mp-user-menu__name" data-testid="shell-user-name">{{ displayName() }}</div>
+        <div class="mp-user-menu__email" data-testid="shell-user-email">{{ currentUser.email }}</div>
+      </div>
+      <mat-divider />
+    }
+    <button mat-menu-item type="button" (click)="logout()" data-testid="shell-logout">
+      <mat-icon>logout</mat-icon>
+      <span>Se déconnecter</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>
+
+<mat-sidenav-container class="mp-shell">
+  <mat-sidenav
+    class="mp-sidenav"
+    [mode]="sidenavMode()"
+    [opened]="opened()"
+    (openedChange)="onOpenedChange($event)"
+    [fixedInViewport]="false"
+  >
+    <nav aria-label="Navigation principale">
+      <mat-nav-list>
+        @for (item of navItems(); track item.label) {
+          @if (item.route) {
+            <a
+              mat-list-item
+              [routerLink]="item.route"
+              routerLinkActive="mp-nav--active"
+              #rla="routerLinkActive"
+              [activated]="rla.isActive"
+              [attr.aria-current]="rla.isActive ? 'page' : null"
+              data-testid="shell-nav-item"
+            >
+              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+              <span matListItemTitle>{{ item.label }}</span>
+            </a>
+          } @else {
+            <a
+              mat-list-item
+              disabled
+              aria-disabled="true"
+              class="mp-nav--disabled"
+              data-testid="shell-nav-item-disabled"
+            >
+              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+              <span matListItemTitle>{{ item.label }}</span>
+              <span matListItemMeta class="mp-nav__soon">bientôt</span>
+            </a>
+          }
+        }
+      </mat-nav-list>
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="mp-content">
+    <main id="main-content" class="mp-content__inner" tabindex="-1">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

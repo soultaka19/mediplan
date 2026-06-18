@@ -4,6 +4,10 @@ dist/
 build/
 coverage/
 
+# Caches d'outils (monorepo)
+.turbo/
+.angular/
+
 # Environnement
 .env
 .env.local

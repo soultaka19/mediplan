@@ -1,0 +1,137 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter, Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
+
+import { AuthFacade } from '@core/auth';
+import { LoginPage } from './login-page';
+
+/** Fake minimal d'AuthFacade contrôlable par test. */
+function createFakeFacade() {
+  return {
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    isAuthenticated: () => false,
+    currentUser: () => null,
+  };
+}
+
+function byTestId<T extends HTMLElement>(root: HTMLElement, id: string): T {
+  return root.querySelector(`[data-testid="${id}"]`) as T;
+}
+
+describe('LoginPage', () => {
+  let facade: ReturnType<typeof createFakeFacade>;
+
+  function setup() {
+    facade = createFakeFacade();
+    TestBed.configureTestingModule({
+      imports: [LoginPage],
+      providers: [
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: AuthFacade, useValue: facade },
+      ],
+    });
+    const fixture = TestBed.createComponent(LoginPage);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it("n'appelle pas login si le formulaire est invalide", () => {
+    const fixture = setup();
+    const root = fixture.nativeElement as HTMLElement;
+
+    byTestId<HTMLButtonElement>(root, 'login-submit').click();
+    fixture.detectChanges();
+
+    expect(facade.login).not.toHaveBeenCalled();
+  });
+
+  it('appelle login avec les valeurs et redirige en cas de succès', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    facade.login.mockReturnValue(of({ accessToken: 't' }));
+
+    component.form.setValue({ email: 'patient@example.com', password: 'Str0ng!Pass' });
+    component.submit();
+
+    expect(facade.login).toHaveBeenCalledWith({
+      email: 'patient@example.com',
+      password: 'Str0ng!Pass',
+    });
+    expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
+    expect(component.loading()).toBe(false);
+  });
+
+  it('bascule la visibilité du mot de passe via le toggle (type + ARIA)', () => {
+    const fixture = setup();
+    const root = fixture.nativeElement as HTMLElement;
+    const input = byTestId<HTMLInputElement>(root, 'login-password');
+    const toggle = byTestId<HTMLButtonElement>(root, 'login-password-toggle');
+
+    // État initial : masqué.
+    expect(input.getAttribute('type')).toBe('password');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    expect(toggle.getAttribute('aria-label')).toBe('Afficher le mot de passe');
+
+    // Clic → affiché.
+    toggle.click();
+    fixture.detectChanges();
+    expect(input.getAttribute('type')).toBe('text');
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(toggle.getAttribute('aria-label')).toBe('Masquer le mot de passe');
+
+    // Re-clic → masqué.
+    toggle.click();
+    fixture.detectChanges();
+    expect(input.getAttribute('type')).toBe('password');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it("affiche un message d'erreur sur 401", () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    facade.login.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' })),
+    );
+
+    component.form.setValue({ email: 'patient@example.com', password: 'wrongpass' });
+    component.submit();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(byTestId(root, 'login-error')).not.toBeNull();
+    expect(component.errorMessage()).toBe('Adresse e-mail ou mot de passe incorrect.');
+  });
+
+  it('affiche le message de verrouillage sur 423', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const lockMessage =
+      'Compte temporairement verrouillé suite à trop de tentatives. Réessayez plus tard.';
+    facade.login.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 423,
+            error: { message: lockMessage },
+          }),
+      ),
+    );
+
+    component.form.setValue({ email: 'patient@example.com', password: 'Str0ng!Pass' });
+    component.submit();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(byTestId(root, 'login-error')).not.toBeNull();
+    expect(component.errorMessage()).toBe(lockMessage);
+    // Distinct du message 401.
+    expect(component.errorMessage()).not.toBe('Adresse e-mail ou mot de passe incorrect.');
+  });
+});

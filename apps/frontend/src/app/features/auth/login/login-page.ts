@@ -1,0 +1,90 @@
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { Router, RouterLink } from '@angular/router';
+
+import { AuthFacade } from '@core/auth';
+import { Alert } from '@shared/ui';
+import { authErrorMessage } from '@shared/http/http-error-message';
+
+/**
+ * Écran de connexion (composant smart).
+ *
+ * Orchestre le formulaire réactif typé et l'appel via l'AuthFacade. Les états
+ * `loading`/`error` sont exposés en signals ; aucun appel HTTP direct ici.
+ */
+@Component({
+  selector: 'app-login-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+    Alert,
+  ],
+  templateUrl: './login-page.html',
+  styleUrl: './login-page.scss',
+})
+export class LoginPage {
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly auth = inject(AuthFacade);
+  private readonly router = inject(Router);
+
+  /** Soumission en cours : désactive le bouton et les champs. */
+  readonly loading = signal(false);
+  /** Message d'erreur serveur à afficher, ou `null`. */
+  readonly errorMessage = signal<string | null>(null);
+  /** Affiche le mot de passe en clair (toggle accessible, A5). */
+  readonly showPassword = signal(false);
+
+  /** Formulaire réactif typé. */
+  readonly form = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]],
+  });
+
+  get email() {
+    return this.form.controls.email;
+  }
+
+  get password() {
+    return this.form.controls.password;
+  }
+
+  /** Bascule l'affichage du mot de passe (clair ↔ masqué). */
+  togglePassword(): void {
+    this.showPassword.update((visible) => !visible);
+  }
+
+  /** Soumet le formulaire de connexion. */
+  submit(): void {
+    this.errorMessage.set(null);
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.loading.set(true);
+    this.auth.login(this.form.getRawValue()).subscribe({
+      next: () => {
+        this.loading.set(false);
+        void this.router.navigate(['/dashboard']);
+      },
+      error: (error: unknown) => {
+        this.loading.set(false);
+        this.errorMessage.set(authErrorMessage(error));
+      },
+    });
+  }
+}

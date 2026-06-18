@@ -1,0 +1,82 @@
+@if (user(); as currentUser) {
+  <!-- Zone d'accueil : avatar + salutation (seul <h1>) + badge de rôle (frère) -->
+  <header class="dashboard-hero">
+    <app-avatar [name]="displayName()" [email]="currentUser.email ?? ''" size="md" />
+    <div class="dashboard-hero__text">
+      <div class="dashboard-hero__heading">
+        <h1 class="dashboard-hero__title" data-testid="dashboard-welcome">{{ greeting() }}</h1>
+        <app-role-badge [role]="currentUser.role" />
+      </div>
+      <p class="dashboard-hero__subtitle">{{ subtitle() }}</p>
+    </div>
+  </header>
+
+  <!-- KPI placeholder par rôle (valeurs « — » : aucune donnée inventée) -->
+  <section class="dashboard-stats" aria-label="Statistiques">
+    @for (stat of stats(); track stat.label) {
+      <app-stat-card [icon]="stat.icon" [label]="stat.label" hint="bientôt" />
+    }
+  </section>
+
+  <!-- Prochain rendez-vous : état vide (la prise de RDV arrive plus tard) -->
+  <section class="dashboard-next" aria-labelledby="dashboard-next-title">
+    <h2 id="dashboard-next-title" class="dashboard-section-title">Prochain rendez-vous</h2>
+    <mat-card class="dashboard-next__card" appearance="outlined">
+      <app-empty-state
+        icon="event_busy"
+        title="Aucun rendez-vous à venir"
+        description="La prise de rendez-vous arrive bientôt."
+        [headingLevel]="3"
+        [dense]="true"
+      />
+    </mat-card>
+  </section>
+
+  <!-- Accès rapides : lien actif si l'écran existe (route), sinon « bientôt ». -->
+  <section class="dashboard-quick" aria-labelledby="dashboard-quick-title">
+    <h2 id="dashboard-quick-title" class="dashboard-section-title">Accès rapides</h2>
+    <div class="dashboard-quick__grid">
+      @for (action of quickActions(); track action.label) {
+        @if (action.route) {
+          <a
+            [routerLink]="action.route"
+            class="dashboard-quick__item dashboard-quick__item--active"
+            data-testid="dashboard-quick-action-link"
+          >
+            <mat-icon class="dashboard-quick__icon" aria-hidden="true">{{ action.icon }}</mat-icon>
+            <span class="dashboard-quick__label">{{ action.label }}</span>
+            <mat-icon class="dashboard-quick__chevron" aria-hidden="true">chevron_right</mat-icon>
+          </a>
+        } @else {
+          <button
+            type="button"
+            class="dashboard-quick__item"
+            disabled
+            aria-disabled="true"
+            data-testid="dashboard-quick-action"
+          >
+            <mat-icon class="dashboard-quick__icon" aria-hidden="true">{{ action.icon }}</mat-icon>
+            <span class="dashboard-quick__label">{{ action.label }}</span>
+            <span class="dashboard-quick__soon">bientôt</span>
+          </button>
+        }
+      }
+    </div>
+  </section>
+
+  <!-- Carte identité secondaire/condensée (email + rôle) -->
+  <section class="dashboard-account" aria-labelledby="dashboard-account-title">
+    <h2 id="dashboard-account-title" class="dashboard-section-title">Mon compte</h2>
+    <mat-card class="dashboard-account__card" appearance="outlined">
+      <mat-card-content>
+        <dl class="dashboard-account__list">
+          <dt>Adresse e-mail</dt>
+          <dd data-testid="dashboard-email">{{ currentUser.email }}</dd>
+
+          <dt>Rôle</dt>
+          <dd data-testid="dashboard-role">{{ roleLabel() }}</dd>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+  </section>
+}

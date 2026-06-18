@@ -1,0 +1,25 @@
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Préfixe global d'API (décision archi Phase 2). /health reste hors préfixe
+  // pour servir de sonde de disponibilité simple.
+  app.setGlobalPrefix('api/v1', { exclude: ['health'] });
+
+  // Validation globale des DTO (rejette les entrées invalides en 400).
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+  );
+
+  // Filtre global : normalise toutes les erreurs en JSON { statusCode, error,
+  // message } sans fuite d'info sensible (401/403/409/423… cohérents).
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  const port = process.env.BACKEND_PORT ?? process.env.PORT ?? 3000;
+  await app.listen(port);
+}
+void bootstrap();

@@ -14,36 +14,91 @@ solution unique, sécurisée et accessible 24 h/24.
 
 Quatre rôles interagissent avec la plateforme :
 
-| Rôle | Besoins principaux |
-|------|--------------------|
-| **Patient** | Réserver, modifier ou annuler un rendez-vous sans téléphoner |
-| **Médecin** | Consulter son horaire, gérer ses disponibilités, suivre le flux du jour |
-| **Administrateur de clinique** | Gérer utilisateurs, médecins, disponibilités, statistiques |
-| **Super administrateur** | Configurer les cliniques et la plateforme |
+| Rôle                           | Besoins principaux                                                      |
+| ------------------------------ | ----------------------------------------------------------------------- |
+| **Patient**                    | Réserver, modifier ou annuler un rendez-vous sans téléphoner            |
+| **Médecin**                    | Consulter son horaire, gérer ses disponibilités, suivre le flux du jour |
+| **Administrateur de clinique** | Gérer utilisateurs, médecins, disponibilités, statistiques              |
+| **Super administrateur**       | Configurer les cliniques et la plateforme                               |
 
 ## Stack technique
 
-| Couche | Technologie |
-|--------|-------------|
-| Frontend | Angular + Angular Material + TypeScript |
-| Backend | NestJS (API REST) + TypeScript |
-| Base de données | PostgreSQL |
-| Déploiement | Docker + Docker Compose (local) |
-| Qualité | Jest, Cypress/Playwright, ESLint, Prettier, GitHub Actions |
+| Couche          | Technologie                                                |
+| --------------- | ---------------------------------------------------------- |
+| Frontend        | Angular + Angular Material + TypeScript                    |
+| Backend         | NestJS (API REST) + TypeScript                             |
+| Base de données | PostgreSQL                                                 |
+| Déploiement     | Docker + Docker Compose (local)                            |
+| Qualité         | Jest, Cypress/Playwright, ESLint, Prettier, GitHub Actions |
 
 ## Structure du dépôt
 
+Monorepo géré avec **Turborepo + pnpm workspaces** :
+
 ```
 .
+├── apps/
+│   ├── backend/    ← API NestJS (TypeScript, TypeORM, PostgreSQL)
+│   └── frontend/   ← Application Angular (Angular Material, standalone components)
+├── packages/       ← Paquets partagés (vide pour l'instant)
 ├── docs/
-│   ├── cahier-des-charges/   ← Cahier des charges (LIV-05)
-│   ├── consignes/            ← Consignes et énoncés du cours
-│   └── conception/           ← Dossier de conception (diagrammes UML, explications)
+│   └── conception/ ← Dossier de conception (diagrammes UML, ERD, explications)
+├── package.json    ← Scripts racine (délégués à Turbo)
+├── pnpm-workspace.yaml
+├── turbo.json      ← Pipelines de tâches (build/lint/test/dev)
+├── docker-compose.yml ← Orchestration locale (postgres + backend + frontend)
+├── docker/         ← Dockerfiles (backend, frontend) + config nginx
+├── .env.example    ← Modèle de configuration (copier en .env)
 └── README.md
 ```
 
-> Les sous-dossiers `frontend/` (Angular) et `backend/` (NestJS) seront ajoutés lors des
-> phases de développement (Phases 2 et 3 du cahier des charges).
+## Démarrage (développement local)
+
+> 📖 **Nouveau sur le projet ?** Suivez le [**Guide du collaborateur** (`CONTRIBUTING.md`)](CONTRIBUTING.md) : prérequis détaillés, outils, configuration de l'environnement, migrations, workflow Git et dépannage.
+
+> Prérequis : **Node.js ≥ 22.22 (ou ≥ 24.15)** — requis par Angular 22 — et **pnpm** (via Corepack : `corepack enable`, sinon `npm i -g pnpm`).
+
+```bash
+# 1. Installer les dépendances de tout le monorepo
+pnpm install
+
+# 2. Copier la configuration et renseigner les valeurs
+cp .env.example .env
+
+# 3. Lancer les apps en développement (toutes via Turbo)
+pnpm dev
+
+# Autres commandes utiles
+pnpm build         # build de toutes les apps
+pnpm lint          # lint de tout le monorepo
+pnpm test          # tests
+pnpm format        # formatage Prettier
+```
+
+## Démarrage avec Docker (« une commande »)
+
+> Prérequis : **Docker Desktop** (ou Docker Engine + Compose v2).
+
+```bash
+# Copier la configuration (des valeurs de dev par défaut existent sinon)
+cp .env.example .env
+
+# Construire et lancer postgres + backend + frontend
+docker compose up -d --build
+```
+
+| Service          | URL                                                                    |
+| ---------------- | ---------------------------------------------------------------------- |
+| Frontend (nginx) | http://localhost:4200                                                  |
+| API backend      | http://localhost:4200/api/v1 (proxy) — ou http://localhost:3000/api/v1 |
+| Santé backend    | http://localhost:3000/health                                           |
+| PostgreSQL       | localhost:5432                                                         |
+
+```bash
+docker compose ps        # état des conteneurs
+docker compose logs -f   # journaux
+docker compose down      # arrêter (le volume de données est conservé)
+```
 
 ## Dossier de conception
 

@@ -1,0 +1,18 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './user.entity';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+/**
+ * Expose le repository User et les endpoints utilisateurs (MEDIPLAN-17).
+ * Le module Auth importe ce module pour accéder au repository sans redéclarer
+ * l'entité ; l'export de `TypeOrmModule` reste donc en place.
+ */
+@Module({
+  imports: [TypeOrmModule.forFeature([User])],
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [TypeOrmModule],
+})
+export class UserModule {}

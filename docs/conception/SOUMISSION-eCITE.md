@@ -17,11 +17,10 @@ Tous situés dans `docs/conception/` :
 |-----------|----------|
 | Introduction | `00-introduction.md`, `README.md` |
 | Cas d'utilisation (7) | `cas-utilisation/uc-01-global.md` … `uc-07-statistiques.md` |
+| Diagramme de classes | `classes/diagramme-classes.md` |
+| Diagrammes de séquence (3) | `sequence/seq-01-reservation.md`, `seq-02-annulation.md`, `seq-03-authentification.md` |
 | Diagramme entité-association | `erd/mcd-erd.md` |
-| Images exportées (PNG) | `images/*.png` (8 diagrammes) |
-
-> Les diagrammes de **classes** et de **séquence** sont en cours de finalisation dans un espace
-> de travail séparé et seront réintégrés avant la remise finale.
+| Images exportées (PNG) | `images/*.png` (12 diagrammes) |
 
 > Chaque diagramme est accompagné d'une explication écrite dans le même fichier. Les diagrammes
 > sont écrits en Mermaid (affichage natif sur GitHub) et exportés en PNG dans `images/`.
@@ -31,7 +30,7 @@ Tous situés dans `docs/conception/` :
 - [x] **Plan Jira mis à jour** : 7 Epics, 23 User Stories, 3 Tâches, responsables et statuts (progression réelle : 7 terminés, 2 en cours, le reste à faire).
 - [x] **Tâches Jira liées au dossier de conception** : Epic « E1 — Analyse et conception (Sprint 1) » avec stories diagrammes + dépôt + soumission.
 - [x] **≥ 5 diagrammes de cas d'utilisation** : 7 fournis.
-- [x] **Diagrammes selon le type (Site Web)** : cas d'utilisation + ERD fournis ; classes + séquence en cours de finalisation.
+- [x] **Diagrammes selon le type (Site Web)** : cas d'utilisation + classes + séquence (+ ERD bonus).
 - [x] **Explications écrites** : une par diagramme.
 - [x] **Dépôt GitHub** dans `docs/conception/`.
 - [ ] **Accès professeure** : ajouter `StephanieKa-2022` sur GitHub et l'inviter sur Jira (voir `GUIDE-REMISE-GITHUB.md`).
