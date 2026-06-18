@@ -12,6 +12,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter, map } from 'rxjs';
 
 import { AuthFacade } from '@core/auth';
+import { ThemeService } from '@core/theme';
 import { Avatar } from '@shared/ui';
 import { NAV_ITEMS, visibleNavItems } from '../nav-items';
 
@@ -53,9 +54,21 @@ export class LayoutShell {
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthFacade);
+  private readonly themeService = inject(ThemeService);
 
   /** Utilisateur courant (signal lecture seule) pour le menu utilisateur. */
   readonly user = this.auth.currentUser;
+
+  /** Thème courant (clair/sombre) pour le bouton de bascule de la toolbar. */
+  readonly theme = this.themeService.theme;
+
+  /** Vrai si le thème sombre est actif (pour `aria-pressed`). */
+  readonly isDarkTheme = computed(() => this.theme() === 'dark');
+
+  /** Libellé accessible dynamique du bouton de thème. */
+  readonly themeToggleLabel = computed(() =>
+    this.isDarkTheme() ? 'Activer le thème clair' : 'Activer le thème sombre',
+  );
 
   /**
    * Items de navigation visibles selon le rôle courant (réactif au changement
@@ -109,6 +122,11 @@ export class LayoutShell {
   /** Bascule l'ouverture du sidenav (burger). */
   toggleSidenav(): void {
     this.openedState.update((value) => !value);
+  }
+
+  /** Bascule le thème clair/sombre. */
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
   /** Synchronise l'état quand l'utilisateur ferme via backdrop/Échap. */

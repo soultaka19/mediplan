@@ -1,10 +1,15 @@
 /*
  * Polices auto-hébergées — AUCUN appel réseau externe (pas de CDN).
- * Roboto via @fontsource (poids 400/500/700) + Material Symbols (icônes).
+ * - Roboto via @fontsource (poids 400/500/700) : corps de texte.
+ * - Inter via @fontsource (poids 400/600/700) : titrage (--mp-font-display-family).
+ * - Material Symbols : icônes.
  * Fichier .css dédié référencé dans angular.json (styles[]) : dart-sass ne peut
  * pas `@use` ces feuilles CSS tierces.
  */
 @import '@fontsource/roboto/400.css';
 @import '@fontsource/roboto/500.css';
 @import '@fontsource/roboto/700.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
 @import 'material-symbols/outlined.css';

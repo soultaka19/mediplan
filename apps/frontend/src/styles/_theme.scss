@@ -55,6 +55,17 @@
 
   // --- 3) Typographie §1.3 ---------------------------------------------------
   --mp-font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  // Famille de titrage : Inter auto-hébergée, repli Roboto garanti (§1.3 / §3.3).
+  --mp-font-display-family: 'Inter', 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  // Échelle de titrage révisée (contraste de poids + letter-spacing négatif léger).
+  --mp-font-display-size: 32px;
+  --mp-font-display-line: 40px;
+  --mp-font-display-weight: 700;
+  --mp-font-display-spacing: -0.5px;
+  --mp-font-title-size: 22px;
+  --mp-font-title-line: 30px;
+  --mp-font-title-weight: 600;
+  --mp-font-title-spacing: -0.2px;
   // Valeur de KPI (StatCard du dashboard) — token dédié, pas de px en dur §1.3.
   --mp-font-kpi-size: 34px;
   --mp-font-kpi-line: 40px;
@@ -109,8 +120,9 @@ html {
         tertiary: mat.$cyan-palette,
       ),
       typography: (
+        // Corps : Roboto. Titrage Material (« brand ») : Inter, repli Roboto (§1.3).
         plain-family: 'Roboto, system-ui, sans-serif',
-        brand-family: 'Roboto, system-ui, sans-serif',
+        brand-family: 'Inter, Roboto, system-ui, sans-serif',
       ),
       density: 0,
     )
@@ -132,4 +144,82 @@ html {
   --mat-sys-outline: var(--mp-color-border); // bordures / outline form-field
   --mat-sys-outline-variant: var(--mp-color-border);
   --mat-sys-error: var(--mp-color-error); // validation invalide
+}
+
+// =============================================================================
+// --- Mode sombre : [data-theme='dark'] sur <html> (posé par ThemeService) ----
+// =============================================================================
+// On redéfinit UNIQUEMENT les tokens sémantiques `--mp-color-*` (cibles
+// roadmap §3.2, contrastes AA re-vérifiés dans design-system.md §1.2bis), on
+// bascule le thème Material en sombre, puis on réaffirme le pont `--mat-sys-*`.
+// Aucun markup ni classe `.mat-*` touché : source unique préservée.
+
+[data-theme='dark'] {
+  // 1) Tokens sémantiques sombres (AA re-vérifié, cf. design-system §1.2bis).
+  --mp-color-primary: #5b9be8;
+  --mp-color-primary-hover: #7db2ef;
+  --mp-color-primary-container: #1e3149;
+  --mp-color-on-primary: #0f1722;
+  --mp-color-accent: #3fc9b7;
+  --mp-color-on-accent: #0f1722;
+  --mp-color-background: #0f1722;
+  --mp-color-surface: #172234;
+  --mp-color-surface-variant: #1f2b3e;
+  --mp-color-text: #e6eaf2;
+  --mp-color-text-secondary: #a9b4c6;
+  --mp-color-text-disabled: #7e8aa0;
+  --mp-color-border: #2a384f;
+  --mp-color-focus-ring: #5b9be8;
+  --mp-color-success: #5dd27a;
+  --mp-color-warning: #e0a23c;
+  --mp-color-error: #f0707a;
+  --mp-color-info: #5b9be8;
+}
+
+// 2) Thème Material 3 sombre (mêmes palettes ; couleurs exactes garanties par le
+//    pont ci-dessous). Voie la plus fiable Material 3 : re-include avec
+//    theme-type: dark sous le sélecteur, plutôt que de bricoler les `--mat-sys-*`
+//    de luminance un par un.
+html[data-theme='dark'] {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: dark,
+        primary: mat.$blue-palette,
+        tertiary: mat.$cyan-palette,
+      ),
+      typography: (
+        plain-family: 'Roboto, system-ui, sans-serif',
+        brand-family: 'Inter, Roboto, system-ui, sans-serif',
+      ),
+      density: 0,
+    )
+  );
+
+  // 3) Pont réaffirmé : les system tokens pointent vers nos `--mp-*` sombres.
+  --mat-sys-primary: var(--mp-color-primary);
+  --mat-sys-on-primary: var(--mp-color-on-primary);
+  --mat-sys-tertiary: var(--mp-color-accent);
+  --mat-sys-surface: var(--mp-color-surface);
+  --mat-sys-surface-container: var(--mp-color-surface);
+  --mat-sys-background: var(--mp-color-background);
+  --mat-sys-on-surface: var(--mp-color-text);
+  --mat-sys-on-surface-variant: var(--mp-color-text-secondary);
+  --mat-sys-outline: var(--mp-color-border);
+  --mat-sys-outline-variant: var(--mp-color-border);
+  --mat-sys-error: var(--mp-color-error);
+}
+
+// Transition douce de couleur lors de la bascule clair/sombre (sobre, ≤ 240ms).
+// Désactivée si l'utilisateur réduit les animations.
+@media (prefers-reduced-motion: no-preference) {
+  body,
+  .mp-toolbar,
+  .mp-sidenav,
+  .mp-shell,
+  .mp-content {
+    transition:
+      background-color var(--mp-motion-slow) var(--mp-ease-standard),
+      color var(--mp-motion-slow) var(--mp-ease-standard);
+  }
 }

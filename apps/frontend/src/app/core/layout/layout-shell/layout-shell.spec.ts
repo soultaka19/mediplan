@@ -153,4 +153,19 @@ describe('LayoutShell', () => {
 
     expect(component.opened()).toBe(!initial);
   });
+
+  it('le bouton de thème bascule clair/sombre et reflète aria-pressed', () => {
+    const fixture = setup();
+    const root = fixture.nativeElement as HTMLElement;
+    const toggle = byTestId<HTMLButtonElement>(root, 'shell-theme-toggle');
+    const initialDark = fixture.componentInstance.isDarkTheme();
+
+    expect(toggle.getAttribute('aria-pressed')).toBe(String(initialDark));
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.isDarkTheme()).toBe(!initialDark);
+    expect(toggle.getAttribute('aria-pressed')).toBe(String(!initialDark));
+  });
 });

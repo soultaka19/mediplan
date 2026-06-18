@@ -27,6 +27,7 @@
 }
 
 .mp-toolbar__name {
+  font-family: var(--mp-font-display-family);
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.2px;
@@ -122,9 +123,32 @@
   margin: 0 auto;
   padding: var(--mp-space-5);
 
+  // Entrée de page discrète : fade + légère translation verticale au montage
+  // (§3.5). Durée --mp-motion-slow, courbe standard, aucun bounce.
+  animation: mp-page-enter var(--mp-motion-slow) var(--mp-ease-standard) both;
+
   // Le contenu reçoit le focus via le skip link sans anneau parasite.
   &:focus {
     outline: none;
+  }
+}
+
+@keyframes mp-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// prefers-reduced-motion : pas d'animation d'entrée (contenu posé directement).
+@media (prefers-reduced-motion: reduce) {
+  .mp-content__inner {
+    animation: none;
   }
 }
 

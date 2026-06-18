@@ -23,10 +23,11 @@
   flex-wrap: wrap;
   gap: var(--mp-space-3);
   margin: 0;
-  font-size: 28px;
-  line-height: 36px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
+  font-family: var(--mp-font-display-family);
+  font-size: var(--mp-font-display-size);
+  line-height: var(--mp-font-display-line);
+  font-weight: var(--mp-font-display-weight);
+  letter-spacing: var(--mp-font-display-spacing);
   color: var(--mp-color-text);
 }
 
@@ -38,9 +39,11 @@
 // --- Titres de section -------------------------------------------------------
 .dashboard-section-title {
   margin: 0 0 var(--mp-space-3);
-  font-size: 20px;
-  line-height: 28px;
-  font-weight: 600;
+  font-family: var(--mp-font-display-family);
+  font-size: var(--mp-font-title-size);
+  line-height: var(--mp-font-title-line);
+  font-weight: var(--mp-font-title-weight);
+  letter-spacing: var(--mp-font-title-spacing);
   color: var(--mp-color-text);
 }
 

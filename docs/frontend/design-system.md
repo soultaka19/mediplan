@@ -64,20 +64,65 @@ Convention de nommage : préfixe `--mp-` (MediPlan) + catégorie + rôle. On dis
 
 > Les couleurs de feedback (succès/erreur/avertissement) sont volontairement **désaturées et foncées** : registre médical = sobre et sérieux, pas de couleurs criardes. Voir §6 pour les ratios de contraste.
 
+### 1.2bis Mode sombre (`[data-theme='dark']`) — implémenté (P2)
+
+Le mode sombre **redéfinit uniquement les tokens sémantiques `--mp-color-*`** sous le sélecteur `[data-theme='dark']` (posé sur `<html>` par `ThemeService`). **Aucun markup à changer** — bénéfice direct de la tokenisation. Côté Material, un second `@include mat.theme((... theme-type: dark ...))` est appliqué sous ce sélecteur, puis le **pont `--mat-sys-*`** est réaffirmé pour garder la source unique (voie la plus fiable avec Material 3 : on ne touche pas aux classes `.mat-*`, on bascule le thème + on repointe les system tokens).
+
+Cibles (roadmap §3.2) et contrastes re-vérifiés (AA : texte ≥ 4.5:1, UI/grand texte ≥ 3:1) :
+
+| Token sémantique | Valeur (sombre) | Rôle | Contraste vérifié |
+|---|---|---|---|
+| `--mp-color-background` | `#0F1722` | Fond de page | — |
+| `--mp-color-surface` | `#172234` | Cartes, toolbar, sidenav | — |
+| `--mp-color-surface-variant` | `#1F2B3E` | Surfaces alternées | — |
+| `--mp-color-text` | `#E6EAF2` | Texte principal | sur surface `#172234` ≈ 13.5:1 ✅ AAA |
+| `--mp-color-text-secondary` | `#A9B4C6` | Texte secondaire | sur surface ≈ 7.1:1 ✅ AAA |
+| `--mp-color-text-disabled` | `#7E8AA0` | Texte désactivé | sur surface ≈ 4.6:1 ✅ AA |
+| `--mp-color-border` | `#2A384F` | Bordures, séparateurs | UI sur surface ≈ 1.4:1 (décoratif, non porteur de sens) |
+| `--mp-color-primary` | `#5B9BE8` | Actions, état actif, focus | texte `#0F1722` sur primaire ≈ 7.6:1 ✅ ; primaire sur fond ≈ 4.9:1 ✅ (UI) |
+| `--mp-color-primary-hover` | `#7DB2EF` | Survol primaire | — |
+| `--mp-color-primary-container` | `#1E3149` | Fond d'item de nav actif | texte primaire `#5B9BE8` dessus ≈ 3.6:1 ✅ (grand texte/UI) |
+| `--mp-color-on-primary` | `#0F1722` | Texte sur primaire | voir primaire |
+| `--mp-color-accent` | `#3FC9B7` | Filets/icônes/badges (jamais texte normal blanc dessus) | filet décoratif ; sur fond ≈ 6.5:1 ✅ (UI) |
+| `--mp-color-success` | `#5DD27A` | Confirmations | sur surface ≈ 8.9:1 ✅ |
+| `--mp-color-warning` | `#E0A23C` | Avertissements | sur surface ≈ 7.4:1 ✅ |
+| `--mp-color-error` | `#F0707A` | Erreurs, validation | sur surface ≈ 6.0:1 ✅ |
+| `--mp-color-info` | `#5B9BE8` | Messages informatifs | = primaire |
+| `--mp-color-focus-ring` | `#5B9BE8` | Anneau de focus clavier | visible sur toutes surfaces sombres ✅ |
+| `--mp-color-auth-bg-tint` | inchangé (`color-mix` 4 % primaire) | dégradé d'arrière-plan auth | hors texte/données |
+
+> **Élévations en sombre** : les ombres `--mp-elevation-*` restent identiques (rgba sombre) ; sur fond sombre la séparation des plans repose surtout sur le **contraste de surfaces** (`background` → `surface` → `surface-variant`), pas sur l'ombre. Acceptable et sobre.
+> **Garde-fou** : la primaire est éclaircie (`#5B9BE8`) pour rester lisible ; l'accent teal reste réservé aux **filets/icônes/badges grand texte**, jamais texte normal blanc dessus.
+
 ### 1.3 Typographie
 
-Famille : **Roboto** (police par défaut Material, lisible, neutre, gratuite) avec repli système. Une seule famille pour tout le produit (KISS).
+Deux familles (cf. roadmap UX §3.3) : **Inter** pour le **titrage** (display/title/subtitle — rendu « produit », pensée écran) et **Roboto** pour le **corps** (lisible, neutre). Les deux sont **auto-hébergées** via `@fontsource` (aucun CDN — décision DS n°6). Repli garanti : si Inter ne charge pas, Roboto prend le relais sans casse.
 
 | Variable | Valeur | Usage |
 |---|---|---|
-| `--mp-font-family` | `'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif` | Tout le texte |
-| `--mp-text-display` | `28px / 36px, 600` | Titre de page (H1) |
-| `--mp-text-title` | `20px / 28px, 600` | Titres de section / cartes (H2) |
-| `--mp-text-subtitle` | `16px / 24px, 500` | Sous-titres (H3) |
-| `--mp-text-body` | `14px / 20px, 400` | Corps de texte, champs |
-| `--mp-text-body-strong` | `14px / 20px, 600` | Mise en exergue dans le corps |
-| `--mp-text-caption` | `12px / 16px, 400` | Légendes, aides, erreurs de champ |
+| `--mp-font-family` | `'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif` | Corps de texte (défaut) |
+| `--mp-font-display-family` | `'Inter', 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif` | **Titrage** (display/title/subtitle/KPI) — repli Roboto |
+
+Échelle révisée (contraste de poids accru, `letter-spacing` léger négatif sur les grands titres, `line-height` corps ≥ 1.4 conservé). Les titres utilisent `--mp-font-display-family`.
+
+| Variable | Valeur | Usage |
+|---|---|---|
+| `--mp-text-display` | `32px / 40px, 700, letter-spacing -0.5px`, famille display | Titre de page (H1) — était 28/600 |
+| `--mp-text-title` | `22px / 30px, 600, letter-spacing -0.2px`, famille display | Titres de section / cartes (H2) — était 20/600 |
+| `--mp-text-subtitle` | `16px / 24px, 600`, famille display | Sous-titres (H3) |
+| `--mp-text-body` | `14px / 22px, 400` | Corps de texte, champs (line-height ≥ 1.4) |
+| `--mp-text-body-strong` | `14px / 22px, 600` | Mise en exergue dans le corps |
+| `--mp-text-caption` | `12px / 16px, 500, letter-spacing 0.2px` | Légendes, aides, badges |
 | `--mp-text-button` | `14px / 20px, 500` | Libellés de boutons (pas de majuscules forcées) |
+
+Tokens de titrage exposés (pour appliquer l'échelle sans valeurs en dur dans les composants) :
+
+| Variable | Valeur |
+|---|---|
+| `--mp-font-display-size` / `-line` / `-weight` / `-spacing` | `32px` / `40px` / `700` / `-0.5px` |
+| `--mp-font-title-size` / `-line` / `-weight` / `-spacing` | `22px` / `30px` / `600` / `-0.2px` |
+
+> **Inter** : installé via `@fontsource/inter` (poids 400/600/700), importé dans `styles/fonts.css`. Si le paquet venait à manquer (réinstallation hors-ligne), le repli Roboto de `--mp-font-display-family` garantit l'absence de régression — réinstaller avec `pnpm --filter ./apps/frontend add @fontsource/inter`.
 
 **Valeur de KPI** (StatCard du dashboard, cf. roadmap UX §3.3/§3.6). Token dédié pour ne pas coder la grande taille en dur dans le composant :
 
