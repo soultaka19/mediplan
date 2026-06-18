@@ -9,6 +9,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -48,6 +49,7 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
     MatProgressBarModule,
     Alert,
   ],
@@ -70,6 +72,10 @@ export class ResetPasswordPage {
 
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  /** Affiche le nouveau mot de passe en clair (toggle accessible, A5). */
+  readonly showNewPassword = signal(false);
+  /** Affiche la confirmation en clair (toggle accessible, A5). */
+  readonly showConfirmPassword = signal(false);
 
   readonly form = this.fb.group(
     {
@@ -85,6 +91,16 @@ export class ResetPasswordPage {
 
   get confirmPassword() {
     return this.form.controls.confirmPassword;
+  }
+
+  /** Bascule l'affichage du nouveau mot de passe (clair ↔ masqué). */
+  toggleNewPassword(): void {
+    this.showNewPassword.update((visible) => !visible);
+  }
+
+  /** Bascule l'affichage de la confirmation (clair ↔ masqué). */
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword.update((visible) => !visible);
   }
 
   /** Soumet la réinitialisation du mot de passe. */

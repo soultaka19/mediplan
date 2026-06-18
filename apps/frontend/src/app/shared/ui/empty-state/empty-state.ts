@@ -20,10 +20,21 @@ export class EmptyState {
   readonly icon = input('inbox');
   /** Titre court. */
   readonly title = input.required<string>();
+  /**
+   * Niveau du titre (`2` ou `3`) pour préserver la hiérarchie des titres de la
+   * page hôte. Défaut `2` ; passer `3` quand l'état vide est imbriqué sous une
+   * section déjà titrée en `<h2>` (évite deux `<h2>` pour un même bloc).
+   */
+  readonly headingLevel = input<2 | 3>(2);
   /** Phrase explicative. */
   readonly description = input('');
   /** Libellé de l'action ; si absent, aucun bouton n'est affiché. */
   readonly actionLabel = input('');
+  /**
+   * Compacte la zone (padding/hauteur réduits) pour les contextes denses, ex.
+   * carte « prochain rendez-vous » du dashboard. Défaut `false`.
+   */
+  readonly dense = input(false);
 
   /** Émis au clic sur l'action. */
   readonly action = output<void>();

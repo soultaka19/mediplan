@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, guestGuard } from '@core/auth';
+import { authGuard, guestGuard, roleGuard } from '@core/auth';
 
 /**
  * Routes applicatives (cf. design-system §7.2).
@@ -56,6 +56,14 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () =>
           import('@features/dashboard/dashboard-page').then((m) => m.DashboardPage),
+      },
+      {
+        // Administration des utilisateurs : protégé EN PLUS par le rôle.
+        // L'autorisation faisant foi reste imposée par l'API (403 sinon).
+        path: 'admin/users',
+        canActivate: [roleGuard('clinic_admin', 'super_admin')],
+        loadComponent: () =>
+          import('@features/admin/users/users-list-page').then((m) => m.UsersListPage),
       },
       {
         path: '',

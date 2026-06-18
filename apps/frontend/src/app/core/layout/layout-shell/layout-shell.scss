@@ -14,6 +14,8 @@
   box-shadow: var(--mp-elevation-1);
 }
 
+// Wordmark verrouillé : pictogramme + « MediPlan », espacement et poids fixes
+// (cf. roadmap UX §3.4). Pas d'asset SVG (KISS) — `mat-icon` Material Symbols.
 .mp-toolbar__brand {
   display: inline-flex;
   align-items: center;
@@ -25,12 +27,24 @@
 }
 
 .mp-toolbar__name {
+  font-family: var(--mp-font-display-family);
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--mp-color-text);
 }
 
+// Menu utilisateur : avatar → nom → caret, dans cet ordre, avec un espacement
+// aéré (≥ --mp-space-2) pour décoller l'avatar du nom et le caret du nom.
 .mp-toolbar__user {
-  gap: var(--mp-space-1);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+}
+
+.mp-toolbar__user-name {
+  // Petit retrait pour ne pas coller l'avatar au nom (lisibilité).
+  margin-inline-start: var(--mp-space-1);
 }
 
 // Le nom est masqué sur petit écran (gardé accessible via aria-label du bouton).
@@ -68,6 +82,10 @@
 
 .mp-sidenav mat-nav-list [mat-list-item] {
   border-radius: var(--mp-radius-md);
+  // Transition douce du fond et du filet d'accent (hover → actif) (S3 / §3.5).
+  transition:
+    background-color 140ms var(--mp-ease-standard, ease),
+    box-shadow 140ms var(--mp-ease-standard, ease);
 
   // Affordance au survol des items actionnables (pas les désactivés).
   &:not(.mp-nav--disabled):hover {
@@ -79,11 +97,21 @@
   --mat-list-active-indicator-color: var(--mp-color-primary-container);
 
   background: var(--mp-color-primary-container);
+  // Filet d'accent teal décoratif (jamais de texte sur teal → AA préservé) (S3).
+  // box-shadow inset gauche : ne décale pas le contenu (vs border-left).
+  box-shadow: inset 3px 0 0 0 var(--mp-color-accent);
 
   .mat-mdc-list-item-icon,
   span[matListItemTitle] {
     color: var(--mp-color-primary);
     font-weight: 600;
+  }
+}
+
+// Respect de prefers-reduced-motion : pas de transition sur le changement d'état.
+@media (prefers-reduced-motion: reduce) {
+  .mp-sidenav mat-nav-list [mat-list-item] {
+    transition: none;
   }
 }
 
@@ -104,9 +132,32 @@
   margin: 0 auto;
   padding: var(--mp-space-5);
 
+  // Entrée de page discrète : fade + légère translation verticale au montage
+  // (§3.5). Durée --mp-motion-slow, courbe standard, aucun bounce.
+  animation: mp-page-enter var(--mp-motion-slow) var(--mp-ease-standard) both;
+
   // Le contenu reçoit le focus via le skip link sans anneau parasite.
   &:focus {
     outline: none;
+  }
+}
+
+@keyframes mp-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// prefers-reduced-motion : pas d'animation d'entrée (contenu posé directement).
+@media (prefers-reduced-motion: reduce) {
+  .mp-content__inner {
+    animation: none;
   }
 }
 

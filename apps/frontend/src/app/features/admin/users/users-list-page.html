@@ -1,0 +1,69 @@
+<section class="users-page">
+  <header class="users-page__header">
+    <h1 class="users-page__title">Utilisateurs</h1>
+    <p class="users-page__subtitle">Comptes rattachés à votre périmètre.</p>
+  </header>
+
+  @if (loading()) {
+    <!-- État de chargement : squelettes (pas de spinner plein écran). -->
+    <div class="users-skeleton" aria-busy="true" aria-live="polite" data-testid="users-loading">
+      @for (row of skeletonRows; track $index) {
+        <app-skeleton height="48px" />
+      }
+    </div>
+  } @else if (error()) {
+    <!-- État d'erreur : bandeau réutilisable. -->
+    <app-alert variant="error" [message]="error()!" data-testid="users-error" />
+  } @else if (isEmpty()) {
+    <!-- État vide : aucun utilisateur. -->
+    <app-empty-state
+      icon="group"
+      title="Aucun utilisateur"
+      description="Aucun compte n’est rattaché à votre périmètre pour le moment."
+      data-testid="users-empty"
+    />
+  } @else {
+    <!-- État de succès : tableau Material. -->
+    <div class="users-table__wrapper">
+      <table mat-table [dataSource]="users()" class="users-table" data-testid="users-table">
+        <!-- Colonne Nom -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef scope="col">Nom</th>
+          <td mat-cell *matCellDef="let user">{{ displayName(user) }}</td>
+        </ng-container>
+
+        <!-- Colonne E-mail -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef scope="col">E-mail</th>
+          <td mat-cell *matCellDef="let user">{{ user.email ?? '—' }}</td>
+        </ng-container>
+
+        <!-- Colonne Rôle -->
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef scope="col">Rôle</th>
+          <td mat-cell *matCellDef="let user">
+            <app-role-badge [role]="user.role" />
+          </td>
+        </ng-container>
+
+        <!-- Colonne Statut : texte + pastille (jamais la couleur seule) -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef scope="col">Statut</th>
+          <td mat-cell *matCellDef="let user">
+            <span
+              class="users-status"
+              [class.users-status--active]="user.isActive"
+              [class.users-status--inactive]="!user.isActive"
+            >
+              <span class="users-status__dot" aria-hidden="true"></span>
+              {{ user.isActive ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="users-row"></tr>
+      </table>
+    </div>
+  }
+</section>

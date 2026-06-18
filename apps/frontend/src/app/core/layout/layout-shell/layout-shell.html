@@ -15,11 +15,24 @@
   </button>
 
   <span class="mp-toolbar__brand">
-    <mat-icon aria-hidden="true" class="mp-toolbar__logo">add_circle</mat-icon>
+    <mat-icon aria-hidden="true" class="mp-toolbar__logo">calendar_month</mat-icon>
     <span class="mp-toolbar__name">MediPlan</span>
   </span>
 
   <span class="grow"></span>
+
+  <!-- Bascule de thème clair/sombre -->
+  <button
+    matIconButton
+    type="button"
+    class="mp-toolbar__theme"
+    (click)="toggleTheme()"
+    [attr.aria-label]="themeToggleLabel()"
+    [attr.aria-pressed]="isDarkTheme()"
+    data-testid="shell-theme-toggle"
+  >
+    <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
 
   <!-- Menu utilisateur -->
   <button
@@ -30,7 +43,7 @@
     aria-label="Menu utilisateur"
     data-testid="shell-user-menu-trigger"
   >
-    <mat-icon>account_circle</mat-icon>
+    <app-avatar [name]="displayName()" [email]="user()?.email ?? ''" size="sm" />
     <span class="mp-toolbar__user-name">{{ displayName() }}</span>
     <mat-icon>arrow_drop_down</mat-icon>
   </button>

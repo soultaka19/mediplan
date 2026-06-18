@@ -132,8 +132,10 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('Utilisateurs');
-    // « Utilisateurs » est un placeholder désactivé (route: null) → 3 désactivés.
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(3);
+    // « Utilisateurs » est désormais un lien actif (/admin/users) → 2 liens
+    // actifs (Tableau de bord + Utilisateurs) et 2 désactivés (RDV + Profil).
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(2);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
   });
 
   it('affiche l’item « Utilisateurs » pour un super administrateur', () => {
@@ -141,7 +143,8 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('Utilisateurs');
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(3);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(2);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
   });
 
   it('le burger bascule l’ouverture du sidenav', () => {
@@ -152,5 +155,20 @@ describe('LayoutShell', () => {
     component.toggleSidenav();
 
     expect(component.opened()).toBe(!initial);
+  });
+
+  it('le bouton de thème bascule clair/sombre et reflète aria-pressed', () => {
+    const fixture = setup();
+    const root = fixture.nativeElement as HTMLElement;
+    const toggle = byTestId<HTMLButtonElement>(root, 'shell-theme-toggle');
+    const initialDark = fixture.componentInstance.isDarkTheme();
+
+    expect(toggle.getAttribute('aria-pressed')).toBe(String(initialDark));
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.isDarkTheme()).toBe(!initialDark);
+    expect(toggle.getAttribute('aria-pressed')).toBe(String(!initialDark));
   });
 });

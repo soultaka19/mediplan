@@ -1,0 +1,15 @@
+// Puce de rôle AA-safe : fond clair tonal + texte foncé (jamais blanc sur teal).
+// Le rôle est lisible en toutes lettres (information non portée par la couleur).
+.mp-role-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--mp-radius-full);
+  padding: var(--mp-space-1) var(--mp-space-3);
+  background: var(--mp-color-primary-container);
+  color: var(--mp-color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
