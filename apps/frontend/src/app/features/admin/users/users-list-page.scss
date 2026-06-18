@@ -1,0 +1,88 @@
+:host {
+  display: block;
+}
+
+// --- En-tête de page ---------------------------------------------------------
+.users-page__header {
+  margin-bottom: var(--mp-space-5);
+}
+
+.users-page__title {
+  margin: 0;
+  font-family: var(--mp-font-display-family);
+  font-size: var(--mp-font-display-size);
+  line-height: var(--mp-font-display-line);
+  font-weight: var(--mp-font-display-weight);
+  letter-spacing: var(--mp-font-display-spacing);
+  color: var(--mp-color-text);
+}
+
+.users-page__subtitle {
+  margin: var(--mp-space-1) 0 0;
+  color: var(--mp-color-text-secondary);
+}
+
+// --- Squelettes de chargement ------------------------------------------------
+.users-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+}
+
+// --- Tableau -----------------------------------------------------------------
+// Conteneur : surface tonale + bord + rayon, débordement horizontal géré sur
+// les petits écrans (cf. design-system §3.2 surfaces tonales).
+.users-table__wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-surface);
+}
+
+.users-table {
+  width: 100%;
+  background: transparent;
+}
+
+// En-tête sur surface-variant pour le détacher des lignes.
+.users-table th.mat-mdc-header-cell {
+  background: var(--mp-color-surface-variant);
+  color: var(--mp-color-text);
+  font-weight: 600;
+}
+
+.users-table th.mat-mdc-header-cell,
+.users-table td.mat-mdc-cell {
+  color: var(--mp-color-text);
+  border-bottom-color: var(--mp-color-border);
+  padding-block: var(--mp-space-3);
+}
+
+// Lignes alternées sobres via token (zébrage léger, lisible en clair et sombre).
+.users-table tr.mat-mdc-row:nth-child(even) td.mat-mdc-cell {
+  background: var(--mp-color-surface-variant);
+}
+
+// --- Statut (texte + pastille, jamais la couleur seule) ----------------------
+.users-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  font-weight: 500;
+}
+
+.users-status__dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--mp-radius-full);
+  background: currentColor;
+}
+
+.users-status--active {
+  color: var(--mp-color-success);
+}
+
+.users-status--inactive {
+  color: var(--mp-color-text-secondary);
+}

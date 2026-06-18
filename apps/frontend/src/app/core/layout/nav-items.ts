@@ -23,14 +23,20 @@ export interface NavItem {
  *
  * « Tableau de bord » actif ; « Rendez-vous » et « Profil » désactivés
  * (« bientôt ») tant que leurs écrans n'existent pas. « Utilisateurs » est
- * réservé aux administrateurs (placeholder désactivé pour l'instant). Ajouter
- * une `route` ici suffira à activer un item quand l'écran sera prêt.
+ * réservé aux administrateurs (`clinic_admin` / `super_admin`) et pointe vers
+ * l'écran de liste `/admin/users`. Ajouter une `route` ici suffit à activer un
+ * item quand l'écran est prêt.
  */
 export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Tableau de bord', icon: 'dashboard', route: '/dashboard' },
   { label: 'Rendez-vous', icon: 'event', route: null },
   { label: 'Profil', icon: 'person', route: null },
-  { label: 'Utilisateurs', icon: 'group', route: null, roles: ['clinic_admin', 'super_admin'] },
+  {
+    label: 'Utilisateurs',
+    icon: 'group',
+    route: '/admin/users',
+    roles: ['clinic_admin', 'super_admin'],
+  },
 ] as const;
 
 /**
