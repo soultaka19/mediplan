@@ -92,6 +92,7 @@ describe('AuthService', () => {
     lastName: null,
     role: UserRole.PATIENT,
     clinicId: null,
+    isSelfRegistered: true,
     isActive: true,
     failedLoginAttempts: 0,
     lockedUntil: null,

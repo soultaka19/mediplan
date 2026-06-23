@@ -7,6 +7,7 @@ coverage/
 # Caches d'outils (monorepo)
 .turbo/
 .angular/
+.pnpm-store/
 
 # Environnement
 .env
