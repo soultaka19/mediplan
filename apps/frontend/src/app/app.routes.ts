@@ -23,6 +23,11 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     children: [
       {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'login',
+      },
+      {
         path: 'login',
         loadComponent: () => import('@features/auth/login/login-page').then((m) => m.LoginPage),
       },
