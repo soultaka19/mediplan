@@ -29,6 +29,12 @@ export interface NavItem {
  */
 export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Tableau de bord', icon: 'dashboard', route: '/dashboard' },
+  {
+    label: 'Disponibilités',
+    icon: 'event_note',
+    route: '/availabilities',
+    roles: ['doctor', 'clinic_admin', 'super_admin'],
+  },
   { label: 'Rendez-vous', icon: 'event', route: null },
   { label: 'Profil', icon: 'person', route: null },
   {
