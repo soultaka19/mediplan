@@ -10,7 +10,8 @@ export class AddAppointmentReceptionBooking1781674897614 implements MigrationInt
         'cancelled',
         'arrived',
         'in_consultation',
-        'completed'
+        'completed',
+        'absent'
       );
     `);
 

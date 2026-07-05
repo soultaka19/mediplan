@@ -17,10 +17,75 @@ import {
   ReceptionPatientInputDto,
 } from './dto/create-reception-appointment.dto';
 import { AppointmentResponse, toAppointmentResponse } from './dto/appointment-response.dto';
+import {
+  FLOW_APPOINTMENT_STATUSES,
+  UpdateAppointmentStatusDto,
+} from './dto/update-appointment-status.dto';
 
 @Injectable()
 export class AppointmentsService {
   constructor(private readonly dataSource: DataSource) {}
+
+  async findToday(currentUser: AuthenticatedUser): Promise<AppointmentResponse[]> {
+    const query = this.dataSource
+      .getRepository(Appointment)
+      .createQueryBuilder('appointment')
+      .innerJoinAndSelect('appointment.slot', 'slot')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.doctor', 'doctor')
+      .where("slot.start_at >= (date_trunc('day', now() AT TIME ZONE :tz) AT TIME ZONE :tz)", {
+        tz: 'America/Toronto',
+      })
+      .andWhere(
+        "slot.start_at < ((date_trunc('day', now() AT TIME ZONE :tz) + interval '1 day') AT TIME ZONE :tz)",
+        { tz: 'America/Toronto' },
+      )
+      .andWhere('appointment.status != :cancelled', { cancelled: AppointmentStatus.CANCELLED })
+      .orderBy('slot.start_at', 'ASC');
+
+    if (currentUser.role === UserRole.DOCTOR) {
+      query.andWhere('appointment.doctor_id = :doctorId', { doctorId: currentUser.id });
+    } else if (currentUser.role === UserRole.CLINIC_ADMIN) {
+      if (!currentUser.clinicId) {
+        return [];
+      }
+      query.andWhere('appointment.clinic_id = :clinicId', { clinicId: currentUser.clinicId });
+    }
+
+    const appointments = await query.getMany();
+    return appointments.map(toAppointmentResponse);
+  }
+
+  async updateStatus(
+    currentUser: AuthenticatedUser,
+    appointmentId: string,
+    dto: UpdateAppointmentStatusDto,
+  ): Promise<AppointmentResponse> {
+    return this.dataSource.transaction(async (manager) => {
+      const appointment = await manager.findOne(Appointment, {
+        where: { id: appointmentId },
+        relations: { slot: true, patient: true, doctor: true },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!appointment) {
+        throw new NotFoundException('Rendez-vous introuvable.');
+      }
+      this.assertCanFollowAppointment(currentUser, appointment);
+
+      if (!FLOW_APPOINTMENT_STATUSES.includes(dto.status)) {
+        throw new BadRequestException('Statut de flux clinique invalide.');
+      }
+
+      if (!this.canTransition(appointment.status, dto.status)) {
+        throw new BadRequestException('Transition de statut invalide.');
+      }
+
+      appointment.status = dto.status;
+      const saved = await manager.save(Appointment, appointment);
+      return toAppointmentResponse(saved);
+    });
+  }
 
   async createByReception(
     currentUser: AuthenticatedUser,
@@ -142,6 +207,46 @@ export class AppointmentsService {
     if (!currentUser.clinicId || currentUser.clinicId !== clinicId) {
       throw new ForbiddenException('Créneau hors périmètre clinique.');
     }
+  }
+
+  private assertCanFollowAppointment(
+    currentUser: AuthenticatedUser,
+    appointment: Appointment,
+  ): void {
+    if (currentUser.role === UserRole.SUPER_ADMIN) {
+      return;
+    }
+
+    if (currentUser.role === UserRole.DOCTOR && appointment.doctorId === currentUser.id) {
+      return;
+    }
+
+    if (
+      currentUser.role === UserRole.CLINIC_ADMIN &&
+      currentUser.clinicId &&
+      appointment.clinicId === currentUser.clinicId
+    ) {
+      return;
+    }
+
+    throw new NotFoundException('Rendez-vous introuvable.');
+  }
+
+  private canTransition(from: AppointmentStatus, to: AppointmentStatus): boolean {
+    if (from === to) {
+      return true;
+    }
+
+    const transitions: Record<AppointmentStatus, readonly AppointmentStatus[]> = {
+      [AppointmentStatus.BOOKED]: [AppointmentStatus.ARRIVED, AppointmentStatus.ABSENT],
+      [AppointmentStatus.ARRIVED]: [AppointmentStatus.IN_CONSULTATION, AppointmentStatus.ABSENT],
+      [AppointmentStatus.IN_CONSULTATION]: [AppointmentStatus.COMPLETED, AppointmentStatus.ABSENT],
+      [AppointmentStatus.COMPLETED]: [],
+      [AppointmentStatus.ABSENT]: [],
+      [AppointmentStatus.CANCELLED]: [],
+    };
+
+    return transitions[from].includes(to);
   }
 
   private isUniqueViolation(error: unknown): boolean {

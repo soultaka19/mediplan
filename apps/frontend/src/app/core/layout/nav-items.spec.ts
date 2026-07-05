@@ -4,6 +4,7 @@ const items: readonly NavItem[] = [
   { label: 'Public A', icon: 'a', route: '/a' },
   { label: 'Public B', icon: 'b', route: null },
   { label: 'Admin', icon: 'group', route: null, roles: ['clinic_admin', 'super_admin'] },
+  { label: 'Doctor', icon: 'playlist_add_check', route: null, roles: ['doctor'] },
 ];
 
 describe('visibleNavItems', () => {
@@ -15,6 +16,11 @@ describe('visibleNavItems', () => {
   it('expose les items restreints pour un rôle autorisé', () => {
     const result = visibleNavItems(items, 'clinic_admin');
     expect(result.map((i) => i.label)).toEqual(['Public A', 'Public B', 'Admin']);
+  });
+
+  it('expose les items medecin pour un medecin', () => {
+    const result = visibleNavItems(items, 'doctor');
+    expect(result.map((i) => i.label)).toEqual(['Public A', 'Public B', 'Doctor']);
   });
 
   it('ne montre que les items publics quand aucun rôle (non authentifié)', () => {

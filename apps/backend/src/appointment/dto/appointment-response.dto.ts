@@ -12,6 +12,8 @@ export interface AppointmentResponse {
   reason: string | null;
   startAt?: Date;
   endAt?: Date;
+  patientName?: string;
+  doctorName?: string;
   createdAt: Date;
 }
 
@@ -27,6 +29,19 @@ export function toAppointmentResponse(appointment: Appointment): AppointmentResp
     reason: appointment.reason,
     startAt: appointment.slot?.startAt,
     endAt: appointment.slot?.endAt,
+    patientName: displayUserName(appointment.patient),
+    doctorName: displayUserName(appointment.doctor),
     createdAt: appointment.createdAt,
   };
+}
+
+function displayUserName(
+  user: Appointment['patient'] | Appointment['doctor'] | undefined,
+): string | undefined {
+  if (!user) {
+    return undefined;
+  }
+
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  return fullName || user.email || undefined;
 }
