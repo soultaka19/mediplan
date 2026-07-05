@@ -9,7 +9,10 @@ import { AppointmentResponse } from './dto/appointment-response.dto';
 describe('AppointmentsController', () => {
   let controller: AppointmentsController;
   let service: jest.Mocked<
-    Pick<AppointmentsService, 'createByReception' | 'findToday' | 'updateStatus'>
+    Pick<
+      AppointmentsService,
+      'createByReception' | 'findToday' | 'updateStatus' | 'shiftDoctorAppointments'
+    >
   >;
 
   const currentUser: AuthenticatedUser = {
@@ -36,6 +39,7 @@ describe('AppointmentsController', () => {
       createByReception: jest.fn(),
       findToday: jest.fn(),
       updateStatus: jest.fn(),
+      shiftDoctorAppointments: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -68,5 +72,18 @@ describe('AppointmentsController', () => {
       { status: AppointmentStatus.ARRIVED },
     ]);
     expect(result.status).toBe(AppointmentStatus.ARRIVED);
+  });
+
+  it('PATCH /appointments/doctor/shift delegue le decalage en bloc', async () => {
+    service.shiftDoctorAppointments.mockResolvedValue({
+      shiftedCount: 1,
+      appointments: [response],
+    });
+
+    const dto = { doctorId: 'doctor-1', date: '2026-07-05', minutes: 30 };
+    const result = await controller.shiftDoctorAppointments(currentUser, dto);
+
+    expect(service.shiftDoctorAppointments.mock.calls[0]).toEqual([currentUser, dto]);
+    expect(result.shiftedCount).toBe(1);
   });
 });

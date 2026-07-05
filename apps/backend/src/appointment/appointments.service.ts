@@ -18,6 +18,10 @@ import {
 } from './dto/create-reception-appointment.dto';
 import { AppointmentResponse, toAppointmentResponse } from './dto/appointment-response.dto';
 import {
+  ShiftDoctorAppointmentsDto,
+  ShiftDoctorAppointmentsResponse,
+} from './dto/shift-doctor-appointments.dto';
+import {
   FLOW_APPOINTMENT_STATUSES,
   UpdateAppointmentStatusDto,
 } from './dto/update-appointment-status.dto';
@@ -84,6 +88,69 @@ export class AppointmentsService {
       appointment.status = dto.status;
       const saved = await manager.save(Appointment, appointment);
       return toAppointmentResponse(saved);
+    });
+  }
+
+  async shiftDoctorAppointments(
+    currentUser: AuthenticatedUser,
+    dto: ShiftDoctorAppointmentsDto,
+  ): Promise<ShiftDoctorAppointmentsResponse> {
+    if (dto.minutes === 0) {
+      throw new BadRequestException('Le decalage doit etre different de 0 minute.');
+    }
+
+    const day = this.parseDateOnly(dto.date);
+
+    return this.dataSource.transaction(async (manager) => {
+      const doctor = await manager.findOne(User, {
+        where: { id: dto.doctorId },
+        select: {
+          id: true,
+          role: true,
+          clinicId: true,
+          isActive: true,
+        },
+      });
+
+      if (!doctor || doctor.role !== UserRole.DOCTOR || !doctor.isActive) {
+        throw new NotFoundException('Medecin introuvable.');
+      }
+      this.assertCanManageClinic(currentUser, doctor.clinicId ?? '');
+
+      const appointments = await manager
+        .getRepository(Appointment)
+        .createQueryBuilder('appointment')
+        .innerJoinAndSelect('appointment.slot', 'slot')
+        .where('appointment.doctor_id = :doctorId', { doctorId: dto.doctorId })
+        .andWhere(
+          "slot.start_at >= ((CAST(:day AS date))::timestamp AT TIME ZONE 'America/Toronto')",
+          { day },
+        )
+        .andWhere(
+          "slot.start_at < (((CAST(:day AS date) + interval '1 day')::timestamp) AT TIME ZONE 'America/Toronto')",
+          { day },
+        )
+        .andWhere('appointment.status IN (:...statuses)', {
+          statuses: [
+            AppointmentStatus.BOOKED,
+            AppointmentStatus.ARRIVED,
+            AppointmentStatus.IN_CONSULTATION,
+          ],
+        })
+        .orderBy('slot.start_at', 'ASC')
+        .setLock('pessimistic_write')
+        .getMany();
+
+      for (const appointment of appointments) {
+        appointment.slot.startAt = this.addMinutes(appointment.slot.startAt, dto.minutes);
+        appointment.slot.endAt = this.addMinutes(appointment.slot.endAt, dto.minutes);
+        await manager.save(AppointmentSlot, appointment.slot);
+      }
+
+      return {
+        shiftedCount: appointments.length,
+        appointments: appointments.map(toAppointmentResponse),
+      };
     });
   }
 
@@ -247,6 +314,18 @@ export class AppointmentsService {
     };
 
     return transitions[from].includes(to);
+  }
+
+  private parseDateOnly(date: string): string {
+    const parsed = new Date(`${date}T00:00:00.000Z`);
+    if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) {
+      throw new BadRequestException('Date invalide.');
+    }
+    return date;
+  }
+
+  private addMinutes(date: Date, minutes: number): Date {
+    return new Date(date.getTime() + minutes * 60_000);
   }
 
   private isUniqueViolation(error: unknown): boolean {

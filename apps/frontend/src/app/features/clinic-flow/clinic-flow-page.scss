@@ -33,6 +33,55 @@
   gap: var(--mp-space-3);
 }
 
+.shift-panel {
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-md);
+  box-shadow: var(--mp-shadow-sm);
+  display: grid;
+  gap: var(--mp-space-4);
+  padding: var(--mp-space-5);
+}
+
+.shift-panel__heading {
+  align-items: flex-start;
+  display: flex;
+  gap: var(--mp-space-3);
+
+  mat-icon {
+    color: var(--mp-color-accent);
+  }
+
+  h2 {
+    color: var(--mp-color-text);
+    font-family: var(--mp-font-display-family);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 28px;
+    margin: 0;
+  }
+
+  p {
+    color: var(--mp-color-text-secondary);
+    font-family: var(--mp-font-family);
+    font-size: 14px;
+    line-height: 22px;
+    margin: var(--mp-space-1) 0 0;
+  }
+}
+
+.shift-panel__grid {
+  align-items: start;
+  display: grid;
+  gap: var(--mp-space-3);
+  grid-template-columns: minmax(220px, 1.4fr) minmax(160px, 0.8fr) minmax(140px, 0.6fr) auto;
+
+  button {
+    min-height: 56px;
+  }
+}
+
 .flow-table__wrapper {
   background: var(--mp-color-surface);
   border: 1px solid var(--mp-color-border);
@@ -88,5 +137,9 @@
   .flow-page__header {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .shift-panel__grid {
+    grid-template-columns: 1fr;
   }
 }

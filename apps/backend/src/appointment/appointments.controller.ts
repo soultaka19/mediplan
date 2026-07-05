@@ -8,6 +8,10 @@ import { UserRole } from '../user/user-role.enum';
 import { AppointmentsService } from './appointments.service';
 import { AppointmentResponse } from './dto/appointment-response.dto';
 import { CreateReceptionAppointmentDto } from './dto/create-reception-appointment.dto';
+import {
+  ShiftDoctorAppointmentsDto,
+  ShiftDoctorAppointmentsResponse,
+} from './dto/shift-doctor-appointments.dto';
 import { UpdateAppointmentStatusDto } from './dto/update-appointment-status.dto';
 
 @Controller('appointments')
@@ -40,5 +44,15 @@ export class AppointmentsController {
     @Body() dto: UpdateAppointmentStatusDto,
   ): Promise<AppointmentResponse> {
     return this.appointmentsService.updateStatus(user, id, dto);
+  }
+
+  @Patch('doctor/shift')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLINIC_ADMIN, UserRole.SUPER_ADMIN)
+  shiftDoctorAppointments(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: ShiftDoctorAppointmentsDto,
+  ): Promise<ShiftDoctorAppointmentsResponse> {
+    return this.appointmentsService.shiftDoctorAppointments(user, dto);
   }
 }

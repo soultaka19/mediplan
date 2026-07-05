@@ -53,4 +53,15 @@ describe('AppointmentFlowService', () => {
     expect(req.request.body).toEqual({ status: 'arrived' });
     req.flush({ ...item, status: 'arrived' });
   });
+
+  it('PATCH /api/v1/appointments/doctor/shift', () => {
+    service
+      .shiftDoctorAppointments({ doctorId: 'd1', date: '2026-07-05', minutes: 30 })
+      .subscribe();
+
+    const req = httpMock.expectOne('/api/v1/appointments/doctor/shift');
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ doctorId: 'd1', date: '2026-07-05', minutes: 30 });
+    req.flush({ shiftedCount: 1, appointments: [item] });
+  });
 });

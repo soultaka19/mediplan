@@ -3,7 +3,12 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { ENV_CONFIG } from '@core/config/env.config';
-import { AppointmentFlowItem, UpdateAppointmentStatusPayload } from './appointment-flow.models';
+import {
+  AppointmentFlowItem,
+  ShiftDoctorAppointmentsPayload,
+  ShiftDoctorAppointmentsResponse,
+  UpdateAppointmentStatusPayload,
+} from './appointment-flow.models';
 
 @Injectable({ providedIn: 'root' })
 export class AppointmentFlowService {
@@ -20,6 +25,15 @@ export class AppointmentFlowService {
   ): Observable<AppointmentFlowItem> {
     return this.http.patch<AppointmentFlowItem>(
       `${this.apiUrl}/appointments/${appointmentId}/status`,
+      payload,
+    );
+  }
+
+  shiftDoctorAppointments(
+    payload: ShiftDoctorAppointmentsPayload,
+  ): Observable<ShiftDoctorAppointmentsResponse> {
+    return this.http.patch<ShiftDoctorAppointmentsResponse>(
+      `${this.apiUrl}/appointments/doctor/shift`,
       payload,
     );
   }

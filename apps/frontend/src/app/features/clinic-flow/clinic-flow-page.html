@@ -11,6 +11,53 @@
     </button>
   </header>
 
+  @if (canShiftAppointments()) {
+    <form
+      class="shift-panel"
+      [formGroup]="shiftForm"
+      (ngSubmit)="shiftDoctorAppointments()"
+      data-testid="shift-form"
+    >
+      <div class="shift-panel__heading">
+        <mat-icon aria-hidden="true">schedule</mat-icon>
+        <div>
+          <h2>Decaler les rendez-vous</h2>
+          <p>Appliquer un retard ou une avance aux rendez-vous actifs d'un medecin.</p>
+        </div>
+      </div>
+
+      @if (shiftError()) {
+        <app-alert variant="error" [message]="shiftError()!" data-testid="shift-error" />
+      }
+
+      <div class="shift-panel__grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Medecin</mat-label>
+          <mat-select formControlName="doctorId" [disabled]="doctorsLoading()">
+            @for (doctor of doctors(); track doctor.id) {
+              <mat-option [value]="doctor.id">{{ displayDoctor(doctor) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date</mat-label>
+          <input matInput type="date" formControlName="date" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Minutes</mat-label>
+          <input matInput type="number" formControlName="minutes" step="5" min="-240" max="240" />
+        </mat-form-field>
+
+        <button matButton="filled" type="submit" [disabled]="shifting() || doctors().length === 0">
+          <mat-icon aria-hidden="true">update</mat-icon>
+          Decaler
+        </button>
+      </div>
+    </form>
+  }
+
   @if (loading()) {
     <div class="flow-skeleton" aria-busy="true" aria-live="polite" data-testid="flow-loading">
       @for (row of skeletonRows; track $index) {

@@ -25,3 +25,14 @@ export interface AppointmentFlowItem {
 export interface UpdateAppointmentStatusPayload {
   status: Extract<AppointmentStatus, 'arrived' | 'in_consultation' | 'completed' | 'absent'>;
 }
+
+export interface ShiftDoctorAppointmentsPayload {
+  doctorId: string;
+  date: string;
+  minutes: number;
+}
+
+export interface ShiftDoctorAppointmentsResponse {
+  shiftedCount: number;
+  appointments: AppointmentFlowItem[];
+}
