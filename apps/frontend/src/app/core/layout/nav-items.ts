@@ -37,6 +37,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     route: '/admin/users',
     roles: ['clinic_admin', 'super_admin'],
   },
+  {
+    label: 'Cliniques',
+    icon: 'local_hospital',
+    route: '/admin/clinics',
+    roles: ['super_admin'],
+  },
 ] as const;
 
 /**

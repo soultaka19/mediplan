@@ -1,0 +1,139 @@
+:host {
+  display: block;
+}
+
+.clinics-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+}
+
+.clinics-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+}
+
+.clinics-page__title {
+  margin: 0;
+  font-family: var(--mp-font-display-family);
+  font-size: var(--mp-font-display-size);
+  line-height: var(--mp-font-display-line);
+  font-weight: var(--mp-font-display-weight);
+  letter-spacing: var(--mp-font-display-spacing);
+  color: var(--mp-color-text);
+}
+
+.clinics-page__subtitle {
+  margin: var(--mp-space-1) 0 0;
+  color: var(--mp-color-text-secondary);
+}
+
+.clinic-form {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--mp-space-3);
+  align-items: center;
+  padding: var(--mp-space-4);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-surface);
+}
+
+.clinic-form__progress {
+  grid-column: 1 / -1;
+}
+
+.clinic-form mat-form-field {
+  min-width: 0;
+}
+
+.clinic-form mat-form-field:nth-of-type(1),
+.clinic-form mat-form-field:nth-of-type(2) {
+  grid-column: span 2;
+}
+
+.clinic-form__active {
+  min-height: 56px;
+}
+
+.clinic-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--mp-space-2);
+}
+
+.clinics-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+}
+
+.clinics-table__wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-surface);
+}
+
+.clinics-table {
+  width: 100%;
+  background: transparent;
+}
+
+.clinics-table th.mat-mdc-header-cell {
+  background: var(--mp-color-surface-variant);
+  color: var(--mp-color-text);
+  font-weight: 600;
+}
+
+.clinics-table th.mat-mdc-header-cell,
+.clinics-table td.mat-mdc-cell {
+  color: var(--mp-color-text);
+  border-bottom-color: var(--mp-color-border);
+  padding-block: var(--mp-space-3);
+}
+
+.clinic-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  min-height: 28px;
+  font-weight: 600;
+}
+
+.clinic-status__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-color-warning);
+}
+
+.clinic-status--active .clinic-status__dot {
+  background: var(--mp-color-success);
+}
+
+.clinic-status--inactive {
+  color: var(--mp-color-text-secondary);
+}
+
+@media (max-width: 900px) {
+  .clinics-page__header {
+    flex-direction: column;
+  }
+
+  .clinic-form {
+    grid-template-columns: 1fr;
+  }
+
+  .clinic-form mat-form-field:nth-of-type(1),
+  .clinic-form mat-form-field:nth-of-type(2) {
+    grid-column: auto;
+  }
+
+  .clinic-form__actions {
+    justify-content: flex-start;
+  }
+}

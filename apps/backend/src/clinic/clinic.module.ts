@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClinicController } from './clinic.controller';
 import { Clinic } from './clinic.entity';
+import { ClinicService } from './clinic.service';
 
 /**
  * Enregistre le repository Clinic et l'exporte pour les modules consommateurs
@@ -8,6 +10,8 @@ import { Clinic } from './clinic.entity';
  */
 @Module({
   imports: [TypeOrmModule.forFeature([Clinic])],
-  exports: [TypeOrmModule],
+  controllers: [ClinicController],
+  providers: [ClinicService],
+  exports: [TypeOrmModule, ClinicService],
 })
 export class ClinicModule {}
