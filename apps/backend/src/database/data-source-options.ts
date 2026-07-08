@@ -6,11 +6,7 @@ import { Clinic } from '../clinic/clinic.entity';
 import { User } from '../user/user.entity';
 import { InitAuthSchema1781674897611 } from './migrations/1781674897611-InitAuthSchema';
 import { AddPasswordReset1781674897612 } from './migrations/1781674897612-AddPasswordReset';
-<<<<<<< Updated upstream
-=======
-import { AddSelfRegistrationFlag1781674897613 } from './migrations/1781674897613-AddSelfRegistrationFlag';
 import { AddAppointmentReceptionBooking1781674897614 } from './migrations/1781674897614-AddAppointmentReceptionBooking';
->>>>>>> Stashed changes
 
 /**
  * Construit les options TypeORM partagées entre :
@@ -48,18 +44,12 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
     migrationsRun: false,
     // Les migrations ne s'exécutent que via la CLI explicite, jamais au boot.
 
-<<<<<<< Updated upstream
-    entities: [Clinic, User],
-    migrations: [InitAuthSchema1781674897611, AddPasswordReset1781674897612],
-=======
     entities: [Clinic, User, AppointmentSlot, Appointment],
     migrations: [
       InitAuthSchema1781674897611,
       AddPasswordReset1781674897612,
-      AddSelfRegistrationFlag1781674897613,
       AddAppointmentReceptionBooking1781674897614,
     ],
->>>>>>> Stashed changes
 
     namingStrategy: new SnakeNamingStrategy(),
     logging: ['error', 'warn', 'migration'],
