@@ -77,6 +77,12 @@ export const routes: Routes = [
           import('@features/availabilities/availabilities-page').then((m) => m.AvailabilitiesPage),
       },
       {
+        path: 'clinic-flow/today',
+        canActivate: [roleGuard('doctor', 'clinic_admin', 'super_admin')],
+        loadComponent: () =>
+          import('@features/clinic-flow/clinic-flow-page').then((m) => m.ClinicFlowPage),
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',

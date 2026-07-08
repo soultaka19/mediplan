@@ -8,7 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { PublicUser, toPublicUser } from '../auth/dto/auth-response.dto';
 import { ActivateLightPatientDto } from './dto/activate-light-patient.dto';
@@ -75,10 +75,25 @@ export class UsersService {
     dto: CreateLightPatientDto,
   ): Promise<PublicUser> {
     const clinicId = this.resolveTargetClinicId(currentUser, dto.clinicId);
+    const patient = await this.createLightPatientWith(this.userRepository.manager, dto, clinicId);
+    return toPublicUser(patient);
+  }
 
-    if (dto.email) {
-      const existing = await this.userRepository.findOne({
-        where: { email: dto.email },
+  /**
+   * Crée un patient léger (role=patient, passwordHash=NULL) via l'EntityManager
+   * fourni. Méthode PARTAGÉE entre l'endpoint dédié (MEDIPLAN-35) et la
+   * réservation par la réception (MEDIPLAN-23) : cette dernière l'appelle DANS sa
+   * transaction pour rester atomique (patient + rendez-vous créés ensemble ou pas
+   * du tout). Le périmètre clinique est résolu par l'appelant.
+   */
+  async createLightPatientWith(
+    manager: EntityManager,
+    input: { email?: string | null; firstName?: string | null; lastName?: string | null },
+    clinicId: string,
+  ): Promise<User> {
+    if (input.email) {
+      const existing = await manager.findOne(User, {
+        where: { email: input.email },
         select: { id: true },
       });
       if (existing) {
@@ -86,11 +101,11 @@ export class UsersService {
       }
     }
 
-    const user = this.userRepository.create({
-      email: dto.email ?? null,
+    const patient = manager.create(User, {
+      email: input.email ?? null,
       passwordHash: null,
-      firstName: dto.firstName ?? null,
-      lastName: dto.lastName ?? null,
+      firstName: input.firstName ?? null,
+      lastName: input.lastName ?? null,
       role: UserRole.PATIENT,
       clinicId,
       isSelfRegistered: false,
@@ -100,7 +115,7 @@ export class UsersService {
     });
 
     try {
-      return toPublicUser(await this.userRepository.save(user));
+      return await manager.save(User, patient);
     } catch (error) {
       if (this.isUniqueViolation(error)) {
         throw new ConflictException('Cette adresse e-mail est déjà utilisée.');

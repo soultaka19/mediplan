@@ -1,5 +1,7 @@
 import { DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { Appointment } from '../appointment/appointment.entity';
+import { AppointmentSlot } from '../appointment/appointment-slot.entity';
 import { Availability } from '../availability/availability.entity';
 import { Clinic } from '../clinic/clinic.entity';
 import { User } from '../user/user.entity';
@@ -7,6 +9,7 @@ import { InitAuthSchema1781674897611 } from './migrations/1781674897611-InitAuth
 import { AddPasswordReset1781674897612 } from './migrations/1781674897612-AddPasswordReset';
 import { AddSelfRegistrationFlag1781674897613 } from './migrations/1781674897613-AddSelfRegistrationFlag';
 import { CreateAvailability1781674897614 } from './migrations/1781674897614-CreateAvailability';
+import { AddAppointmentReceptionBooking1781674897615 } from './migrations/1781674897615-AddAppointmentReceptionBooking';
 
 /**
  * Construit les options TypeORM partagées entre :
@@ -44,12 +47,13 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
     migrationsRun: false,
     // Les migrations ne s'exécutent que via la CLI explicite, jamais au boot.
 
-    entities: [Clinic, User, Availability],
+    entities: [Clinic, User, Availability, AppointmentSlot, Appointment],
     migrations: [
       InitAuthSchema1781674897611,
       AddPasswordReset1781674897612,
       AddSelfRegistrationFlag1781674897613,
       CreateAvailability1781674897614,
+      AddAppointmentReceptionBooking1781674897615,
     ],
 
     namingStrategy: new SnakeNamingStrategy(),
