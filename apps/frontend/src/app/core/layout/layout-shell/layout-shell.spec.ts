@@ -132,9 +132,9 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('Utilisateurs');
-    // « Utilisateurs » est désormais un lien actif (/admin/users) → 2 liens
-    // actifs (Tableau de bord + Utilisateurs) et 2 désactivés (RDV + Profil).
-    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(2);
+    // Liens actifs : Tableau de bord + Disponibilités + Flux du jour +
+    // Utilisateurs = 4 ; désactivés (« bientôt ») : RDV + Profil = 2.
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(4);
     expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
   });
 
@@ -143,7 +143,7 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('Utilisateurs');
-    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(2);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(4);
     expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
   });
 

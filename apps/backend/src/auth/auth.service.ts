@@ -121,6 +121,7 @@ export class AuthService {
       // SÉCURITÉ AC5 : rôle/clinique forcés, jamais issus du client.
       role: UserRole.PATIENT,
       clinicId: null,
+      isSelfRegistered: true,
       isActive: true,
       failedLoginAttempts: 0,
       lockedUntil: null,
@@ -160,6 +161,7 @@ export class AuthService {
         lastName: true,
         role: true,
         clinicId: true,
+        isSelfRegistered: true,
         isActive: true,
         passwordHash: true,
         failedLoginAttempts: true,

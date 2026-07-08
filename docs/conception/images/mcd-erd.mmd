@@ -15,12 +15,13 @@ erDiagram
 
     USER {
         uuid id PK
-        string email UK
-        string password_hash
+        string email UK "nullable"
+        string password_hash "nullable"
         string first_name
         string last_name
         enum role
         uuid clinic_id FK
+        bool is_self_registered
         bool is_active
         int failed_login_attempts
         timestamp locked_until

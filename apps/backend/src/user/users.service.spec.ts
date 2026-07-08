@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -23,6 +24,7 @@ describe('UsersService', () => {
     lastName: 'Doe',
     role: UserRole.PATIENT,
     clinicId: null,
+    isSelfRegistered: true,
     isActive: true,
     failedLoginAttempts: 3,
     lockedUntil: new Date('2026-01-01T00:00:00Z'),
@@ -46,10 +48,17 @@ describe('UsersService', () => {
     const repoMock: Partial<jest.Mocked<Repository<User>>> = {
       find: jest.fn(),
       findOne: jest.fn(),
+      create: jest.fn((entity: Partial<User>) => entity as User),
+      save: jest.fn((entity: User) => Promise.resolve(buildUser(entity))),
+      update: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersService, { provide: getRepositoryToken(User), useValue: repoMock }],
+      providers: [
+        UsersService,
+        { provide: getRepositoryToken(User), useValue: repoMock },
+        { provide: ConfigService, useValue: { get: jest.fn(() => undefined) } },
+      ],
     }).compile();
 
     service = module.get(UsersService);

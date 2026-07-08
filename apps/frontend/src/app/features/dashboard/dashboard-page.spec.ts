@@ -127,8 +127,9 @@ describe('DashboardPage', () => {
       expect(link).not.toBeNull();
       expect(link.getAttribute('href')).toContain('/admin/users');
       expect(link.textContent).toContain('Utilisateurs');
-      // Médecins + Disponibilités restent désactivés « bientôt ».
-      expect(allByTestId(root, 'dashboard-quick-action').length).toBe(2);
+      // « Disponibilités » est désormais un lien actif (/availabilities) ;
+      // seul « Médecins » reste désactivé « bientôt ».
+      expect(allByTestId(root, 'dashboard-quick-action').length).toBe(1);
     },
   );
 

@@ -23,6 +23,11 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     children: [
       {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'login',
+      },
+      {
         path: 'login',
         loadComponent: () => import('@features/auth/login/login-page').then((m) => m.LoginPage),
       },
@@ -64,6 +69,18 @@ export const routes: Routes = [
         canActivate: [roleGuard('clinic_admin', 'super_admin')],
         loadComponent: () =>
           import('@features/admin/users/users-list-page').then((m) => m.UsersListPage),
+      },
+      {
+        path: 'availabilities',
+        canActivate: [roleGuard('doctor', 'clinic_admin', 'super_admin')],
+        loadComponent: () =>
+          import('@features/availabilities/availabilities-page').then((m) => m.AvailabilitiesPage),
+      },
+      {
+        path: 'clinic-flow/today',
+        canActivate: [roleGuard('doctor', 'clinic_admin', 'super_admin')],
+        loadComponent: () =>
+          import('@features/clinic-flow/clinic-flow-page').then((m) => m.ClinicFlowPage),
       },
       {
         path: '',
