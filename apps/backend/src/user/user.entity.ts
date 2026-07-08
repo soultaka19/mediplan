@@ -57,6 +57,9 @@ export class User {
   @Column({ type: 'uuid', nullable: true })
   clinicId: string | null;
 
+  @Column({ name: 'is_self_registered', type: 'boolean', default: false })
+  isSelfRegistered: boolean;
+
   @ManyToOne(() => Clinic, (clinic) => clinic.users, {
     nullable: true,
     onDelete: 'RESTRICT',

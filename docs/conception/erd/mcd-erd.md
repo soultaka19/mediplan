@@ -18,12 +18,13 @@ erDiagram
 
     USER {
         uuid id PK
-        string email UK
-        string password_hash
+        string email UK "nullable"
+        string password_hash "nullable"
         string first_name
         string last_name
         enum role
         uuid clinic_id FK
+        bool is_self_registered
         bool is_active
         int failed_login_attempts
         timestamp locked_until
@@ -101,6 +102,15 @@ choix de conception notables :
 
 - **Cloisonnement multi-cliniques** : la colonne `clinic_id` sur `USER` et `SPECIALTY` porte la
   séparation logique des données entre cliniques (OM-05), filtrée systématiquement côté API.
+- **Patient léger créé par la clinique** : pour le rôle `patient`, `email` et `password_hash`
+  sont optionnels afin de couvrir le flux dominant de réception (patient au téléphone, souvent
+  non numérique). Un patient léger est rattaché à la clinique (`clinic_id`) et porte
+  `is_self_registered=false`. Il peut être utilisé immédiatement pour réserver, modifier ou
+  annuler un rendez-vous par la réception.
+- **Activation ultérieure du compte patient** : un patient léger peut réclamer/activer son
+  compte plus tard. L'activation renseigne un `email` unique, crée `password_hash` et passe
+  `is_self_registered=true`, sans recréer le patient ni perdre l'historique des rendez-vous.
+  L'unicité d'email s'applique uniquement aux valeurs non nulles.
 - **Relation many-to-many** : `DOCTOR_SPECIALTY` est une table d'association entre médecins et
   spécialités, conforme à la normalisation.
 - **Unicité de réservation** : la clé étrangère `slot_id` sur `APPOINTMENT` est marquée **unique

@@ -4,6 +4,7 @@ import { Clinic } from '../clinic/clinic.entity';
 import { User } from '../user/user.entity';
 import { InitAuthSchema1781674897611 } from './migrations/1781674897611-InitAuthSchema';
 import { AddPasswordReset1781674897612 } from './migrations/1781674897612-AddPasswordReset';
+import { AddSelfRegistrationFlag1781674897613 } from './migrations/1781674897613-AddSelfRegistrationFlag';
 
 /**
  * Construit les options TypeORM partagées entre :
@@ -42,7 +43,11 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
     // Les migrations ne s'exécutent que via la CLI explicite, jamais au boot.
 
     entities: [Clinic, User],
-    migrations: [InitAuthSchema1781674897611, AddPasswordReset1781674897612],
+    migrations: [
+      InitAuthSchema1781674897611,
+      AddPasswordReset1781674897612,
+      AddSelfRegistrationFlag1781674897613,
+    ],
 
     namingStrategy: new SnakeNamingStrategy(),
     logging: ['error', 'warn', 'migration'],

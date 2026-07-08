@@ -5,13 +5,14 @@ import { UserRole } from './user-role.enum';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
-/**
- * Tests unitaires (légers) du UsersController : le service est mocké, on vérifie
- * le câblage des handlers (récupération de l'utilisateur courant, délégation).
- */
 describe('UsersController', () => {
   let controller: UsersController;
-  let service: jest.Mocked<Pick<UsersService, 'findOneById' | 'findAllScoped'>>;
+  let service: jest.Mocked<
+    Pick<
+      UsersService,
+      'findOneById' | 'findAllScoped' | 'createLightPatient' | 'activateLightPatient'
+    >
+  >;
 
   const currentUser: AuthenticatedUser = {
     id: 'user-1',
@@ -27,6 +28,7 @@ describe('UsersController', () => {
     lastName: 'Doe',
     role: UserRole.CLINIC_ADMIN,
     clinicId: 'clinic-1',
+    isSelfRegistered: true,
     isActive: true,
     createdAt: new Date('2026-01-01T00:00:00Z'),
   };
@@ -35,6 +37,8 @@ describe('UsersController', () => {
     service = {
       findOneById: jest.fn(),
       findAllScoped: jest.fn(),
+      createLightPatient: jest.fn(),
+      activateLightPatient: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -45,7 +49,7 @@ describe('UsersController', () => {
     controller = module.get(UsersController);
   });
 
-  it('GET /me -> renvoie l’utilisateur courant mappé par le service', async () => {
+  it('GET /me -> renvoie l utilisateur courant mappe par le service', async () => {
     service.findOneById.mockResolvedValue(publicUser);
 
     const result = await controller.getMe(currentUser);
@@ -54,12 +58,32 @@ describe('UsersController', () => {
     expect(result).toBe(publicUser);
   });
 
-  it('GET /users -> délègue au service avec l’utilisateur courant (scope)', async () => {
+  it('GET /users -> delegue au service avec l utilisateur courant', async () => {
     service.findAllScoped.mockResolvedValue([publicUser]);
 
     const result = await controller.findAll(currentUser);
 
     expect(service.findAllScoped.mock.calls[0]).toEqual([currentUser]);
     expect(result).toEqual([publicUser]);
+  });
+
+  it('POST /users/light-patients -> delegue la creation au service', async () => {
+    service.createLightPatient.mockResolvedValue(publicUser);
+    const dto = { firstName: 'Awa', lastName: 'Traore' };
+
+    const result = await controller.createLightPatient(currentUser, dto);
+
+    expect(service.createLightPatient.mock.calls[0]).toEqual([currentUser, dto]);
+    expect(result).toBe(publicUser);
+  });
+
+  it('POST /users/:id/activate-self-service -> delegue l activation au service', async () => {
+    service.activateLightPatient.mockResolvedValue(publicUser);
+    const dto = { email: 'patient@example.com', password: 'Mediplan2026!' };
+
+    const result = await controller.activateLightPatient(currentUser, 'patient-1', dto);
+
+    expect(service.activateLightPatient.mock.calls[0]).toEqual([currentUser, 'patient-1', dto]);
+    expect(result).toBe(publicUser);
   });
 });

@@ -15,6 +15,7 @@ export interface PublicUser {
   lastName: string | null;
   role: UserRole;
   clinicId: string | null;
+  isSelfRegistered: boolean;
   isActive: boolean;
   createdAt: Date;
 }
@@ -37,6 +38,7 @@ export function toPublicUser(user: User): PublicUser {
     lastName: user.lastName,
     role: user.role,
     clinicId: user.clinicId,
+    isSelfRegistered: user.isSelfRegistered,
     isActive: user.isActive,
     createdAt: user.createdAt,
   };

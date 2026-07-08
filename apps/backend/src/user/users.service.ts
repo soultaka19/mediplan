@@ -1,10 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { PublicUser, toPublicUser } from '../auth/dto/auth-response.dto';
+import { ActivateLightPatientDto } from './dto/activate-light-patient.dto';
+import { CreateLightPatientDto } from './dto/create-light-patient.dto';
 import { UserRole } from './user-role.enum';
 import { User } from './user.entity';
+
+const DEFAULT_BCRYPT_ROUNDS = 12;
 
 /**
  * Logique métier de consultation des utilisateurs (MEDIPLAN-17 / EF-09).
@@ -19,6 +31,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly configService: ConfigService,
   ) {}
 
   /** Récupère un utilisateur par son id (vue publique). 404 si introuvable. */
@@ -55,5 +68,145 @@ export class UsersService {
       where: { clinicId: currentUser.clinicId },
     });
     return users.map(toPublicUser);
+  }
+
+  async createLightPatient(
+    currentUser: AuthenticatedUser,
+    dto: CreateLightPatientDto,
+  ): Promise<PublicUser> {
+    const clinicId = this.resolveTargetClinicId(currentUser, dto.clinicId);
+
+    if (dto.email) {
+      const existing = await this.userRepository.findOne({
+        where: { email: dto.email },
+        select: { id: true },
+      });
+      if (existing) {
+        throw new ConflictException('Cette adresse e-mail est déjà utilisée.');
+      }
+    }
+
+    const user = this.userRepository.create({
+      email: dto.email ?? null,
+      passwordHash: null,
+      firstName: dto.firstName ?? null,
+      lastName: dto.lastName ?? null,
+      role: UserRole.PATIENT,
+      clinicId,
+      isSelfRegistered: false,
+      isActive: true,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+    });
+
+    try {
+      return toPublicUser(await this.userRepository.save(user));
+    } catch (error) {
+      if (this.isUniqueViolation(error)) {
+        throw new ConflictException('Cette adresse e-mail est déjà utilisée.');
+      }
+      throw error;
+    }
+  }
+
+  async activateLightPatient(
+    currentUser: AuthenticatedUser,
+    patientId: string,
+    dto: ActivateLightPatientDto,
+  ): Promise<PublicUser> {
+    const patient = await this.userRepository.findOne({
+      where: { id: patientId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        clinicId: true,
+        isSelfRegistered: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+
+    if (!patient || patient.role !== UserRole.PATIENT) {
+      throw new NotFoundException('Patient introuvable.');
+    }
+    this.assertCanManageClinic(currentUser, patient.clinicId);
+
+    if (patient.isSelfRegistered) {
+      throw new BadRequestException('Ce patient possède déjà un compte libre-service.');
+    }
+
+    const existing = await this.userRepository.findOne({
+      where: { email: dto.email },
+      select: { id: true },
+    });
+    if (existing && existing.id !== patient.id) {
+      throw new ConflictException('Cette adresse e-mail est déjà utilisée.');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, this.getBcryptRounds());
+    await this.userRepository.update(
+      { id: patient.id },
+      {
+        email: dto.email,
+        passwordHash,
+        isSelfRegistered: true,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      },
+    );
+
+    return toPublicUser({
+      ...patient,
+      email: dto.email,
+      passwordHash,
+      isSelfRegistered: true,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+    } as User);
+  }
+
+  private resolveTargetClinicId(
+    currentUser: AuthenticatedUser,
+    requestedClinicId?: string,
+  ): string {
+    if (currentUser.role === UserRole.SUPER_ADMIN) {
+      if (!requestedClinicId) {
+        throw new BadRequestException('clinicId est requis pour créer un patient léger.');
+      }
+      return requestedClinicId;
+    }
+
+    if (!currentUser.clinicId) {
+      throw new ForbiddenException('Aucune clinique rattachée à cet utilisateur.');
+    }
+    return currentUser.clinicId;
+  }
+
+  private assertCanManageClinic(currentUser: AuthenticatedUser, clinicId: string | null): void {
+    if (currentUser.role === UserRole.SUPER_ADMIN) {
+      return;
+    }
+    if (!clinicId || currentUser.clinicId !== clinicId) {
+      throw new ForbiddenException('Patient hors périmètre clinique.');
+    }
+  }
+
+  private getBcryptRounds(): number {
+    const configuredRounds = Number(this.configService.get<string>('BCRYPT_ROUNDS'));
+    return Number.isInteger(configuredRounds) && configuredRounds >= 10
+      ? configuredRounds
+      : DEFAULT_BCRYPT_ROUNDS;
+  }
+
+  private isUniqueViolation(error: unknown): boolean {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code?: unknown }).code === '23505'
+    );
   }
 }
