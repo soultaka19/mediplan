@@ -59,7 +59,6 @@ export class InitAuthSchema1781674897611 implements MigrationInterface {
         "last_name"             text,
         "role"                  "user_role" NOT NULL,
         "clinic_id"             uuid,
-        "is_self_registered"    boolean     NOT NULL DEFAULT false,
         "is_active"             boolean     NOT NULL DEFAULT true,
         "failed_login_attempts" integer     NOT NULL DEFAULT 0,
         "locked_until"          timestamptz,
