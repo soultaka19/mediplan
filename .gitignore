@@ -23,6 +23,11 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Outils locaux (agents / navigateur de test)
+.claude/
+.playwright/
+.playwright-cli/
+
 # Fichiers temporaires Office
 ~$*.docx
 ~$*.xlsx
