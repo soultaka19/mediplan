@@ -180,7 +180,7 @@ export class UsersService {
       isSelfRegistered: true,
       failedLoginAttempts: 0,
       lockedUntil: null,
-    } as User);
+    });
   }
 
   private resolveTargetClinicId(

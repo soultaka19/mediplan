@@ -49,7 +49,7 @@ describe('UsersService', () => {
       find: jest.fn(),
       findOne: jest.fn(),
       create: jest.fn((entity: Partial<User>) => entity as User),
-      save: jest.fn(async (entity: User) => buildUser(entity)),
+      save: jest.fn((entity: User) => Promise.resolve(buildUser(entity))),
       update: jest.fn(),
     };
 

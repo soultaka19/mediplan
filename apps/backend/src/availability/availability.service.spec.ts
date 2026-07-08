@@ -23,7 +23,7 @@ describe('AvailabilityService', () => {
     lastName: 'Tor',
     role: UserRole.DOCTOR,
     clinicId: 'clinic-1',
-    clinic: null as unknown as Clinic,
+    clinic: null,
     isActive: true,
     failedLoginAttempts: 0,
     lockedUntil: null,
@@ -85,8 +85,8 @@ describe('AvailabilityService', () => {
 
   it('doctor -> crée une plage pour lui-même et dérive clinicId du médecin', async () => {
     userRepo.findOne.mockResolvedValue(doctorUser());
-    availabilityRepo.save.mockImplementation(async (entity) =>
-      availability(entity as Availability),
+    availabilityRepo.save.mockImplementation((entity) =>
+      Promise.resolve(availability(entity as Availability)),
     );
 
     const result = await service.create(authUser(), {

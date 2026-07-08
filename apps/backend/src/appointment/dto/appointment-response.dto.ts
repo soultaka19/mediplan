@@ -35,9 +35,7 @@ export function toAppointmentResponse(appointment: Appointment): AppointmentResp
   };
 }
 
-function displayUserName(
-  user: Appointment['patient'] | Appointment['doctor'] | undefined,
-): string | undefined {
+function displayUserName(user: Appointment['patient'] | undefined): string | undefined {
   if (!user) {
     return undefined;
   }
