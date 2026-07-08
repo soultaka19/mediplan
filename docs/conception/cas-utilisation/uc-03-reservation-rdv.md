@@ -5,7 +5,7 @@
 ```mermaid
 flowchart LR
     Patient(("👤 Patient"))
-    Admin(("🧑‍💼 Admin clinique"))
+    Reception(("🧑‍💼 Réception / admin clinique"))
 
     subgraph Resa["Module Rendez-vous"]
         direction TB
@@ -17,6 +17,9 @@ flowchart LR
         UC6(["Vérifier l'unicité de la plage"])
         UC7(["Contrôler le délai minimum d'annulation"])
         UC8(["Forcer l'annulation avec motif"])
+        UC9(["Rechercher un patient existant"])
+        UC10(["Créer un patient léger"])
+        UC11(["Activer le compte patient"])
     end
 
     Patient --- UC1
@@ -24,16 +27,22 @@ flowchart LR
     Patient --- UC3
     Patient --- UC4
     Patient --- UC5
+    Patient --- UC11
 
-    Admin --- UC3
-    Admin --- UC4
-    Admin --- UC5
-    Admin --- UC8
+    Reception --- UC3
+    Reception --- UC4
+    Reception --- UC5
+    Reception --- UC8
+    Reception --- UC9
+    Reception --- UC10
 
+    UC3 -. include .-> UC9
     UC3 -. include .-> UC6
+    UC10 -. extend .-> UC9
     UC4 -. include .-> UC7
     UC5 -. include .-> UC7
     UC8 -. extend .-> UC5
+    UC11 -. extend .-> UC10
 ```
 
 ## Explication
@@ -45,6 +54,18 @@ la réserve, puis peut la modifier ou l'annuler. Deux contrôles critiques sont 
 les doubles réservations ») et le **contrôle du délai minimum d'annulation** (ex. 24 h). Lorsque
 ce délai est dépassé, seul l'administrateur peut **forcer l'annulation** avec un motif (`extend`),
 en agissant au nom du patient — ce qui illustre le scénario SC-02.
+
+Le Sprint 3 introduit un flux Must pour la réception : un rendez-vous peut être pris au téléphone
+pour un patient qui n'a pas encore de compte libre-service. Dans ce cas, la réception recherche
+d'abord un patient existant ; si aucun dossier ne correspond, elle crée un **patient léger**
+(`role=patient`, `clinic_id` renseigné, `email` et `password_hash` optionnels,
+`is_self_registered=false`). Ce patient léger peut immédiatement être associé au rendez-vous.
+
+Décision de cadrage : le patient léger peut réclamer/activer son compte plus tard. L'activation
+ajoute un email unique, définit le mot de passe, passe `is_self_registered=true` et conserve le
+même identifiant patient, donc le même historique de rendez-vous. Cette décision débloque
+MEDIPLAN-21 et la story « RDV par la réception » sans imposer la création d'un compte numérique
+au moment de l'appel.
 
 **Lien avec le projet** : il s'agit de la fonctionnalité la plus prioritaire et la plus risquée
 (risque R-02 du cahier des charges). Le détail du flux de réservation est approfondi dans le

@@ -7,6 +7,7 @@ coverage/
 # Caches d'outils (monorepo)
 .turbo/
 .angular/
+.pnpm-store/
 
 # Environnement
 .env
@@ -22,6 +23,11 @@ npm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Outils locaux (agents / navigateur de test)
+.claude/
+.playwright/
+.playwright-cli/
 
 # Fichiers temporaires Office
 ~$*.docx

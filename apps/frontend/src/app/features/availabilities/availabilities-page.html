@@ -1,0 +1,204 @@
+<section class="availabilities-page">
+  <header class="availabilities-page__header">
+    <div>
+      <h1 class="availabilities-page__title">Disponibilités</h1>
+      <p class="availabilities-page__subtitle">Planifiez les plages réservables et les congés.</p>
+    </div>
+    <button matButton="outlined" type="button" (click)="load()" [disabled]="loading() || saving()">
+      <mat-icon>refresh</mat-icon>
+      Actualiser
+    </button>
+  </header>
+
+  @if (error(); as message) {
+    <app-alert variant="error" [message]="message" data-testid="availabilities-error" />
+  }
+
+  <mat-card class="availability-form-card" appearance="outlined">
+    @if (saving()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <mat-card-content>
+      <form [formGroup]="form" class="availability-form" (ngSubmit)="submit()" novalidate>
+        @if (!isDoctor()) {
+          <mat-form-field appearance="outline">
+            <mat-label>Médecin</mat-label>
+            <mat-select formControlName="doctorId" data-testid="availability-doctor">
+              @for (doctor of doctors(); track doctor.id) {
+                <mat-option [value]="doctor.id">{{ doctorName(doctor.id) }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.doctorId.touched && form.controls.doctorId.invalid) {
+              <mat-error>Le médecin est requis.</mat-error>
+            }
+          </mat-form-field>
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type" data-testid="availability-type">
+            <mat-option value="available">Disponible</mat-option>
+            <mat-option value="time_off">Congé</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Début</mat-label>
+          <input
+            matInput
+            type="datetime-local"
+            formControlName="startAt"
+            data-testid="availability-start"
+          />
+          @if (form.controls.startAt.touched && form.controls.startAt.invalid) {
+            <mat-error>Le début est requis.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fin</mat-label>
+          <input
+            matInput
+            type="datetime-local"
+            formControlName="endAt"
+            data-testid="availability-end"
+          />
+          @if (form.controls.endAt.touched && form.controls.endAt.invalid) {
+            <mat-error>La fin est requise.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Durée</mat-label>
+          <input
+            matInput
+            type="number"
+            min="5"
+            max="240"
+            step="5"
+            formControlName="slotDurationMin"
+            data-testid="availability-duration"
+          />
+          <span matTextSuffix>min</span>
+          @if (form.controls.slotDurationMin.touched && form.controls.slotDurationMin.invalid) {
+            <mat-error>Durée entre 5 et 240 minutes.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="availability-form__note">
+          <mat-label>Note</mat-label>
+          <input matInput formControlName="note" data-testid="availability-note" />
+        </mat-form-field>
+
+        <button
+          matButton="filled"
+          type="submit"
+          class="availability-form__submit"
+          [disabled]="saving()"
+          data-testid="availability-submit"
+        >
+          <mat-icon>add</mat-icon>
+          Ajouter
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  @if (loading()) {
+    <div class="availability-skeleton" aria-busy="true">
+      @for (row of skeletonRows; track $index) {
+        <app-skeleton height="56px" />
+      }
+    </div>
+  } @else if (isEmpty()) {
+    <app-empty-state
+      icon="event_busy"
+      title="Aucune disponibilité"
+      description="Ajoutez une première plage pour ouvrir des créneaux réservables."
+    />
+  } @else {
+    <div class="availability-table__wrapper">
+      <table mat-table [dataSource]="availabilities()" class="availability-table">
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef scope="col">Type</th>
+          <td mat-cell *matCellDef="let availability">
+            <span
+              class="availability-type"
+              [class.availability-type--off]="availability.type === 'time_off'"
+            >
+              {{ typeLabel(availability.type) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="period">
+          <th mat-header-cell *matHeaderCellDef scope="col">Période</th>
+          <td mat-cell *matCellDef="let availability">
+            <div class="availability-period">
+              <span>{{ formatDateTime(availability.startAt) }}</span>
+              <span>{{ formatDateTime(availability.endAt) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef scope="col">Créneau</th>
+          <td mat-cell *matCellDef="let availability">{{ availability.slotDurationMin }} min</td>
+        </ng-container>
+
+        <ng-container matColumnDef="note">
+          <th mat-header-cell *matHeaderCellDef scope="col">Note</th>
+          <td mat-cell *matCellDef="let availability">{{ availability.note || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
+          <td mat-cell *matCellDef="let availability">
+            <div class="availability-actions">
+              <button
+                matIconButton
+                type="button"
+                aria-label="Voir les créneaux"
+                (click)="showSlots(availability)"
+                [disabled]="availability.type !== 'available'"
+              >
+                <mat-icon>view_timeline</mat-icon>
+              </button>
+              <button
+                matIconButton
+                type="button"
+                aria-label="Supprimer"
+                (click)="deleteAvailability(availability)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  }
+
+  @if (selectedAvailabilityId()) {
+    <mat-card class="slots-card" appearance="outlined">
+      <mat-card-content>
+        <h2 class="slots-card__title">Créneaux générés</h2>
+        @if (selectedSlots().length === 0) {
+          <p class="slots-card__empty">Aucun créneau généré pour cette plage.</p>
+        } @else {
+          <div class="slots-list">
+            @for (slot of selectedSlots(); track slot.startAt) {
+              <span class="slot-chip">
+                {{ formatDateTime(slot.startAt) }} - {{ formatDateTime(slot.endAt) }}
+              </span>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</section>

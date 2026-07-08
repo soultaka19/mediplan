@@ -49,7 +49,7 @@ const ADMIN_ACTIONS: readonly QuickAction[] = [
   // L'écran de gestion des utilisateurs existe (/admin/users) → lien actif.
   { icon: 'group', label: 'Utilisateurs', route: '/admin/users' },
   { icon: 'medical_services', label: 'Médecins' },
-  { icon: 'event_note', label: 'Disponibilités' },
+  { icon: 'event_note', label: 'Disponibilités', route: '/availabilities' },
 ];
 
 /**

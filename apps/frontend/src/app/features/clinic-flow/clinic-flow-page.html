@@ -1,0 +1,112 @@
+<section class="flow-page">
+  <header class="flow-page__header">
+    <div>
+      <h1 class="flow-page__title">Flux clinique du jour</h1>
+      <p class="flow-page__subtitle">Suivi des rendez-vous et statuts de consultation.</p>
+    </div>
+
+    <button matButton="outlined" type="button" (click)="load()" [disabled]="loading()">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      Actualiser
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="flow-skeleton" aria-busy="true" aria-live="polite" data-testid="flow-loading">
+      @for (row of skeletonRows; track $index) {
+        <app-skeleton height="52px" />
+      }
+    </div>
+  } @else if (error()) {
+    <app-alert variant="error" [message]="error()!" data-testid="flow-error" />
+  } @else if (isEmpty()) {
+    <app-empty-state
+      icon="event_busy"
+      title="Aucun rendez-vous aujourd'hui"
+      description="La file clinique du jour est vide pour le moment."
+      data-testid="flow-empty"
+    />
+  } @else {
+    <div class="flow-table__wrapper">
+      <table mat-table [dataSource]="appointments()" class="flow-table" data-testid="flow-table">
+        <ng-container matColumnDef="time">
+          <th mat-header-cell *matHeaderCellDef scope="col">Heure</th>
+          <td mat-cell *matCellDef="let appointment">
+            {{ appointment.startAt | date: 'HH:mm' }} - {{ appointment.endAt | date: 'HH:mm' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="patient">
+          <th mat-header-cell *matHeaderCellDef scope="col">Patient</th>
+          <td mat-cell *matCellDef="let appointment">{{ patientLabel(appointment) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="doctor">
+          <th mat-header-cell *matHeaderCellDef scope="col">Medecin</th>
+          <td mat-cell *matCellDef="let appointment">{{ doctorLabel(appointment) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef scope="col">Statut</th>
+          <td mat-cell *matCellDef="let appointment">
+            <span class="flow-status" [attr.data-status]="appointment.status">
+              {{ statusLabel(appointment.status) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
+          <td mat-cell *matCellDef="let appointment">
+            <div class="flow-actions">
+              <button
+                matButton="outlined"
+                type="button"
+                [disabled]="
+                  !canSetStatus(appointment.status, 'arrived') || updatingId() === appointment.id
+                "
+                (click)="updateStatus(appointment, 'arrived')"
+              >
+                Arrive
+              </button>
+              <button
+                matButton="outlined"
+                type="button"
+                [disabled]="
+                  !canSetStatus(appointment.status, 'in_consultation') ||
+                  updatingId() === appointment.id
+                "
+                (click)="updateStatus(appointment, 'in_consultation')"
+              >
+                Consultation
+              </button>
+              <button
+                matButton="outlined"
+                type="button"
+                [disabled]="
+                  !canSetStatus(appointment.status, 'completed') || updatingId() === appointment.id
+                "
+                (click)="updateStatus(appointment, 'completed')"
+              >
+                Termine
+              </button>
+              <button
+                matButton="outlined"
+                type="button"
+                [disabled]="
+                  !canSetStatus(appointment.status, 'absent') || updatingId() === appointment.id
+                "
+                (click)="updateStatus(appointment, 'absent')"
+              >
+                Absent
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="flow-row"></tr>
+      </table>
+    </div>
+  }
+</section>
