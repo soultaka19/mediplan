@@ -32,6 +32,12 @@ export class StatCard {
   readonly value = input(PLACEHOLDER);
   /** Aide/précision optionnelle sous la valeur (ex. « bientôt »). */
   readonly hint = input('');
+  /** Tendance optionnelle (ex. « +2 »). Vide = non affichée. */
+  readonly trend = input('');
+  /** Sens de la tendance : true = hausse (icône ↑), false = baisse (icône ↓). */
+  readonly trendUp = input(true);
+  /** Vrai si une tendance est fournie. */
+  readonly hasTrend = computed(() => this.trend().trim().length > 0);
 
   /**
    * Vrai quand la valeur est le placeholder par défaut. Sert à l'afficher en
