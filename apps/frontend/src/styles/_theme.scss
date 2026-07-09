@@ -13,20 +13,22 @@
 // pas `@use` un .css simple ; on garde donc les @font-face hors SCSS.
 
 :root {
-  // --- 1) Tokens primitifs (palette « Bleu clinique apaisant ») §1.1 ---------
-  --mp-blue-900: #0d47a1;
-  --mp-blue-700: #1565c0;
+  // --- 1) Tokens primitifs (palette « Bleu clinique » — Direction A) ---------
+  --mp-blue-900: #17518f; // primary-strong / hover
+  --mp-blue-700: #1e5fa8; // primary (6.6:1 sur blanc, AA)
   --mp-blue-50: #e8f0fb;
-  --mp-teal-600: #00897b;
-  --mp-teal-800: #00695c; // variante foncée (bouton teal si besoin, AA)
-  --mp-teal-50: #e0f2f0;
-  --mp-bg: #f7f9fc;
+  --mp-teal-600: #16a6a6; // teal VIF — décoratif uniquement en clair
+  --mp-teal-700: #0f766e; // teal SIGNIFIANT (5.4:1 sur blanc, AA)
+  --mp-teal-800: #00695c;
+  --mp-teal-50: #def3f3; // conteneur « soft »
+  --mp-bg: #f6f8fb;
   --mp-surface: #ffffff;
   --mp-ink-900: #1a2233;
   --mp-ink-600: #4a5568;
   --mp-ink-400: #6b7280;
-  --mp-line-200: #e2e8f0;
-  --mp-green-700: #2e7d32;
+  --mp-line-200: #e7ecf3;
+  --mp-green-700: #15803d;
+  --mp-green-50: #e6f4ec; // success « soft »
   --mp-amber-800: #b45309;
   --mp-red-700: #c62828;
 
@@ -35,7 +37,9 @@
   --mp-color-primary-hover: var(--mp-blue-900);
   --mp-color-primary-container: var(--mp-blue-50);
   --mp-color-on-primary: #ffffff;
-  --mp-color-accent: var(--mp-teal-600);
+  --mp-color-accent: var(--mp-teal-600); // teal décoratif (aplats/bg soft)
+  --mp-color-accent-ink: var(--mp-teal-700); // teal porteur de sens (clair, AA)
+  --mp-color-accent-soft: var(--mp-teal-50); // fond de pastille d'icône / rôle
   --mp-color-on-accent: #ffffff;
   --mp-color-background: var(--mp-bg);
   // Teinte primaire très basse (≤ 4 %) pour le dégradé de fond des écrans auth.
@@ -49,6 +53,7 @@
   --mp-color-border: var(--mp-line-200);
   --mp-color-focus-ring: var(--mp-blue-700);
   --mp-color-success: var(--mp-green-700);
+  --mp-color-success-soft: var(--mp-green-50); // fond de pastille tendance/statut
   --mp-color-warning: var(--mp-amber-800);
   --mp-color-error: var(--mp-red-700);
   --mp-color-info: var(--mp-blue-700);
@@ -160,7 +165,9 @@ html {
   --mp-color-primary-hover: #7db2ef;
   --mp-color-primary-container: #1e3149;
   --mp-color-on-primary: #0f1722;
-  --mp-color-accent: #3fc9b7;
+  --mp-color-accent: #3fc9b7; // teal vif — peut signifier en sombre (AA)
+  --mp-color-accent-ink: #5fded0; // teal signifiant sombre (clair sur navy)
+  --mp-color-accent-soft: #123b38; // conteneur teal sombre
   --mp-color-on-accent: #0f1722;
   --mp-color-background: #0f1722;
   --mp-color-surface: #172234;
@@ -171,6 +178,7 @@ html {
   --mp-color-border: #2a384f;
   --mp-color-focus-ring: #5b9be8;
   --mp-color-success: #5dd27a;
+  --mp-color-success-soft: #123320; // conteneur succès sombre
   --mp-color-warning: #e0a23c;
   --mp-color-error: #f0707a;
   --mp-color-info: #5b9be8;
