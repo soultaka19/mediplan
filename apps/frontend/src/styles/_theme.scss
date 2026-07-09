@@ -59,7 +59,7 @@
   --mp-color-info: var(--mp-blue-700);
 
   // --- 3) Typographie §1.3 ---------------------------------------------------
-  --mp-font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mp-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   // Famille de titrage : Inter auto-hébergée, repli Roboto garanti (§1.3 / §3.3).
   --mp-font-display-family: 'Inter', 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
   // Échelle de titrage révisée (contraste de poids + letter-spacing négatif léger).
@@ -125,8 +125,8 @@ html {
         tertiary: mat.$cyan-palette,
       ),
       typography: (
-        // Corps : Roboto. Titrage Material (« brand ») : Inter, repli Roboto (§1.3).
-        plain-family: 'Roboto, system-ui, sans-serif',
+        // Corps + titrage Material (« brand ») : Inter (§1.3).
+        plain-family: 'Inter, system-ui, sans-serif',
         brand-family: 'Inter, Roboto, system-ui, sans-serif',
       ),
       density: 0,
@@ -197,7 +197,7 @@ html[data-theme='dark'] {
         tertiary: mat.$cyan-palette,
       ),
       typography: (
-        plain-family: 'Roboto, system-ui, sans-serif',
+        plain-family: 'Inter, system-ui, sans-serif',
         brand-family: 'Inter, Roboto, system-ui, sans-serif',
       ),
       density: 0,
@@ -230,4 +230,10 @@ html[data-theme='dark'] {
       background-color var(--mp-motion-slow) var(--mp-ease-standard),
       color var(--mp-motion-slow) var(--mp-ease-standard);
   }
+}
+
+// Numéraux tabulaires : chiffres de largeur fixe (KPI, heures, dates, compteurs).
+.mp-tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
 }
