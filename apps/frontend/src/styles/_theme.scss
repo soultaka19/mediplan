@@ -149,6 +149,17 @@ html {
   --mat-sys-outline: var(--mp-color-border); // bordures / outline form-field
   --mat-sys-outline-variant: var(--mp-color-border);
   --mat-sys-error: var(--mp-color-error); // validation invalide
+
+  // Variantes de surface : sans pont explicite, Material les dérive de SA palette
+  // par défaut (violette) et les cartes rendent rosées (#f6f2f7) au milieu d'une
+  // identité bleu clinique. `mat-card` consomme `surface-container-low`.
+  --mat-sys-surface-container-lowest: var(--mp-color-surface);
+  --mat-sys-surface-container-low: var(--mp-color-surface); // cartes
+  --mat-sys-surface-container-high: var(--mp-blue-50); // conteneurs surélevés
+  --mat-sys-surface-container-highest: var(--mp-line-200);
+  --mat-sys-surface-bright: var(--mp-color-surface);
+  --mat-sys-surface-dim: var(--mp-line-200);
+  --mat-sys-surface-variant: var(--mp-line-200);
 }
 
 // =============================================================================
@@ -216,6 +227,15 @@ html[data-theme='dark'] {
   --mat-sys-outline: var(--mp-color-border);
   --mat-sys-outline-variant: var(--mp-color-border);
   --mat-sys-error: var(--mp-color-error);
+
+  // Mêmes variantes de surface qu'en clair (cf. commentaire du pont `:root`).
+  --mat-sys-surface-container-lowest: var(--mp-color-background);
+  --mat-sys-surface-container-low: var(--mp-color-surface); // cartes
+  --mat-sys-surface-container-high: var(--mp-color-surface-variant);
+  --mat-sys-surface-container-highest: var(--mp-color-surface-variant);
+  --mat-sys-surface-bright: var(--mp-color-surface-variant);
+  --mat-sys-surface-dim: var(--mp-color-background);
+  --mat-sys-surface-variant: var(--mp-color-surface-variant);
 }
 
 // Transition douce de couleur lors de la bascule clair/sombre (sobre, ≤ 240ms).
@@ -236,4 +256,21 @@ html[data-theme='dark'] {
 .mp-tnum {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
+}
+
+// Focus visible homogène sur les éléments interactifs (Material masque le focus
+// derrière ses state-layers). Anneau ≥ 2px, ≥ 3:1 (§6.5).
+// `:is()` et non `:where()` : Material pose `.mdc-button { outline: none }` en
+// (0,1,0) ; `:where()` ramènerait la règle à (0,1,0) et, à égalité, la feuille
+// Material — chargée après — l'emporterait. `:is()` la porte à (0,2,0).
+:is(a, button, [tabindex], .mp-stat, .mp-quick__item):focus-visible {
+  outline: 3px solid var(--mp-color-accent-ink);
+  outline-offset: 2px;
+  border-radius: var(--mp-radius-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
 }

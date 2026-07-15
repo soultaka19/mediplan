@@ -53,13 +53,20 @@
 
 // --- Grille de KPI -----------------------------------------------------------
 // 1 colonne en mobile ; 3 colonnes dès le pivot md (exploite la largeur 1200px).
+// Paliers KPI : 1 colonne en mobile, 2 en tablette, 3 en bureau.
 .dashboard-stats {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--mp-space-4);
 }
 
-@media (min-width: 960px) {
+@media (min-width: 641px) and (max-width: 1024px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
   .dashboard-stats {
     grid-template-columns: repeat(3, 1fr);
   }

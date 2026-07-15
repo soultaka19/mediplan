@@ -22,8 +22,28 @@
   gap: var(--mp-space-2);
 }
 
+// Signature visuelle : pastille dégradée bleu → teal. Le glyphe est réduit à
+// 18px pour respirer dans la pastille de 30px (taille Material par défaut : 24px).
 .mp-toolbar__logo {
-  color: var(--mp-color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--mp-color-primary), var(--mp-color-accent));
+}
+
+// Sur fond navy, la pastille se fond dans la barre : un liseré la détache.
+// `:host-context` est obligatoire ici : en encapsulation Emulated, un sélecteur
+// écrit `html[data-theme='dark'] .mp-toolbar__logo` se compile en
+// `html[data-theme='dark'][_ngcontent-x] .mp-toolbar__logo[_ngcontent-x]` —
+// l'attribut de scope atterrit sur <html>, qui ne le porte jamais, et la règle
+// ne matche donc aucun élément.
+:host-context(html[data-theme='dark']) .mp-toolbar__logo {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 14%);
 }
 
 .mp-toolbar__name {
