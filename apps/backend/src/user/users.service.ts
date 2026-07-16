@@ -13,6 +13,7 @@ import { AuthenticatedUser } from '../auth/auth.types';
 import { PublicUser, toPublicUser } from '../auth/dto/auth-response.dto';
 import { ActivateLightPatientDto } from './dto/activate-light-patient.dto';
 import { CreateLightPatientDto } from './dto/create-light-patient.dto';
+import { UpdateDoctorPreferencesDto } from './dto/update-doctor-preferences.dto';
 import { UserRole } from './user-role.enum';
 import { User } from './user.entity';
 
@@ -79,6 +80,22 @@ export class UsersService {
     return toPublicUser(patient);
   }
 
+  async updateDoctorPreferences(
+    currentUser: AuthenticatedUser,
+    dto: UpdateDoctorPreferencesDto,
+  ): Promise<PublicUser> {
+    if (currentUser.role !== UserRole.DOCTOR) {
+      throw new ForbiddenException('Réservé aux médecins.');
+    }
+
+    await this.userRepository.update(
+      { id: currentUser.id },
+      { consultationDurationMin: dto.consultationDurationMin },
+    );
+
+    return this.findOneById(currentUser.id);
+  }
+
   /**
    * Crée un patient léger (role=patient, passwordHash=NULL) via l'EntityManager
    * fourni. Méthode PARTAGÉE entre l'endpoint dédié (MEDIPLAN-35) et la
@@ -112,6 +129,7 @@ export class UsersService {
       isActive: true,
       failedLoginAttempts: 0,
       lockedUntil: null,
+      consultationDurationMin: 30,
     });
 
     try {
@@ -140,6 +158,7 @@ export class UsersService {
         clinicId: true,
         isSelfRegistered: true,
         isActive: true,
+        consultationDurationMin: true,
         createdAt: true,
       },
     });

@@ -22,7 +22,6 @@ export interface CreateAvailabilityPayload {
   doctorId?: string;
   startAt: string;
   endAt: string;
-  slotDurationMin?: number;
   type?: AvailabilityType;
   note?: string;
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ActivateLightPatientDto } from './dto/activate-light-patient.dto';
 import { CreateLightPatientDto } from './dto/create-light-patient.dto';
+import { UpdateDoctorPreferencesDto } from './dto/update-doctor-preferences.dto';
 import { UserRole } from './user-role.enum';
 import { UsersService } from './users.service';
 
@@ -42,6 +43,16 @@ export class UsersController {
   @Roles(UserRole.CLINIC_ADMIN, UserRole.SUPER_ADMIN)
   findAll(@CurrentUser() user: AuthenticatedUser): Promise<PublicUser[]> {
     return this.usersService.findAllScoped(user);
+  }
+
+  @Patch('me/doctor-preferences')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DOCTOR)
+  updateMyDoctorPreferences(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: UpdateDoctorPreferencesDto,
+  ): Promise<PublicUser> {
+    return this.usersService.updateDoctorPreferences(user, dto);
   }
 
   @Post('light-patients')

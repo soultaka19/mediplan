@@ -14,6 +14,7 @@ export interface PublicUser {
   role: UserRole;
   clinicId: string | null;
   isActive: boolean;
+  consultationDurationMin?: number;
   createdAt: string;
 }
 

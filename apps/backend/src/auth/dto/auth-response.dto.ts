@@ -17,6 +17,7 @@ export interface PublicUser {
   clinicId: string | null;
   isSelfRegistered: boolean;
   isActive: boolean;
+  consultationDurationMin: number;
   createdAt: Date;
 }
 
@@ -40,6 +41,7 @@ export function toPublicUser(user: User): PublicUser {
     clinicId: user.clinicId,
     isSelfRegistered: user.isSelfRegistered,
     isActive: user.isActive,
+    consultationDurationMin: user.consultationDurationMin,
     createdAt: user.createdAt,
   };
 }

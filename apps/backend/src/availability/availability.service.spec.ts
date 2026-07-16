@@ -25,6 +25,7 @@ describe('AvailabilityService', () => {
     clinicId: 'clinic-1',
     clinic: null,
     isActive: true,
+    consultationDurationMin: 25,
     failedLoginAttempts: 0,
     lockedUntil: null,
     passwordResetTokenHash: null,
@@ -92,14 +93,13 @@ describe('AvailabilityService', () => {
     const result = await service.create(authUser(), {
       startAt: '2026-06-24T13:00:00Z',
       endAt: '2026-06-24T14:00:00Z',
-      slotDurationMin: 20,
     });
 
     expect(userRepo.findOne.mock.calls[0]).toEqual([{ where: { id: 'doctor-1' } }]);
     expect(availabilityRepo.create.mock.calls[0][0]).toMatchObject({
       doctorId: 'doctor-1',
       clinicId: 'clinic-1',
-      slotDurationMin: 20,
+      slotDurationMin: 25,
       type: AvailabilityType.AVAILABLE,
     });
     expect(result.doctorId).toBe('doctor-1');

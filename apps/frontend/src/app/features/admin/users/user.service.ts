@@ -26,4 +26,10 @@ export class UserService {
   listUsers(): Observable<PublicUser[]> {
     return this.http.get<PublicUser[]>(`${this.apiUrl}/users`);
   }
+
+  updateDoctorPreferences(payload: {
+    consultationDurationMin: number;
+  }): Observable<PublicUser> {
+    return this.http.patch<PublicUser>(`${this.apiUrl}/users/me/doctor-preferences`, payload);
+  }
 }

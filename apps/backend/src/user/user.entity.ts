@@ -70,6 +70,9 @@ export class User {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ name: 'consultation_duration_min', type: 'int', default: 30 })
+  consultationDurationMin: number;
+
   @Column({ type: 'int', default: 0 })
   failedLoginAttempts: number;
 

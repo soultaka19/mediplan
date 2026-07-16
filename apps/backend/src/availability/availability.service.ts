@@ -37,7 +37,7 @@ export class AvailabilityService {
       clinicId,
       startAt,
       endAt,
-      slotDurationMin: dto.slotDurationMin ?? 30,
+      slotDurationMin: doctor.consultationDurationMin,
       type: dto.type ?? AvailabilityType.AVAILABLE,
       note: dto.note?.trim() || null,
     });
@@ -82,9 +82,6 @@ export class AvailabilityService {
       availability.endAt = endAt;
     }
 
-    if (dto.slotDurationMin !== undefined) {
-      availability.slotDurationMin = dto.slotDurationMin;
-    }
     if (dto.type !== undefined) {
       availability.type = dto.type;
     }

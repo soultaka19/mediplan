@@ -163,6 +163,7 @@ export class AuthService {
         clinicId: true,
         isSelfRegistered: true,
         isActive: true,
+        consultationDurationMin: true,
         passwordHash: true,
         failedLoginAttempts: true,
         lockedUntil: true,

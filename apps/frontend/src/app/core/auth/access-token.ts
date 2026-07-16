@@ -41,6 +41,7 @@ export function userFromAccessToken(token: string): PublicUser | null {
     role: claims.role,
     clinicId: claims.clinic_id ?? null,
     isActive: true,
+    consultationDurationMin: 30,
     createdAt: '',
   };
 }

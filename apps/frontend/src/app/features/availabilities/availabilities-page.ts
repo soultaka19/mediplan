@@ -67,11 +67,26 @@ export class AvailabilitiesPage {
     type: ['available' as AvailabilityType, [Validators.required]],
     startAt: ['', [Validators.required]],
     endAt: ['', [Validators.required]],
-    slotDurationMin: [30, [Validators.required, Validators.min(5), Validators.max(240)]],
     note: [''],
   });
 
+  readonly preferenceForm = this.fb.group({
+    consultationDurationMin: [30, [Validators.required, Validators.min(5), Validators.max(240)]],
+  });
+
+  readonly selectedDoctorDuration = computed(() => {
+    if (this.isDoctor()) {
+      return this.currentUser()?.consultationDurationMin ?? 30;
+    }
+
+    const doctorId = this.form.controls.doctorId.value;
+    const doctor = this.doctors().find((item) => item.id === doctorId);
+    return doctor?.consultationDurationMin ?? 30;
+  });
+
   constructor() {
+    const duration = this.currentUser()?.consultationDurationMin ?? 30;
+    this.preferenceForm.controls.consultationDurationMin.setValue(duration);
     this.load();
   }
 
@@ -118,11 +133,10 @@ export class AvailabilitiesPage {
 
     this.availabilityService
       .createAvailability({
-        doctorId: this.isDoctor() ? undefined : value.doctorId,
+        doctorId: this.isDoctor() ? undefined : value.doctorId || undefined,
         type: value.type,
         startAt: this.toIsoDateTime(value.startAt),
         endAt: this.toIsoDateTime(value.endAt),
-        slotDurationMin: value.slotDurationMin,
         note: value.note.trim() || undefined,
       })
       .pipe(finalize(() => this.saving.set(false)))
@@ -133,11 +147,36 @@ export class AvailabilitiesPage {
             startAt: '',
             endAt: '',
             note: '',
-            slotDurationMin: 30,
             type: 'available',
           });
           this.form.markAsPristine();
           this.load();
+        },
+        error: (err: unknown) => {
+          this.error.set(authErrorMessage(err));
+        },
+      });
+  }
+
+  saveDoctorPreference(): void {
+    if (this.preferenceForm.invalid) {
+      this.preferenceForm.markAllAsTouched();
+      return;
+    }
+
+    const { consultationDurationMin } = this.preferenceForm.getRawValue();
+    this.saving.set(true);
+
+    this.userService
+      .updateDoctorPreferences({ consultationDurationMin })
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: (user) => {
+          this.preferenceForm.controls.consultationDurationMin.setValue(
+            user.consultationDurationMin ?? 30,
+          );
+          this.auth.refreshCurrentUser();
+          this.notifications.success('Preference medecin mise a jour.');
         },
         error: (err: unknown) => {
           this.error.set(authErrorMessage(err));
