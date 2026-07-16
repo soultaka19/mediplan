@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -15,8 +16,23 @@ import { AuthFacade, PublicUser } from '@core/auth';
 import { authErrorMessage } from '@shared/http/http-error-message';
 import { Alert, EmptyState, NotificationService, Skeleton } from '@shared/ui';
 import { UserService } from '@features/admin/users/user.service';
-import { Availability, AvailabilitySlot, AvailabilityType } from './availability.models';
+import {
+  Availability,
+  AvailabilitySlot,
+  AvailabilityType,
+  CreateAvailabilityPayload,
+} from './availability.models';
 import { AvailabilityService } from './availability.service';
+
+interface AvailabilityFormValue {
+  doctorId: string;
+  type: AvailabilityType;
+  startAt: string;
+  endAt: string;
+  note: string;
+  repeatWeekly: boolean;
+  repeatUntil: string;
+}
 
 @Component({
   selector: 'app-availabilities-page',
@@ -25,6 +41,7 @@ import { AvailabilityService } from './availability.service';
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -68,6 +85,8 @@ export class AvailabilitiesPage {
     startAt: ['', [Validators.required]],
     endAt: ['', [Validators.required]],
     note: [''],
+    repeatWeekly: [false],
+    repeatUntil: [''],
   });
 
   readonly preferenceForm = this.fb.group({
@@ -129,16 +148,16 @@ export class AvailabilitiesPage {
     }
 
     const value = this.form.getRawValue();
+    const payloads = this.buildAvailabilityPayloads(value);
+    if (payloads.length === 0) {
+      this.form.controls.repeatUntil.setErrors({ required: true });
+      this.form.controls.repeatUntil.markAsTouched();
+      return;
+    }
+
     this.saving.set(true);
 
-    this.availabilityService
-      .createAvailability({
-        doctorId: this.isDoctor() ? undefined : value.doctorId || undefined,
-        type: value.type,
-        startAt: this.toIsoDateTime(value.startAt),
-        endAt: this.toIsoDateTime(value.endAt),
-        note: value.note.trim() || undefined,
-      })
+    forkJoin(payloads.map((payload) => this.availabilityService.createAvailability(payload)))
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: () => {
@@ -148,6 +167,8 @@ export class AvailabilitiesPage {
             endAt: '',
             note: '',
             type: 'available',
+            repeatWeekly: false,
+            repeatUntil: '',
           });
           this.form.markAsPristine();
           this.load();
@@ -228,7 +249,58 @@ export class AvailabilitiesPage {
     }).format(new Date(value));
   }
 
-  private toIsoDateTime(value: string): string {
-    return new Date(value).toISOString();
+  private buildAvailabilityPayloads(value: AvailabilityFormValue): CreateAvailabilityPayload[] {
+    const startDate = new Date(value.startAt);
+    const endDate = new Date(value.endAt);
+    const durationMs = endDate.getTime() - startDate.getTime();
+
+    if (!Number.isFinite(durationMs) || durationMs <= 0) {
+      return [];
+    }
+
+    if (!value.repeatWeekly) {
+      return [this.buildAvailabilityPayload(value, startDate, endDate)];
+    }
+
+    const repeatEnd = this.endOfLocalDate(value.repeatUntil);
+    if (!repeatEnd || repeatEnd < startDate) {
+      return [];
+    }
+
+    const payloads: CreateAvailabilityPayload[] = [];
+    const maxOccurrences = 52;
+    let occurrenceStart = new Date(startDate);
+
+    while (occurrenceStart <= repeatEnd && payloads.length < maxOccurrences) {
+      const occurrenceEnd = new Date(occurrenceStart.getTime() + durationMs);
+      payloads.push(this.buildAvailabilityPayload(value, occurrenceStart, occurrenceEnd));
+      occurrenceStart = new Date(occurrenceStart);
+      occurrenceStart.setDate(occurrenceStart.getDate() + 7);
+    }
+
+    return payloads;
+  }
+
+  private buildAvailabilityPayload(
+    value: AvailabilityFormValue,
+    startAt: Date,
+    endAt: Date,
+  ): CreateAvailabilityPayload {
+    return {
+      doctorId: this.isDoctor() ? undefined : value.doctorId || undefined,
+      type: value.type,
+      startAt: startAt.toISOString(),
+      endAt: endAt.toISOString(),
+      note: value.note.trim() || undefined,
+    };
+  }
+
+  private endOfLocalDate(value: string): Date | null {
+    const [year, month, day] = value.split('-').map(Number);
+    if (!year || !month || !day) {
+      return null;
+    }
+
+    return new Date(year, month - 1, day, 23, 59, 59, 999);
   }
 }

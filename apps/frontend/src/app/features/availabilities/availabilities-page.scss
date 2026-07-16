@@ -51,6 +51,12 @@
   grid-column: span 2;
 }
 
+.availability-form__repeat {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
 .availability-form__submit {
   min-height: 56px;
   white-space: nowrap;
