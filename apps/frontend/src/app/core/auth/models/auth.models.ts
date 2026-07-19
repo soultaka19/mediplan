@@ -13,6 +13,7 @@ export interface PublicUser {
   lastName: string | null;
   role: UserRole;
   clinicId: string | null;
+  isSelfRegistered: boolean;
   isActive: boolean;
   createdAt: string;
 }

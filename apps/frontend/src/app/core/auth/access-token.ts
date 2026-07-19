@@ -40,6 +40,7 @@ export function userFromAccessToken(token: string): PublicUser | null {
     lastName: null,
     role: claims.role,
     clinicId: claims.clinic_id ?? null,
+    isSelfRegistered: true,
     isActive: true,
     createdAt: '',
   };

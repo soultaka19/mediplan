@@ -1,0 +1,173 @@
+<section class="reception-page">
+  <header class="reception-page__header">
+    <div>
+      <h1 class="reception-page__title">Rendez-vous par telephone</h1>
+      <p class="reception-page__subtitle">
+        Creez un patient leger et reservez un creneau pour un patient qui appelle.
+      </p>
+    </div>
+    <button matButton="outlined" type="button" (click)="load()" [disabled]="loading()">
+      <mat-icon>refresh</mat-icon>
+      Actualiser
+    </button>
+  </header>
+
+  @if (error(); as message) {
+    <app-alert variant="error" [message]="message" />
+  }
+
+  @if (loading()) {
+    <div class="reception-skeleton" aria-busy="true">
+      @for (row of skeletonRows; track $index) {
+        <app-skeleton height="64px" />
+      }
+    </div>
+  } @else {
+    <div class="reception-grid">
+      <mat-card class="reception-card" appearance="outlined">
+        @if (savingPatient()) {
+          <mat-progress-bar mode="indeterminate" />
+        }
+        <mat-card-header>
+          <mat-card-title>Option 1 - Patient leger</mat-card-title>
+          <mat-card-subtitle>Patient gere par la reception, sans compte obligatoire.</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="patientForm" class="reception-form" (ngSubmit)="createLightPatient()">
+            <mat-form-field appearance="outline">
+              <mat-label>Prenom</mat-label>
+              <input matInput formControlName="firstName" />
+              @if (patientForm.controls.firstName.touched && patientForm.controls.firstName.invalid) {
+                <mat-error>Renseignez au moins un champ.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="lastName" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email optionnel</mat-label>
+              <input matInput type="email" formControlName="email" />
+              @if (patientForm.controls.email.touched && patientForm.controls.email.invalid) {
+                <mat-error>Email invalide.</mat-error>
+              }
+            </mat-form-field>
+
+            <button matButton="filled" type="submit" [disabled]="savingPatient()">
+              <mat-icon>person_add</mat-icon>
+              Creer patient leger
+            </button>
+          </form>
+
+          @if (createdPatient(); as patient) {
+            <p class="reception-note">
+              Patient pret pour la reservation : <strong>{{ personName(patient) }}</strong>
+            </p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="reception-card" appearance="outlined">
+        @if (savingAppointment() || generatingSlots()) {
+          <mat-progress-bar mode="indeterminate" />
+        }
+        <mat-card-header>
+          <mat-card-title>Option 2 - Reservation par telephone</mat-card-title>
+          <mat-card-subtitle>La reception reserve pour un patient existant ou nouveau.</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (isEmpty()) {
+            <app-empty-state
+              icon="event_busy"
+              title="Aucune disponibilite reservable"
+              description="Ajoutez d'abord une disponibilite medecin, puis revenez ici."
+            />
+          } @else {
+            <form
+              [formGroup]="appointmentForm"
+              class="reception-form"
+              (ngSubmit)="bookByReception()"
+            >
+              <mat-form-field appearance="outline">
+                <mat-label>Disponibilite</mat-label>
+                <mat-select formControlName="availabilityId" (selectionChange)="loadSlots()">
+                  @for (availability of availabilities(); track availability.id) {
+                    <mat-option [value]="availability.id">
+                      {{ availabilityLabel(availability) }}
+                    </mat-option>
+                  }
+                </mat-select>
+                @if (
+                  appointmentForm.controls.availabilityId.touched &&
+                  appointmentForm.controls.availabilityId.invalid
+                ) {
+                  <mat-error>La disponibilite est requise.</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Creneau</mat-label>
+                <mat-select formControlName="slotId">
+                  @for (slot of freeSlots(); track slot.id) {
+                    <mat-option [value]="slot.id">{{ slotLabel(slot) }}</mat-option>
+                  }
+                </mat-select>
+                @if (appointmentForm.controls.slotId.touched && appointmentForm.controls.slotId.invalid) {
+                  <mat-error>Le creneau est requis.</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Patient existant</mat-label>
+                <mat-select formControlName="patientId">
+                  <mat-option value="">Nouveau patient dans ce formulaire</mat-option>
+                  @for (patient of patients(); track patient.id) {
+                    <mat-option [value]="patient.id">{{ personName(patient) }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <div class="reception-form__inline-title">Ou nouveau patient leger</div>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Prenom</mat-label>
+                <input matInput formControlName="firstName" />
+                @if (
+                  appointmentForm.controls.firstName.touched &&
+                  appointmentForm.controls.firstName.invalid
+                ) {
+                  <mat-error>Renseignez un patient existant ou un nom.</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Nom</mat-label>
+                <input matInput formControlName="lastName" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Email optionnel</mat-label>
+                <input matInput type="email" formControlName="email" />
+                @if (appointmentForm.controls.email.touched && appointmentForm.controls.email.invalid) {
+                  <mat-error>Email invalide.</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="reception-form__full">
+                <mat-label>Motif optionnel</mat-label>
+                <textarea matInput rows="3" formControlName="reason"></textarea>
+              </mat-form-field>
+
+              <button matButton="filled" type="submit" [disabled]="savingAppointment()">
+                <mat-icon>event_available</mat-icon>
+                Reserver le RDV
+              </button>
+            </form>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</section>

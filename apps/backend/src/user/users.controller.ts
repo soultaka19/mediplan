@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ActivateLightPatientDto } from './dto/activate-light-patient.dto';
 import { CreateLightPatientDto } from './dto/create-light-patient.dto';
+import { UpdatePatientDto } from './dto/update-patient.dto';
 import { UserRole } from './user-role.enum';
 import { UsersService } from './users.service';
 
@@ -63,5 +64,26 @@ export class UsersController {
     @Body() dto: ActivateLightPatientDto,
   ): Promise<PublicUser> {
     return this.usersService.activateLightPatient(user, patientId, dto);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLINIC_ADMIN, UserRole.SUPER_ADMIN)
+  updatePatient(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') patientId: string,
+    @Body() dto: UpdatePatientDto,
+  ): Promise<PublicUser> {
+    return this.usersService.updatePatient(user, patientId, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLINIC_ADMIN, UserRole.SUPER_ADMIN)
+  deletePatient(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') patientId: string,
+  ): Promise<void> {
+    return this.usersService.deletePatient(user, patientId);
   }
 }

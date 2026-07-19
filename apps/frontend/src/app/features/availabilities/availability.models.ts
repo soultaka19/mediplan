@@ -14,8 +14,10 @@ export interface Availability {
 }
 
 export interface AvailabilitySlot {
+  id: string;
   startAt: string;
   endAt: string;
+  isBooked: boolean;
 }
 
 export interface CreateAvailabilityPayload {

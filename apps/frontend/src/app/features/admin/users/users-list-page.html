@@ -61,6 +61,37 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
+          <td mat-cell *matCellDef="let user">
+            @if (canManagePatient(user)) {
+              <div class="users-actions">
+                <button
+                  matIconButton
+                  type="button"
+                  aria-label="Modifier le patient"
+                  title="Modifier"
+                  (click)="editPatient(user)"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button
+                  matIconButton
+                  type="button"
+                  aria-label="Supprimer le patient"
+                  title="Supprimer"
+                  class="users-actions__delete"
+                  (click)="deletePatient(user)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            } @else {
+              <span class="users-actions__empty">-</span>
+            }
+          </td>
+        </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="users-row"></tr>
       </table>

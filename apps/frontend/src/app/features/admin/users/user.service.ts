@@ -26,4 +26,29 @@ export class UserService {
   listUsers(): Observable<PublicUser[]> {
     return this.http.get<PublicUser[]>(`${this.apiUrl}/users`);
   }
+
+  createLightPatient(payload: CreateLightPatientPayload): Observable<PublicUser> {
+    return this.http.post<PublicUser>(`${this.apiUrl}/users/light-patients`, payload);
+  }
+
+  updatePatient(patientId: string, payload: UpdatePatientPayload): Observable<PublicUser> {
+    return this.http.patch<PublicUser>(`${this.apiUrl}/users/${patientId}`, payload);
+  }
+
+  deletePatient(patientId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/users/${patientId}`);
+  }
+}
+
+export interface CreateLightPatientPayload {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  clinicId?: string;
+}
+
+export interface UpdatePatientPayload {
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
 }

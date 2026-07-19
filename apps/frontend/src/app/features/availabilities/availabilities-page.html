@@ -191,9 +191,12 @@
           <p class="slots-card__empty">Aucun créneau généré pour cette plage.</p>
         } @else {
           <div class="slots-list">
-            @for (slot of selectedSlots(); track slot.startAt) {
-              <span class="slot-chip">
+            @for (slot of selectedSlots(); track slot.id) {
+              <span class="slot-chip" [class.slot-chip--booked]="slot.isBooked">
                 {{ formatDateTime(slot.startAt) }} - {{ formatDateTime(slot.endAt) }}
+                @if (slot.isBooked) {
+                  - reserve
+                }
               </span>
             }
           </div>

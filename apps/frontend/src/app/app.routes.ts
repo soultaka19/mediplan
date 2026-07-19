@@ -71,10 +71,24 @@ export const routes: Routes = [
           import('@features/admin/users/users-list-page').then((m) => m.UsersListPage),
       },
       {
+        path: 'admin/users/:id/edit',
+        canActivate: [roleGuard('clinic_admin', 'super_admin')],
+        loadComponent: () =>
+          import('@features/admin/users/patient-edit-page').then((m) => m.PatientEditPage),
+      },
+      {
         path: 'availabilities',
         canActivate: [roleGuard('doctor', 'clinic_admin', 'super_admin')],
         loadComponent: () =>
           import('@features/availabilities/availabilities-page').then((m) => m.AvailabilitiesPage),
+      },
+      {
+        path: 'appointments/reception',
+        canActivate: [roleGuard('clinic_admin', 'super_admin')],
+        loadComponent: () =>
+          import('@features/appointments/reception/reception-appointment-page').then(
+            (m) => m.ReceptionAppointmentPage,
+          ),
       },
       {
         path: 'clinic-flow/today',

@@ -143,6 +143,11 @@
   background: var(--mp-color-surface-variant);
 }
 
+.slot-chip--booked {
+  color: var(--mp-color-text-secondary);
+  text-decoration: line-through;
+}
+
 @media (max-width: 900px) {
   .availabilities-page__header {
     flex-direction: column;

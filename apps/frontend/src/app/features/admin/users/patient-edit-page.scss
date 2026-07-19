@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+.patient-edit-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  max-width: 760px;
+}
+
+.patient-edit-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+}
+
+.patient-edit-page__title {
+  margin: 0;
+  font-family: var(--mp-font-display-family);
+  font-size: var(--mp-font-display-size);
+  line-height: var(--mp-font-display-line);
+  font-weight: var(--mp-font-display-weight);
+  color: var(--mp-color-text);
+}
+
+.patient-edit-page__subtitle {
+  margin: var(--mp-space-1) 0 0;
+  color: var(--mp-color-text-secondary);
+}
+
+.patient-edit-card {
+  border-color: var(--mp-color-border);
+  background: var(--mp-color-surface);
+}
+
+.patient-edit-form,
+.patient-edit-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+}
+
+.patient-edit-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--mp-space-2);
+}
+
+@media (max-width: 700px) {
+  .patient-edit-page__header {
+    flex-direction: column;
+  }
+
+  .patient-edit-form__actions {
+    flex-direction: column-reverse;
+  }
+}

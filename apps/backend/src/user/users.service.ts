@@ -9,23 +9,18 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { EntityManager, Repository } from 'typeorm';
+import { AppointmentSlot } from '../appointment/appointment-slot.entity';
+import { Appointment } from '../appointment/appointment.entity';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { PublicUser, toPublicUser } from '../auth/dto/auth-response.dto';
 import { ActivateLightPatientDto } from './dto/activate-light-patient.dto';
 import { CreateLightPatientDto } from './dto/create-light-patient.dto';
+import { UpdatePatientDto } from './dto/update-patient.dto';
 import { UserRole } from './user-role.enum';
 import { User } from './user.entity';
 
 const DEFAULT_BCRYPT_ROUNDS = 12;
 
-/**
- * Logique métier de consultation des utilisateurs (MEDIPLAN-17 / EF-09).
- *
- * Porte le SCOPE `clinic_id` du RBAC : c'est ici, et non dans le contrôleur, que
- * l'on restreint les données selon le rôle et la clinique de l'appelant. Toutes les
- * sorties passent par `toPublicUser` pour ne jamais exposer de champ sensible
- * (passwordHash, failedLoginAttempts, lockedUntil, passwordResetTokenHash).
- */
 @Injectable()
 export class UsersService {
   constructor(
@@ -34,7 +29,6 @@ export class UsersService {
     private readonly configService: ConfigService,
   ) {}
 
-  /** Récupère un utilisateur par son id (vue publique). 404 si introuvable. */
   async findOneById(id: string): Promise<PublicUser> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
@@ -43,24 +37,13 @@ export class UsersService {
     return toPublicUser(user);
   }
 
-  /**
-   * Liste des utilisateurs selon le périmètre de l'appelant :
-   * - `super_admin`  → tous les utilisateurs (aucun filtre clinique) ;
-   * - `clinic_admin` → uniquement les utilisateurs de SA clinique ;
-   *   si son `clinicId` est `null` (cas anormal), renvoie une liste vide (défensif).
-   *
-   * L'accès lui-même (rôles autorisés) est garanti en amont par `RolesGuard`
-   * + `@Roles(...)` ; ce service applique le filtrage des données.
-   */
   async findAllScoped(currentUser: AuthenticatedUser): Promise<PublicUser[]> {
     if (currentUser.role === UserRole.SUPER_ADMIN) {
       const users = await this.userRepository.find();
       return users.map(toPublicUser);
     }
 
-    // clinic_admin : restreint à sa propre clinique.
     if (!currentUser.clinicId) {
-      // Un clinic_admin sans clinique ne doit voir personne.
       return [];
     }
 
@@ -79,13 +62,6 @@ export class UsersService {
     return toPublicUser(patient);
   }
 
-  /**
-   * Crée un patient léger (role=patient, passwordHash=NULL) via l'EntityManager
-   * fourni. Méthode PARTAGÉE entre l'endpoint dédié (MEDIPLAN-35) et la
-   * réservation par la réception (MEDIPLAN-23) : cette dernière l'appelle DANS sa
-   * transaction pour rester atomique (patient + rendez-vous créés ensemble ou pas
-   * du tout). Le périmètre clinique est résolu par l'appelant.
-   */
   async createLightPatientWith(
     manager: EntityManager,
     input: { email?: string | null; firstName?: string | null; lastName?: string | null },
@@ -97,7 +73,7 @@ export class UsersService {
         select: { id: true },
       });
       if (existing) {
-        throw new ConflictException('Cette adresse e-mail est déjà utilisée.');
+        throw new ConflictException('Cette adresse e-mail est deja utilisee.');
       }
     }
 
@@ -118,7 +94,7 @@ export class UsersService {
       return await manager.save(User, patient);
     } catch (error) {
       if (this.isUniqueViolation(error)) {
-        throw new ConflictException('Cette adresse e-mail est déjà utilisée.');
+        throw new ConflictException('Cette adresse e-mail est deja utilisee.');
       }
       throw error;
     }
@@ -150,7 +126,7 @@ export class UsersService {
     this.assertCanManageClinic(currentUser, patient.clinicId);
 
     if (patient.isSelfRegistered) {
-      throw new BadRequestException('Ce patient possède déjà un compte libre-service.');
+      throw new BadRequestException('Ce patient possede deja un compte libre-service.');
     }
 
     const existing = await this.userRepository.findOne({
@@ -158,7 +134,7 @@ export class UsersService {
       select: { id: true },
     });
     if (existing && existing.id !== patient.id) {
-      throw new ConflictException('Cette adresse e-mail est déjà utilisée.');
+      throw new ConflictException('Cette adresse e-mail est deja utilisee.');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, this.getBcryptRounds());
@@ -183,19 +159,76 @@ export class UsersService {
     });
   }
 
+  async updatePatient(
+    currentUser: AuthenticatedUser,
+    patientId: string,
+    dto: UpdatePatientDto,
+  ): Promise<PublicUser> {
+    const patient = await this.findPatientForWrite(currentUser, patientId);
+    const email = this.normalizeNullableText(dto.email);
+
+    if (email) {
+      const existing = await this.userRepository.findOne({
+        where: { email },
+        select: { id: true },
+      });
+      if (existing && existing.id !== patient.id) {
+        throw new ConflictException('Cette adresse e-mail est deja utilisee.');
+      }
+    }
+
+    if (dto.firstName !== undefined) {
+      patient.firstName = this.normalizeNullableText(dto.firstName);
+    }
+    if (dto.lastName !== undefined) {
+      patient.lastName = this.normalizeNullableText(dto.lastName);
+    }
+    if (dto.email !== undefined) {
+      patient.email = email;
+    }
+
+    try {
+      return toPublicUser(await this.userRepository.save(patient));
+    } catch (error) {
+      if (this.isUniqueViolation(error)) {
+        throw new ConflictException('Cette adresse e-mail est deja utilisee.');
+      }
+      throw error;
+    }
+  }
+
+  async deletePatient(currentUser: AuthenticatedUser, patientId: string): Promise<void> {
+    await this.userRepository.manager.transaction(async (manager) => {
+      const patient = await this.findPatientForWrite(currentUser, patientId, manager);
+      const appointments = await manager.find(Appointment, {
+        where: { patientId: patient.id },
+      });
+      const slotIds = appointments.map((appointment) => appointment.slotId);
+
+      if (appointments.length > 0) {
+        await manager.remove(Appointment, appointments);
+      }
+      if (slotIds.length > 0) {
+        await manager.update(AppointmentSlot, slotIds, { isBooked: false });
+      }
+
+      await manager.remove(User, patient);
+    });
+  }
+
   private resolveTargetClinicId(
     currentUser: AuthenticatedUser,
     requestedClinicId?: string,
   ): string {
     if (currentUser.role === UserRole.SUPER_ADMIN) {
       if (!requestedClinicId) {
-        throw new BadRequestException('clinicId est requis pour créer un patient léger.');
+        throw new BadRequestException('clinicId est requis pour creer un patient leger.');
       }
       return requestedClinicId;
     }
 
     if (!currentUser.clinicId) {
-      throw new ForbiddenException('Aucune clinique rattachée à cet utilisateur.');
+      throw new ForbiddenException('Aucune clinique rattachee a cet utilisateur.');
     }
     return currentUser.clinicId;
   }
@@ -205,8 +238,33 @@ export class UsersService {
       return;
     }
     if (!clinicId || currentUser.clinicId !== clinicId) {
-      throw new ForbiddenException('Patient hors périmètre clinique.');
+      throw new ForbiddenException('Patient hors perimetre clinique.');
     }
+  }
+
+  private async findPatientForWrite(
+    currentUser: AuthenticatedUser,
+    patientId: string,
+    manager: EntityManager = this.userRepository.manager,
+  ): Promise<User> {
+    const patient = await manager.findOne(User, {
+      where: { id: patientId },
+    });
+
+    if (!patient || patient.role !== UserRole.PATIENT) {
+      throw new NotFoundException('Patient introuvable.');
+    }
+
+    this.assertCanManageClinic(currentUser, patient.clinicId);
+    return patient;
+  }
+
+  private normalizeNullableText(value: string | null | undefined): string | null {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    const trimmed = value.trim();
+    return trimmed || null;
   }
 
   private getBcryptRounds(): number {

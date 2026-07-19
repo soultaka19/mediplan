@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppointmentSlot } from '../appointment/appointment-slot.entity';
+import { Appointment } from '../appointment/appointment.entity';
 import { User } from './user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
@@ -10,7 +12,7 @@ import { UsersService } from './users.service';
  * l'entité ; l'export de `TypeOrmModule` reste donc en place.
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User, Appointment, AppointmentSlot])],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [TypeOrmModule, UsersService],

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
+import { AppointmentSlot } from '../appointment/appointment-slot.entity';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { UserRole } from '../user/user-role.enum';
 import { User } from '../user/user.entity';
@@ -22,6 +23,8 @@ export class AvailabilityService {
     private readonly availabilityRepository: Repository<Availability>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(AppointmentSlot)
+    private readonly appointmentSlotRepository: Repository<AppointmentSlot>,
   ) {}
 
   async create(currentUser: AuthenticatedUser, dto: CreateAvailabilityDto) {
@@ -114,14 +117,49 @@ export class AvailabilityService {
     const end = availability.endAt.getTime();
 
     while (cursor + durationMs <= end) {
+      const startAt = new Date(cursor);
+      const endAt = new Date(cursor + durationMs);
+      const slot = await this.findOrCreateSlot(availability, startAt, endAt);
+
       slots.push({
-        startAt: new Date(cursor).toISOString(),
-        endAt: new Date(cursor + durationMs).toISOString(),
+        id: slot.id,
+        startAt: slot.startAt.toISOString(),
+        endAt: slot.endAt.toISOString(),
+        isBooked: slot.isBooked,
       });
       cursor += durationMs;
     }
 
     return slots;
+  }
+
+  private async findOrCreateSlot(
+    availability: Availability,
+    startAt: Date,
+    endAt: Date,
+  ): Promise<AppointmentSlot> {
+    const existing = await this.appointmentSlotRepository.findOne({
+      where: {
+        clinicId: availability.clinicId,
+        doctorId: availability.doctorId,
+        startAt,
+        endAt,
+      },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
+    const slot = this.appointmentSlotRepository.create({
+      clinicId: availability.clinicId,
+      doctorId: availability.doctorId,
+      startAt,
+      endAt,
+      isBooked: false,
+    });
+
+    return this.appointmentSlotRepository.save(slot);
   }
 
   private buildReadScope(currentUser: AuthenticatedUser): FindOptionsWhere<Availability> {

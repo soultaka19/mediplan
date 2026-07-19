@@ -35,7 +35,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     route: '/availabilities',
     roles: ['doctor', 'clinic_admin', 'super_admin'],
   },
-  { label: 'Rendez-vous', icon: 'event', route: null },
+  {
+    label: 'Rendez-vous',
+    icon: 'event',
+    route: '/appointments/reception',
+    roles: ['clinic_admin', 'super_admin'],
+  },
   {
     label: 'Flux du jour',
     icon: 'playlist_add_check',

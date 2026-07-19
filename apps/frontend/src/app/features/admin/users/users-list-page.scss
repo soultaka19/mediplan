@@ -86,3 +86,17 @@
 .users-status--inactive {
   color: var(--mp-color-text-secondary);
 }
+
+.users-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-1);
+}
+
+.users-actions__delete {
+  color: var(--mp-color-error);
+}
+
+.users-actions__empty {
+  color: var(--mp-color-text-secondary);
+}

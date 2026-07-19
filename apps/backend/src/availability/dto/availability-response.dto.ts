@@ -15,8 +15,10 @@ export interface AvailabilityResponseDto {
 }
 
 export interface AvailabilitySlotDto {
+  id: string;
   startAt: string;
   endAt: string;
+  isBooked: boolean;
 }
 
 export function toAvailabilityResponse(availability: Availability): AvailabilityResponseDto {
