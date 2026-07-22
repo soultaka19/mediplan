@@ -65,24 +65,11 @@ describe('LayoutShell', () => {
 
     expect(byTestId(root, 'shell-burger')).not.toBeNull();
     expect(root.textContent).toContain('MediPlan');
-    // 1 item actif (Tableau de bord) + 1 désactivé (Profil) ; « Rendez-vous »
-    // est réservé aux admins, donc masqué au patient.
+    // 1 seul item actif (Tableau de bord) ; « Rendez-vous » est réservé aux
+    // admins, donc masqué au patient. Aucun item désactivé (« Profil » retiré
+    // tant que son écran n'existe pas).
     expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(1);
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(1);
-  });
-
-  it('affiche les items désactivés avec la mention « bientôt » et non cliquables', () => {
-    const fixture = setup();
-    const root = fixture.nativeElement as HTMLElement;
-    const disabled = root.querySelectorAll('[data-testid="shell-nav-item-disabled"]');
-
-    expect(disabled.length).toBe(1);
-    disabled.forEach((item) => {
-      expect(item.getAttribute('aria-disabled')).toBe('true');
-      // Pas de routerLink → pas de href de navigation.
-      expect(item.getAttribute('href')).toBeNull();
-    });
-    expect(root.textContent).toContain('bientôt');
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it("le menu utilisateur affiche le nom et l'e-mail", () => {
@@ -116,9 +103,9 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).not.toContain('Utilisateurs');
-    // 1 actif (Tableau de bord) + 1 désactivé (Profil) ; « Utilisateurs » et
-    // « Rendez-vous » (réservés admins) masqués au patient.
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(1);
+    // Seul « Tableau de bord » est actif ; « Utilisateurs » et « Rendez-vous »
+    // (réservés admins) sont masqués au patient, et aucun item désactivé.
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it('masque l’item « Utilisateurs » pour un médecin', () => {
@@ -127,9 +114,9 @@ describe('LayoutShell', () => {
 
     expect(root.textContent).not.toContain('Utilisateurs');
     // Actifs : Tableau de bord + Disponibilités + Flux du jour = 3 ;
-    // désactivé : Profil = 1 ; « Rendez-vous » réservé aux admins.
+    // « Rendez-vous » réservé aux admins ; aucun item désactivé.
     expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(3);
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(1);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it('affiche l’item « Utilisateurs » pour un administrateur de clinique', () => {
@@ -138,9 +125,9 @@ describe('LayoutShell', () => {
 
     expect(root.textContent).toContain('Utilisateurs');
     // Liens actifs : Tableau de bord + Disponibilités + Rendez-vous + Flux du
-    // jour + Utilisateurs = 5 ; désactivé (« bientôt ») : Profil = 1.
+    // jour + Utilisateurs = 5 ; aucun item désactivé.
     expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(5);
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(1);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it('affiche l’item « Utilisateurs » pour un super administrateur', () => {
@@ -149,7 +136,7 @@ describe('LayoutShell', () => {
 
     expect(root.textContent).toContain('Utilisateurs');
     expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(5);
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(1);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it('le burger bascule l’ouverture du sidenav', () => {
