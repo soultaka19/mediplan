@@ -21,11 +21,11 @@ export interface NavItem {
 /**
  * Items de navigation principale (cf. design-system §3, décision client n°5).
  *
- * « Tableau de bord » actif ; « Rendez-vous » et « Profil » désactivés
- * (« bientôt ») tant que leurs écrans n'existent pas. « Utilisateurs » est
- * réservé aux administrateurs (`clinic_admin` / `super_admin`) et pointe vers
- * l'écran de liste `/admin/users`. Ajouter une `route` ici suffit à activer un
- * item quand l'écran est prêt.
+ * « Tableau de bord » actif ; « Profil » désactivé (« bientôt ») tant que son
+ * écran n'existe pas. « Rendez-vous » (prise de RDV réception) et
+ * « Utilisateurs » sont réservés aux administrateurs (`clinic_admin` /
+ * `super_admin`). Ajouter une `route` ici suffit à activer un item quand
+ * l'écran est prêt.
  */
 export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Tableau de bord', icon: 'dashboard', route: '/dashboard' },
@@ -35,7 +35,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     route: '/availabilities',
     roles: ['doctor', 'clinic_admin', 'super_admin'],
   },
-  { label: 'Rendez-vous', icon: 'event', route: null },
+  {
+    label: 'Rendez-vous',
+    icon: 'event',
+    route: '/appointments/new',
+    roles: ['clinic_admin', 'super_admin'],
+  },
   {
     label: 'Flux du jour',
     icon: 'playlist_add_check',

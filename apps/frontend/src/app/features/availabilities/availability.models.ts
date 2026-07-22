@@ -18,6 +18,17 @@ export interface AvailabilitySlot {
   endAt: string;
 }
 
+/**
+ * Créneau matérialisé (persisté) et réservable : porte l'`id` à passer à la
+ * réservation réception, et `isBooked` pour n'afficher que les créneaux libres.
+ */
+export interface MaterializedSlot {
+  id: string;
+  startAt: string;
+  endAt: string;
+  isBooked: boolean;
+}
+
 export interface CreateAvailabilityPayload {
   doctorId?: string;
   startAt: string;

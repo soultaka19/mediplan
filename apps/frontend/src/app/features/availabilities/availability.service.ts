@@ -3,7 +3,12 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { ENV_CONFIG } from '@core/config/env.config';
-import { Availability, AvailabilitySlot, CreateAvailabilityPayload } from './availability.models';
+import {
+  Availability,
+  AvailabilitySlot,
+  CreateAvailabilityPayload,
+  MaterializedSlot,
+} from './availability.models';
 
 @Injectable({ providedIn: 'root' })
 export class AvailabilityService {
@@ -24,5 +29,13 @@ export class AvailabilityService {
 
   generateSlots(id: string): Observable<AvailabilitySlot[]> {
     return this.http.get<AvailabilitySlot[]>(`${this.apiUrl}/availabilities/${id}/slots`);
+  }
+
+  /**
+   * Matérialise et renvoie les créneaux réservables (avec `id` + `isBooked`).
+   * Prérequis à la réservation par la réception (qui réserve par `slotId`).
+   */
+  materializeSlots(id: string): Observable<MaterializedSlot[]> {
+    return this.http.post<MaterializedSlot[]>(`${this.apiUrl}/availabilities/${id}/slots`, {});
   }
 }
