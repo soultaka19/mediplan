@@ -6,6 +6,7 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { Clinic } from '../clinic/clinic.entity';
 import { UserRole } from '../user/user-role.enum';
 import { User } from '../user/user.entity';
+import { AppointmentSlot } from '../appointment/appointment-slot.entity';
 import { AvailabilityType } from './availability-type.enum';
 import { Availability } from './availability.entity';
 import { AvailabilityService } from './availability.service';
@@ -69,12 +70,22 @@ describe('AvailabilityService', () => {
     const userRepoMock = {
       findOne: jest.fn(),
     };
+    const slotRepoMock = {
+      find: jest.fn(),
+      createQueryBuilder: jest.fn(() => ({
+        insert: jest.fn().mockReturnThis(),
+        values: jest.fn().mockReturnThis(),
+        orIgnore: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({}),
+      })),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AvailabilityService,
         { provide: getRepositoryToken(Availability), useValue: availabilityRepoMock },
         { provide: getRepositoryToken(User), useValue: userRepoMock },
+        { provide: getRepositoryToken(AppointmentSlot), useValue: slotRepoMock },
       ],
     }).compile();
 

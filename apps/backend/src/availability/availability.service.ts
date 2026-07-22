@@ -5,13 +5,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { Between, FindOptionsWhere, Repository } from 'typeorm';
+import { AppointmentSlot } from '../appointment/appointment-slot.entity';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { UserRole } from '../user/user-role.enum';
 import { User } from '../user/user.entity';
 import { AvailabilityType } from './availability-type.enum';
 import { Availability } from './availability.entity';
-import { AvailabilitySlotDto, toAvailabilityResponse } from './dto/availability-response.dto';
+import {
+  AvailabilitySlotDto,
+  MaterializedSlotDto,
+  toAvailabilityResponse,
+} from './dto/availability-response.dto';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 
@@ -22,6 +27,8 @@ export class AvailabilityService {
     private readonly availabilityRepository: Repository<Availability>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(AppointmentSlot)
+    private readonly slotRepository: Repository<AppointmentSlot>,
   ) {}
 
   async create(currentUser: AuthenticatedUser, dto: CreateAvailabilityDto) {
@@ -122,6 +129,64 @@ export class AvailabilityService {
     }
 
     return slots;
+  }
+
+  /**
+   * Matérialise (persiste) les créneaux réservables d'une disponibilité et les
+   * renvoie avec leur `id` et leur état `isBooked`.
+   *
+   * Contrairement à `generateSlots` (aperçu éphémère), cette méthode crée en base
+   * les lignes `appointment_slot` manquantes afin que la réception puisse réserver
+   * par `slotId`. L'insertion est idempotente (`ON CONFLICT DO NOTHING` sur
+   * l'unique `(doctor_id, start_at)`) : rejouable sans doublon et sans jamais
+   * réécrire un créneau déjà réservé. Le périmètre RBAC est celui de la
+   * disponibilité (médecin → les siennes, admin → sa clinique).
+   */
+  async materializeSlots(
+    currentUser: AuthenticatedUser,
+    id: string,
+  ): Promise<MaterializedSlotDto[]> {
+    const availability = await this.getScopedAvailability(currentUser, id);
+
+    if (availability.type !== AvailabilityType.AVAILABLE) {
+      return [];
+    }
+
+    const durationMs = availability.slotDurationMin * 60_000;
+    const end = availability.endAt.getTime();
+    const rows: Array<Partial<AppointmentSlot>> = [];
+    for (
+      let cursor = availability.startAt.getTime();
+      cursor + durationMs <= end;
+      cursor += durationMs
+    ) {
+      rows.push({
+        clinicId: availability.clinicId,
+        doctorId: availability.doctorId,
+        startAt: new Date(cursor),
+        endAt: new Date(cursor + durationMs),
+      });
+    }
+
+    if (rows.length > 0) {
+      await this.slotRepository.createQueryBuilder().insert().values(rows).orIgnore().execute();
+    }
+
+    const slots = await this.slotRepository.find({
+      where: {
+        clinicId: availability.clinicId,
+        doctorId: availability.doctorId,
+        startAt: Between(availability.startAt, availability.endAt),
+      },
+      order: { startAt: 'ASC' },
+    });
+
+    return slots.map((slot) => ({
+      id: slot.id,
+      startAt: slot.startAt.toISOString(),
+      endAt: slot.endAt.toISOString(),
+      isBooked: slot.isBooked,
+    }));
   }
 
   private buildReadScope(currentUser: AuthenticatedUser): FindOptionsWhere<Availability> {

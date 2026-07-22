@@ -19,6 +19,18 @@ export interface AvailabilitySlotDto {
   endAt: string;
 }
 
+/**
+ * Créneau matérialisé (persisté) et réservable : porte l'`id` du créneau à
+ * passer à `POST /appointments/reception`, et `isBooked` pour masquer/afficher
+ * la disponibilité côté réception.
+ */
+export interface MaterializedSlotDto {
+  id: string;
+  startAt: string;
+  endAt: string;
+  isBooked: boolean;
+}
+
 export function toAvailabilityResponse(availability: Availability): AvailabilityResponseDto {
   return {
     id: availability.id,
