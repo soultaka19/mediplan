@@ -2,6 +2,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -13,9 +14,13 @@ import { filter, map } from 'rxjs';
 
 import { AuthFacade } from '@core/auth';
 import { ThemeService } from '@core/theme';
+import { BookAppointmentDialog } from '@features/appointments/book-appointment-dialog';
 import { Avatar } from '@shared/ui';
 import { resolveDisplayName } from '@shared/user/display-name';
 import { NAV_ITEMS, visibleNavItems } from '../nav-items';
+
+/** Rôles autorisés à réserver un rendez-vous depuis la topbar (comme l'onglet dédié). */
+const BOOKING_ROLES = ['clinic_admin', 'super_admin'] as const;
 
 /** Largeur max au-delà de laquelle le sidenav est en mode `side` (pivot md). */
 const MOBILE_QUERY = '(max-width: 959.98px)';
@@ -56,6 +61,7 @@ export class LayoutShell {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthFacade);
   private readonly themeService = inject(ThemeService);
+  private readonly dialog = inject(MatDialog);
 
   /** Utilisateur courant (signal lecture seule) pour le menu utilisateur. */
   readonly user = this.auth.currentUser;
@@ -99,6 +105,15 @@ export class LayoutShell {
   /** Nom affichable : prénom/nom si présents, sinon la partie locale de l'e-mail. */
   readonly displayName = computed(() => resolveDisplayName(this.user()));
 
+  /**
+   * Vrai si le rôle courant peut réserver un rendez-vous (raccourci topbar).
+   * Aligné sur le `roleGuard` de la route `/appointments`.
+   */
+  readonly canBookAppointment = computed(() => {
+    const role = this.user()?.role;
+    return role != null && (BOOKING_ROLES as readonly string[]).includes(role);
+  });
+
   constructor() {
     // En mode overlay, refermer le sidenav à chaque navigation (item cliqué).
     this.router.events
@@ -121,6 +136,21 @@ export class LayoutShell {
   /** Bascule le thème clair/sombre. */
   toggleTheme(): void {
     this.themeService.toggle();
+  }
+
+  /**
+   * Ouvre la prise de rendez-vous en modale depuis la topbar. Au succès, redirige
+   * vers l'historique des rendez-vous pour que l'utilisateur voie l'ajout.
+   */
+  openBooking(): void {
+    this.dialog
+      .open(BookAppointmentDialog, { autoFocus: 'dialog', restoreFocus: true })
+      .afterClosed()
+      .subscribe((created?: boolean) => {
+        if (created) {
+          void this.router.navigate(['/appointments']);
+        }
+      });
   }
 
   /** Synchronise l'état quand l'utilisateur ferme via backdrop/Échap. */

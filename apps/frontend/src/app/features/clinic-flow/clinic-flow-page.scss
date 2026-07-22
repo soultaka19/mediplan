@@ -84,6 +84,46 @@
   gap: var(--mp-space-2);
 }
 
+// Barre d'outils au-dessus du tableau (recherche).
+.flow-toolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.flow-search {
+  width: min(420px, 100%);
+}
+
+.flow-search mat-icon[matPrefix] {
+  margin-inline: var(--mp-space-2) var(--mp-space-1);
+  color: var(--mp-color-text-secondary);
+}
+
+// Boutons d'action visibles par ligne : icône + libellé.
+.flow-action mat-icon {
+  margin-right: var(--mp-space-1);
+}
+
+// Action destructrice : teinte d'erreur, distincte des transitions.
+.flow-action--cancel {
+  color: var(--mp-color-error);
+  border-color: color-mix(in srgb, var(--mp-color-error) 40%, var(--mp-color-border));
+
+  mat-icon {
+    color: var(--mp-color-error);
+  }
+}
+
+.flow-actions__empty {
+  color: var(--mp-color-text-disabled);
+}
+
+// Pagination : sur le fond, sans surface propre.
+mat-paginator {
+  background: transparent;
+  margin-top: var(--mp-space-2);
+}
+
 @media (max-width: 720px) {
   .flow-page__header {
     align-items: stretch;

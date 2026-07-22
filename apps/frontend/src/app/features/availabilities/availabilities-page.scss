@@ -38,8 +38,8 @@
 
 .availability-form {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: var(--mp-space-3);
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--mp-space-3) var(--mp-space-4);
   align-items: start;
 }
 
@@ -47,19 +47,83 @@
   min-width: 0;
 }
 
+// La note occupe toute la largeur : champ libre, séparé des contrôles datés.
 .availability-form__note {
-  grid-column: span 2;
+  grid-column: 1 / -1;
 }
 
 .availability-form__submit {
-  min-height: 56px;
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-height: 48px;
+  padding-inline: var(--mp-space-5);
   white-space: nowrap;
+}
+
+// Bouton de repli des options secondaires (formulaire épuré par défaut).
+.availability-form__advanced-toggle {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+// Sous-grille des options avancées (type, durée, note).
+.availability-form__advanced {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--mp-space-3) var(--mp-space-4);
+  align-items: start;
+  padding-top: var(--mp-space-1);
+}
+
+// Ancre de défilement : marge haute pour ne pas coller sous la barre.
+.availability-list {
+  scroll-margin-top: var(--mp-space-4);
+}
+
+// Aperçu en direct des créneaux générés : bandeau tonal discret, pleine largeur.
+.availability-form__preview {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  justify-self: start;
+  margin: 0;
+  padding: var(--mp-space-2) var(--mp-space-3);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-primary-container);
+  color: var(--mp-color-text);
+  font-weight: 500;
+}
+
+.availability-form__preview mat-icon {
+  color: var(--mp-color-primary);
 }
 
 .availability-skeleton {
   display: flex;
   flex-direction: column;
   gap: var(--mp-space-2);
+}
+
+// Barre d'outils (recherche) + pagination de la liste.
+.availability-toolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.availability-search {
+  width: min(420px, 100%);
+}
+
+.availability-search mat-icon[matPrefix] {
+  margin-inline: var(--mp-space-2) var(--mp-space-1);
+  color: var(--mp-color-text-secondary);
+}
+
+mat-paginator {
+  background: transparent;
+  margin-top: var(--mp-space-2);
 }
 
 .availability-table__wrapper {
@@ -87,10 +151,55 @@
   padding-block: var(--mp-space-3);
 }
 
+// En-tête de groupe médecin : ligne pleine largeur, surface tonale, nom une fois.
+.availability-group {
+  padding: 0;
+  background: var(--mp-color-surface-variant);
+  border-top: 2px solid var(--mp-color-border);
+}
+
+.availability-group__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  padding: var(--mp-space-2) var(--mp-space-3);
+}
+
+.availability-group__inner mat-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 20px;
+  color: var(--mp-color-primary);
+}
+
+.availability-group__name {
+  font-weight: 700;
+  color: var(--mp-color-text);
+}
+
+.availability-group__count {
+  margin-left: auto;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--mp-color-text-secondary);
+}
+
 .availability-period {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.availability-period__date {
+  font-weight: 600;
+  color: var(--mp-color-text);
+}
+
+.availability-period__time {
+  color: var(--mp-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .availability-type {

@@ -1,0 +1,41 @@
+:host {
+  display: block;
+}
+
+mat-dialog-content {
+  min-width: min(520px, 82vw);
+}
+
+.book-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+  padding-top: var(--mp-space-2);
+}
+
+.book-form mat-form-field {
+  width: 100%;
+}
+
+.book-section-title {
+  margin: var(--mp-space-2) 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--mp-color-text);
+}
+
+.book-patient__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--mp-space-2) var(--mp-space-3);
+}
+
+.book-field--full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 560px) {
+  .book-patient__grid {
+    grid-template-columns: 1fr;
+  }
+}

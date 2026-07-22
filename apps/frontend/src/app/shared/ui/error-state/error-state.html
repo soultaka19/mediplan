@@ -1,0 +1,22 @@
+<div class="mp-error" [class.mp-error--dense]="dense()" role="alert">
+  <span class="mp-error__badge" aria-hidden="true">
+    <mat-icon class="mp-error__icon">{{ icon() }}</mat-icon>
+  </span>
+  @switch (headingLevel()) {
+    @case (3) {
+      <h3 class="mp-error__title">{{ title() }}</h3>
+    }
+    @default {
+      <h2 class="mp-error__title">{{ title() }}</h2>
+    }
+  }
+  @if (message()) {
+    <p class="mp-error__desc">{{ message() }}</p>
+  }
+  @if (showRetry()) {
+    <button matButton="filled" type="button" class="mp-error__retry" (click)="retry.emit()">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      {{ retryLabel() }}
+    </button>
+  }
+</div>

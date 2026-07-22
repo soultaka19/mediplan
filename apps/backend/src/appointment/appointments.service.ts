@@ -64,6 +64,35 @@ export class AppointmentsService {
     return appointments.map(toAppointmentResponse);
   }
 
+  /**
+   * Historique des rendez-vous du périmètre (tous statuts, plus récents d'abord).
+   *
+   * Scope identique à `findToday` : un médecin ne voit que les siens, un
+   * `clinic_admin` ceux de sa clinique, un `super_admin` tous. Pas de pagination
+   * serveur (volume académique) — le frontend pagine côté client.
+   */
+  async findAll(currentUser: AuthenticatedUser): Promise<AppointmentResponse[]> {
+    const query = this.dataSource
+      .getRepository(Appointment)
+      .createQueryBuilder('appointment')
+      .innerJoinAndSelect('appointment.slot', 'slot')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.doctor', 'doctor')
+      .orderBy('slot.start_at', 'DESC');
+
+    if (currentUser.role === UserRole.DOCTOR) {
+      query.andWhere('appointment.doctor_id = :doctorId', { doctorId: currentUser.id });
+    } else if (currentUser.role === UserRole.CLINIC_ADMIN) {
+      if (!currentUser.clinicId) {
+        return [];
+      }
+      query.andWhere('appointment.clinic_id = :clinicId', { clinicId: currentUser.clinicId });
+    }
+
+    const appointments = await query.getMany();
+    return appointments.map(toAppointmentResponse);
+  }
+
   async updateStatus(
     currentUser: AuthenticatedUser,
     appointmentId: string,

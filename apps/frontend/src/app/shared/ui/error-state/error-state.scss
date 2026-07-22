@@ -1,0 +1,70 @@
+.mp-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--mp-space-2);
+  padding: var(--mp-space-8) var(--mp-space-4);
+  color: var(--mp-color-text-secondary);
+}
+
+// Variante compacte : pour les cartes/sections denses.
+.mp-error--dense {
+  gap: var(--mp-space-1);
+  padding: var(--mp-space-4);
+
+  .mp-error__badge {
+    width: 44px;
+    height: 44px;
+  }
+
+  .mp-error__icon {
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+    line-height: 24px;
+  }
+
+  .mp-error__title {
+    font-size: 16px;
+  }
+}
+
+// Pastille circulaire teintée d'erreur — signale sans agresser.
+.mp-error__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--mp-radius-full);
+  color: var(--mp-color-error);
+  background: color-mix(in srgb, var(--mp-color-error) 12%, transparent);
+}
+
+.mp-error__icon {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+  line-height: 32px;
+}
+
+.mp-error__title {
+  margin: var(--mp-space-2) 0 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--mp-color-text);
+}
+
+.mp-error__desc {
+  margin: 0 0 var(--mp-space-2);
+  max-width: 34rem;
+}
+
+.mp-error__retry {
+  margin-top: var(--mp-space-1);
+
+  mat-icon {
+    margin-right: var(--mp-space-1);
+  }
+}

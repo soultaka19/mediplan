@@ -8,10 +8,31 @@
 .mp-toolbar {
   position: relative;
   z-index: 2;
+  // Barre plus haute et plus aérée que la hauteur Material par défaut (64px) :
+  // respiration verticale pour le wordmark, l'avatar et le CTA (§3.4).
+  min-height: 72px;
+  padding-inline: var(--mp-space-4);
   gap: var(--mp-space-2);
   background: var(--mp-color-surface);
   color: var(--mp-color-text);
   box-shadow: var(--mp-elevation-1);
+}
+
+// Raccourci « Nouveau rendez-vous » : bouton d'action principal de la topbar.
+.mp-toolbar__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-1);
+  // Léger retrait du groupe thème/utilisateur à droite.
+  margin-inline-end: var(--mp-space-1);
+}
+
+// Sous le pivot mobile, on garde l'icône seule (le libellé disparaît) pour ne
+// pas encombrer la barre ; l'action reste accessible via aria-label.
+@media (max-width: 719.98px) {
+  .mp-toolbar__cta-label {
+    display: none;
+  }
 }
 
 // Wordmark verrouillé : pictogramme + « MediPlan », espacement et poids fixes

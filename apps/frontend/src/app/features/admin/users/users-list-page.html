@@ -11,9 +11,14 @@
         <app-skeleton height="48px" />
       }
     </div>
-  } @else if (error()) {
-    <!-- État d'erreur : bandeau réutilisable. -->
-    <app-alert variant="error" [message]="error()!" data-testid="users-error" />
+  } @else if (error(); as message) {
+    <!-- État d'erreur : état plein avec reprise. -->
+    <app-error-state
+      [message]="message"
+      title="Impossible de charger les utilisateurs"
+      (retry)="load()"
+      data-testid="users-error"
+    />
   } @else if (isEmpty()) {
     <!-- État vide : aucun utilisateur. -->
     <app-empty-state
@@ -23,47 +28,88 @@
       data-testid="users-empty"
     />
   } @else {
-    <!-- État de succès : tableau Material. -->
-    <div class="users-table__wrapper">
-      <table mat-table [dataSource]="users()" class="users-table" data-testid="users-table">
-        <!-- Colonne Nom -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef scope="col">Nom</th>
-          <td mat-cell *matCellDef="let user">{{ displayName(user) }}</td>
-        </ng-container>
-
-        <!-- Colonne E-mail -->
-        <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef scope="col">E-mail</th>
-          <td mat-cell *matCellDef="let user">{{ user.email ?? '—' }}</td>
-        </ng-container>
-
-        <!-- Colonne Rôle -->
-        <ng-container matColumnDef="role">
-          <th mat-header-cell *matHeaderCellDef scope="col">Rôle</th>
-          <td mat-cell *matCellDef="let user">
-            <app-role-badge [role]="user.role" />
-          </td>
-        </ng-container>
-
-        <!-- Colonne Statut : texte + pastille (jamais la couleur seule) -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef scope="col">Statut</th>
-          <td mat-cell *matCellDef="let user">
-            <span
-              class="users-status"
-              [class.users-status--active]="user.isActive"
-              [class.users-status--inactive]="!user.isActive"
-            >
-              <span class="users-status__dot" aria-hidden="true"></span>
-              {{ user.isActive ? 'Actif' : 'Inactif' }}
-            </span>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="users-row"></tr>
-      </table>
+    <!-- État de succès : recherche + tableau + pagination. -->
+    <div class="users-toolbar">
+      <mat-form-field appearance="outline" class="users-search" subscriptSizing="dynamic">
+        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+        <mat-label>Rechercher</mat-label>
+        <input
+          matInput
+          #search
+          (input)="applyFilter(search.value)"
+          placeholder="Nom, e-mail, rôle…"
+          data-testid="users-search"
+        />
+        @if (search.value) {
+          <button
+            matIconButton
+            matSuffix
+            type="button"
+            aria-label="Effacer la recherche"
+            (click)="search.value = ''; applyFilter('')"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
     </div>
+
+    @if (filteredCount() === 0) {
+      <app-empty-state
+        icon="search_off"
+        title="Aucun résultat"
+        [description]="'Aucun utilisateur ne correspond à « ' + searchTerm() + ' ».'"
+        data-testid="users-no-results"
+      />
+    } @else {
+      <div class="users-table__wrapper">
+        <table mat-table [dataSource]="dataSource" class="users-table" data-testid="users-table">
+          <!-- Colonne Nom -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef scope="col">Nom</th>
+            <td mat-cell *matCellDef="let user">{{ displayName(user) }}</td>
+          </ng-container>
+
+          <!-- Colonne E-mail -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef scope="col">E-mail</th>
+            <td mat-cell *matCellDef="let user">{{ user.email ?? '—' }}</td>
+          </ng-container>
+
+          <!-- Colonne Rôle -->
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef scope="col">Rôle</th>
+            <td mat-cell *matCellDef="let user">
+              <app-role-badge [role]="user.role" />
+            </td>
+          </ng-container>
+
+          <!-- Colonne Statut : texte + pastille (jamais la couleur seule) -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef scope="col">Statut</th>
+            <td mat-cell *matCellDef="let user">
+              <span
+                class="users-status"
+                [class.users-status--active]="user.isActive"
+                [class.users-status--inactive]="!user.isActive"
+              >
+                <span class="users-status__dot" aria-hidden="true"></span>
+                {{ user.isActive ? 'Actif' : 'Inactif' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="users-row"></tr>
+        </table>
+      </div>
+    }
+
+    <mat-paginator
+      [pageSize]="10"
+      [pageSizeOptions]="[10, 25, 50]"
+      [hidden]="filteredCount() === 0"
+      aria-label="Pagination des utilisateurs"
+    />
   }
 </section>
