@@ -3,7 +3,14 @@ import { TestBed } from '@angular/core/testing';
 import { StatCard } from './stat-card';
 
 describe('StatCard', () => {
-  function setup(inputs: { label: string; value?: string; hint?: string; icon?: string }) {
+  function setup(inputs: {
+    label: string;
+    value?: string;
+    hint?: string;
+    icon?: string;
+    trend?: string;
+    trendUp?: boolean;
+  }) {
     const fixture = TestBed.createComponent(StatCard);
     fixture.componentRef.setInput('label', inputs.label);
     if (inputs.value !== undefined) {
@@ -14,6 +21,12 @@ describe('StatCard', () => {
     }
     if (inputs.icon !== undefined) {
       fixture.componentRef.setInput('icon', inputs.icon);
+    }
+    if (inputs.trend !== undefined) {
+      fixture.componentRef.setInput('trend', inputs.trend);
+    }
+    if (inputs.trendUp !== undefined) {
+      fixture.componentRef.setInput('trendUp', inputs.trendUp);
     }
     fixture.detectChanges();
     return fixture;
@@ -57,5 +70,19 @@ describe('StatCard', () => {
     expect(
       (withHint.nativeElement as HTMLElement).querySelector('.mp-stat__hint')?.textContent?.trim(),
     ).toBe('bientôt');
+  });
+
+  it('affiche la tendance en texte + icône quand fournie', () => {
+    const fixture = setup({ label: 'RDV du jour', value: '8', trend: '+2', trendUp: true });
+    const trend = (fixture.nativeElement as HTMLElement).querySelector('.mp-stat__trend');
+    expect(trend).toBeTruthy();
+    expect(trend?.textContent).toContain('+2');
+    // Information non portée par la seule couleur : une icône accompagne le texte.
+    expect(trend?.querySelector('mat-icon')).toBeTruthy();
+  });
+
+  it('ne rend aucune tendance par défaut', () => {
+    const fixture = setup({ label: 'RDV du jour' });
+    expect((fixture.nativeElement as HTMLElement).querySelector('.mp-stat__trend')).toBeNull();
   });
 });

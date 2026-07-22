@@ -14,6 +14,7 @@ import { filter, map } from 'rxjs';
 import { AuthFacade } from '@core/auth';
 import { ThemeService } from '@core/theme';
 import { Avatar } from '@shared/ui';
+import { resolveDisplayName } from '@shared/user/display-name';
 import { NAV_ITEMS, visibleNavItems } from '../nav-items';
 
 /** Largeur max au-delà de laquelle le sidenav est en mode `side` (pivot md). */
@@ -95,15 +96,8 @@ export class LayoutShell {
   /** Libellé accessible dynamique du burger selon l'état. */
   readonly toggleLabel = computed(() => (this.opened() ? 'Fermer le menu' : 'Ouvrir le menu'));
 
-  /** Nom affichable : prénom/nom si présents, sinon l'e-mail. */
-  readonly displayName = computed(() => {
-    const current = this.user();
-    if (!current) {
-      return '';
-    }
-    const fullName = [current.firstName, current.lastName].filter(Boolean).join(' ').trim();
-    return fullName || current.email || '';
-  });
+  /** Nom affichable : prénom/nom si présents, sinon la partie locale de l'e-mail. */
+  readonly displayName = computed(() => resolveDisplayName(this.user()));
 
   constructor() {
     // En mode overlay, refermer le sidenav à chaque navigation (item cliqué).

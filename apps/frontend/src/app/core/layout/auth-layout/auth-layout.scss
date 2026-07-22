@@ -11,12 +11,23 @@
   );
 }
 
+// Même pastille que la barre d'outils, en plus grand (écran d'authentification).
 .mp-auth__logo {
-  width: 32px;
-  height: 32px;
-  font-size: 32px;
-  line-height: 32px;
-  color: var(--mp-color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 24px;
+  line-height: 24px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--mp-color-primary), var(--mp-color-accent));
+}
+
+// `:host-context` obligatoire en encapsulation Emulated (cf. layout-shell.scss).
+:host-context(html[data-theme='dark']) .mp-auth__logo {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 14%);
 }
 
 .mp-auth__name {

@@ -42,12 +42,16 @@
   padding-top: var(--mp-space-4);
 }
 
+// Pastille d'icône teal-soft.
 .mp-stat__icon {
-  width: 28px;
-  height: 28px;
-  font-size: 28px;
-  line-height: 28px;
-  color: var(--mp-color-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-color-accent-soft);
+  color: var(--mp-color-primary-hover);
 }
 
 .mp-stat__value {
@@ -87,4 +91,29 @@
   font-size: 12px;
   line-height: 16px;
   color: var(--mp-color-text-disabled);
+}
+
+// Tendance : texte + icône (jamais couleur seule), vert sémantique par défaut.
+.mp-stat__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 3px 9px;
+  border-radius: var(--mp-radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mp-color-success);
+  background: var(--mp-color-success-soft);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &--down {
+    color: var(--mp-color-error);
+    background: color-mix(in srgb, var(--mp-color-error) 12%, transparent);
+  }
 }
