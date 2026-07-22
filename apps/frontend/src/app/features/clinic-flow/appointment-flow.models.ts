@@ -15,6 +15,7 @@ export interface AppointmentFlowItem {
   createdById: string;
   status: AppointmentStatus;
   reason: string | null;
+  cancellationReason: string | null;
   startAt?: string;
   endAt?: string;
   patientName?: string;

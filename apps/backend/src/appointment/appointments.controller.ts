@@ -7,6 +7,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from '../user/user-role.enum';
 import { AppointmentsService } from './appointments.service';
 import { AppointmentResponse } from './dto/appointment-response.dto';
+import { CancelAppointmentDto } from './dto/cancel-appointment.dto';
 import { CreateReceptionAppointmentDto } from './dto/create-reception-appointment.dto';
 import { UpdateAppointmentStatusDto } from './dto/update-appointment-status.dto';
 
@@ -40,5 +41,16 @@ export class AppointmentsController {
     @Body() dto: UpdateAppointmentStatusDto,
   ): Promise<AppointmentResponse> {
     return this.appointmentsService.updateStatus(user, id, dto);
+  }
+
+  @Patch(':id/cancel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLINIC_ADMIN, UserRole.SUPER_ADMIN)
+  cancel(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: CancelAppointmentDto,
+  ): Promise<AppointmentResponse> {
+    return this.appointmentsService.cancel(user, id, dto);
   }
 }

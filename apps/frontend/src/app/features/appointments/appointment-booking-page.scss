@@ -1,0 +1,57 @@
+.booking-header {
+  margin-bottom: 1.5rem;
+}
+
+.booking-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.booking-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.6));
+}
+
+.booking-card {
+  max-width: 720px;
+}
+
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.booking-form mat-form-field {
+  width: 100%;
+}
+
+.booking-section-title {
+  margin: 0.75rem 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.booking-patient__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1rem;
+}
+
+.booking-field--full {
+  grid-column: 1 / -1;
+}
+
+.booking-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .booking-patient__grid {
+    grid-template-columns: 1fr;
+  }
+}

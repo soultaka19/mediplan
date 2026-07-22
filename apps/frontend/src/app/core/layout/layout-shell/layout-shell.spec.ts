@@ -65,23 +65,11 @@ describe('LayoutShell', () => {
 
     expect(byTestId(root, 'shell-burger')).not.toBeNull();
     expect(root.textContent).toContain('MediPlan');
-    // 1 item actif (Tableau de bord) + 2 désactivés (Rendez-vous, Profil).
+    // 1 seul item actif (Tableau de bord) ; « Rendez-vous » est réservé aux
+    // admins, donc masqué au patient. Aucun item désactivé (« Profil » retiré
+    // tant que son écran n'existe pas).
     expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(1);
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
-  });
-
-  it('affiche les items désactivés avec la mention « bientôt » et non cliquables', () => {
-    const fixture = setup();
-    const root = fixture.nativeElement as HTMLElement;
-    const disabled = root.querySelectorAll('[data-testid="shell-nav-item-disabled"]');
-
-    expect(disabled.length).toBe(2);
-    disabled.forEach((item) => {
-      expect(item.getAttribute('aria-disabled')).toBe('true');
-      // Pas de routerLink → pas de href de navigation.
-      expect(item.getAttribute('href')).toBeNull();
-    });
-    expect(root.textContent).toContain('bientôt');
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it("le menu utilisateur affiche le nom et l'e-mail", () => {
@@ -115,8 +103,9 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).not.toContain('Utilisateurs');
-    // 1 actif + 2 désactivés (Rendez-vous, Profil) ; « Utilisateurs » masqué.
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
+    // Seul « Tableau de bord » est actif ; « Utilisateurs » et « Rendez-vous »
+    // (réservés admins) sont masqués au patient, et aucun item désactivé.
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it('masque l’item « Utilisateurs » pour un médecin', () => {
@@ -124,7 +113,10 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).not.toContain('Utilisateurs');
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
+    // Actifs : Tableau de bord + Disponibilités + Flux du jour = 3 ;
+    // « Rendez-vous » réservé aux admins ; aucun item désactivé.
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(3);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it('affiche l’item « Utilisateurs » pour un administrateur de clinique', () => {
@@ -132,10 +124,10 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('Utilisateurs');
-    // Liens actifs : Tableau de bord + Disponibilités + Flux du jour +
-    // Utilisateurs = 4 ; désactivés (« bientôt ») : RDV + Profil = 2.
-    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(4);
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
+    // Liens actifs : Tableau de bord + Disponibilités + Rendez-vous + Flux du
+    // jour + Utilisateurs = 5 ; aucun item désactivé.
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(5);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it('affiche l’item « Utilisateurs » pour un super administrateur', () => {
@@ -143,8 +135,8 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('Utilisateurs');
-    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(4);
-    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(2);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(5);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
   it('le burger bascule l’ouverture du sidenav', () => {

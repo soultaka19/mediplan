@@ -10,6 +10,7 @@ import { AddPasswordReset1781674897612 } from './migrations/1781674897612-AddPas
 import { AddSelfRegistrationFlag1781674897613 } from './migrations/1781674897613-AddSelfRegistrationFlag';
 import { CreateAvailability1781674897614 } from './migrations/1781674897614-CreateAvailability';
 import { AddAppointmentReceptionBooking1781674897615 } from './migrations/1781674897615-AddAppointmentReceptionBooking';
+import { AddSlotUniqueDoctorStart1781674897616 } from './migrations/1781674897616-AddSlotUniqueDoctorStart';
 
 /**
  * Construit les options TypeORM partagées entre :
@@ -54,6 +55,7 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
       AddSelfRegistrationFlag1781674897613,
       CreateAvailability1781674897614,
       AddAppointmentReceptionBooking1781674897615,
+      AddSlotUniqueDoctorStart1781674897616,
     ],
 
     namingStrategy: new SnakeNamingStrategy(),
