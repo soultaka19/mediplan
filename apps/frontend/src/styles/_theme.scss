@@ -13,20 +13,22 @@
 // pas `@use` un .css simple ; on garde donc les @font-face hors SCSS.
 
 :root {
-  // --- 1) Tokens primitifs (palette « Bleu clinique apaisant ») §1.1 ---------
-  --mp-blue-900: #0d47a1;
-  --mp-blue-700: #1565c0;
+  // --- 1) Tokens primitifs (palette « Bleu clinique » — Direction A) ---------
+  --mp-blue-900: #17518f; // primary-strong / hover
+  --mp-blue-700: #1e5fa8; // primary (6.6:1 sur blanc, AA)
   --mp-blue-50: #e8f0fb;
-  --mp-teal-600: #00897b;
-  --mp-teal-800: #00695c; // variante foncée (bouton teal si besoin, AA)
-  --mp-teal-50: #e0f2f0;
-  --mp-bg: #f7f9fc;
+  --mp-teal-600: #16a6a6; // teal VIF — décoratif uniquement en clair
+  --mp-teal-700: #0f766e; // teal SIGNIFIANT (5.4:1 sur blanc, AA)
+  --mp-teal-800: #00695c;
+  --mp-teal-50: #def3f3; // conteneur « soft »
+  --mp-bg: #f6f8fb;
   --mp-surface: #ffffff;
   --mp-ink-900: #1a2233;
   --mp-ink-600: #4a5568;
   --mp-ink-400: #6b7280;
-  --mp-line-200: #e2e8f0;
-  --mp-green-700: #2e7d32;
+  --mp-line-200: #e7ecf3;
+  --mp-green-700: #15803d;
+  --mp-green-50: #e6f4ec; // success « soft »
   --mp-amber-800: #b45309;
   --mp-red-700: #c62828;
 
@@ -35,7 +37,9 @@
   --mp-color-primary-hover: var(--mp-blue-900);
   --mp-color-primary-container: var(--mp-blue-50);
   --mp-color-on-primary: #ffffff;
-  --mp-color-accent: var(--mp-teal-600);
+  --mp-color-accent: var(--mp-teal-600); // teal décoratif (aplats/bg soft)
+  --mp-color-accent-ink: var(--mp-teal-700); // teal porteur de sens (clair, AA)
+  --mp-color-accent-soft: var(--mp-teal-50); // fond de pastille d'icône / rôle
   --mp-color-on-accent: #ffffff;
   --mp-color-background: var(--mp-bg);
   // Teinte primaire très basse (≤ 4 %) pour le dégradé de fond des écrans auth.
@@ -49,12 +53,13 @@
   --mp-color-border: var(--mp-line-200);
   --mp-color-focus-ring: var(--mp-blue-700);
   --mp-color-success: var(--mp-green-700);
+  --mp-color-success-soft: var(--mp-green-50); // fond de pastille tendance/statut
   --mp-color-warning: var(--mp-amber-800);
   --mp-color-error: var(--mp-red-700);
   --mp-color-info: var(--mp-blue-700);
 
   // --- 3) Typographie §1.3 ---------------------------------------------------
-  --mp-font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mp-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   // Famille de titrage : Inter auto-hébergée, repli Roboto garanti (§1.3 / §3.3).
   --mp-font-display-family: 'Inter', 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
   // Échelle de titrage révisée (contraste de poids + letter-spacing négatif léger).
@@ -120,8 +125,8 @@ html {
         tertiary: mat.$cyan-palette,
       ),
       typography: (
-        // Corps : Roboto. Titrage Material (« brand ») : Inter, repli Roboto (§1.3).
-        plain-family: 'Roboto, system-ui, sans-serif',
+        // Corps + titrage Material (« brand ») : Inter (§1.3).
+        plain-family: 'Inter, system-ui, sans-serif',
         brand-family: 'Inter, Roboto, system-ui, sans-serif',
       ),
       density: 0,
@@ -144,6 +149,17 @@ html {
   --mat-sys-outline: var(--mp-color-border); // bordures / outline form-field
   --mat-sys-outline-variant: var(--mp-color-border);
   --mat-sys-error: var(--mp-color-error); // validation invalide
+
+  // Variantes de surface : sans pont explicite, Material les dérive de SA palette
+  // par défaut (violette) et les cartes rendent rosées (#f6f2f7) au milieu d'une
+  // identité bleu clinique. `mat-card` consomme `surface-container-low`.
+  --mat-sys-surface-container-lowest: var(--mp-color-surface);
+  --mat-sys-surface-container-low: var(--mp-color-surface); // cartes
+  --mat-sys-surface-container-high: var(--mp-blue-50); // conteneurs surélevés
+  --mat-sys-surface-container-highest: var(--mp-line-200);
+  --mat-sys-surface-bright: var(--mp-color-surface);
+  --mat-sys-surface-dim: var(--mp-line-200);
+  --mat-sys-surface-variant: var(--mp-line-200);
 }
 
 // =============================================================================
@@ -160,7 +176,9 @@ html {
   --mp-color-primary-hover: #7db2ef;
   --mp-color-primary-container: #1e3149;
   --mp-color-on-primary: #0f1722;
-  --mp-color-accent: #3fc9b7;
+  --mp-color-accent: #3fc9b7; // teal vif — peut signifier en sombre (AA)
+  --mp-color-accent-ink: #5fded0; // teal signifiant sombre (clair sur navy)
+  --mp-color-accent-soft: #123b38; // conteneur teal sombre
   --mp-color-on-accent: #0f1722;
   --mp-color-background: #0f1722;
   --mp-color-surface: #172234;
@@ -171,6 +189,7 @@ html {
   --mp-color-border: #2a384f;
   --mp-color-focus-ring: #5b9be8;
   --mp-color-success: #5dd27a;
+  --mp-color-success-soft: #123320; // conteneur succès sombre
   --mp-color-warning: #e0a23c;
   --mp-color-error: #f0707a;
   --mp-color-info: #5b9be8;
@@ -189,7 +208,7 @@ html[data-theme='dark'] {
         tertiary: mat.$cyan-palette,
       ),
       typography: (
-        plain-family: 'Roboto, system-ui, sans-serif',
+        plain-family: 'Inter, system-ui, sans-serif',
         brand-family: 'Inter, Roboto, system-ui, sans-serif',
       ),
       density: 0,
@@ -208,6 +227,15 @@ html[data-theme='dark'] {
   --mat-sys-outline: var(--mp-color-border);
   --mat-sys-outline-variant: var(--mp-color-border);
   --mat-sys-error: var(--mp-color-error);
+
+  // Mêmes variantes de surface qu'en clair (cf. commentaire du pont `:root`).
+  --mat-sys-surface-container-lowest: var(--mp-color-background);
+  --mat-sys-surface-container-low: var(--mp-color-surface); // cartes
+  --mat-sys-surface-container-high: var(--mp-color-surface-variant);
+  --mat-sys-surface-container-highest: var(--mp-color-surface-variant);
+  --mat-sys-surface-bright: var(--mp-color-surface-variant);
+  --mat-sys-surface-dim: var(--mp-color-background);
+  --mat-sys-surface-variant: var(--mp-color-surface-variant);
 }
 
 // Transition douce de couleur lors de la bascule clair/sombre (sobre, ≤ 240ms).
@@ -221,5 +249,28 @@ html[data-theme='dark'] {
     transition:
       background-color var(--mp-motion-slow) var(--mp-ease-standard),
       color var(--mp-motion-slow) var(--mp-ease-standard);
+  }
+}
+
+// Numéraux tabulaires : chiffres de largeur fixe (KPI, heures, dates, compteurs).
+.mp-tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+// Focus visible homogène sur les éléments interactifs (Material masque le focus
+// derrière ses state-layers). Anneau ≥ 2px, ≥ 3:1 (§6.5).
+// `:is()` et non `:where()` : Material pose `.mdc-button { outline: none }` en
+// (0,1,0) ; `:where()` ramènerait la règle à (0,1,0) et, à égalité, la feuille
+// Material — chargée après — l'emporterait. `:is()` la porte à (0,2,0).
+:is(a, button, [tabindex], .mp-stat, .mp-quick__item):focus-visible {
+  outline: 3px solid var(--mp-color-accent-ink);
+  outline-offset: 2px;
+  border-radius: var(--mp-radius-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
   }
 }

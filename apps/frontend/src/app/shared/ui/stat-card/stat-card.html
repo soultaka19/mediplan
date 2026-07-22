@@ -6,13 +6,20 @@
          couleur du filet). -->
     <p class="mp-stat__value" role="group" [attr.aria-label]="value() + ' ' + label()">
       <span
-        class="mp-stat__number"
+        class="mp-stat__number mp-tnum"
         [class.mp-stat__number--placeholder]="isPlaceholder()"
         aria-hidden="true"
         >{{ value() }}</span
       >
       <span class="mp-stat__label" aria-hidden="true">{{ label() }}</span>
     </p>
+
+    @if (hasTrend()) {
+      <p class="mp-stat__trend" [class.mp-stat__trend--down]="!trendUp()">
+        <mat-icon aria-hidden="true">{{ trendUp() ? 'trending_up' : 'trending_down' }}</mat-icon>
+        <span class="mp-tnum">{{ trend() }}</span>
+      </p>
+    }
 
     @if (hint()) {
       <p class="mp-stat__hint">{{ hint() }}</p>

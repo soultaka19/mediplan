@@ -25,6 +25,8 @@
   --color-primary: var(--mp-color-primary);
   --color-primary-hover: var(--mp-color-primary-hover);
   --color-accent: var(--mp-color-accent);
+  --color-accent-ink: var(--mp-color-accent-ink);
+  --color-accent-soft: var(--mp-color-accent-soft);
   --color-surface: var(--mp-color-surface);
   --color-surface-variant: var(--mp-color-surface-variant);
   --color-background: var(--mp-color-background);
@@ -33,6 +35,7 @@
   --color-text-disabled: var(--mp-color-text-disabled);
   --color-border: var(--mp-color-border);
   --color-success: var(--mp-color-success);
+  --color-success-soft: var(--mp-color-success-soft);
   --color-warning: var(--mp-color-warning);
   --color-error: var(--mp-color-error);
   --color-info: var(--mp-color-info);

@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 
 import { AuthFacade } from '@core/auth';
 import { Avatar, EmptyState, RoleBadge, StatCard, roleLabel } from '@shared/ui';
+import { resolveDisplayName } from '@shared/user/display-name';
 
 /** Description d'une carte de statistique placeholder (par rôle). */
 interface StatSpec {
@@ -79,34 +80,15 @@ export class DashboardPage {
   /** Utilisateur connecté (signal en lecture seule). */
   readonly user = this.auth.currentUser;
 
-  /** Nom affichable : prénom/nom si présents, sinon l'e-mail. */
-  readonly displayName = computed(() => {
-    const current = this.user();
-    if (!current) {
-      return '';
-    }
-    const fullName = [current.firstName, current.lastName].filter(Boolean).join(' ').trim();
-    return fullName || current.email || '';
-  });
+  /** Nom affichable : prénom/nom si présents, sinon la partie locale de l'e-mail. */
+  readonly displayName = computed(() => resolveDisplayName(this.user()));
 
   /**
    * Nom de salutation pour le grand titre : prénom/nom si présents, sinon la
    * partie locale de l'e-mail (avant `@`). On ne déverse jamais un e-mail
    * complet dans le `<h1>` (cf. audit visuel — salutation « gracieuse »).
    */
-  readonly greetingName = computed(() => {
-    const current = this.user();
-    if (!current) {
-      return '';
-    }
-    const fullName = [current.firstName, current.lastName].filter(Boolean).join(' ').trim();
-    if (fullName) {
-      return fullName;
-    }
-    const email = current.email?.trim() ?? '';
-    const local = email.split('@')[0]?.trim();
-    return local || '';
-  });
+  readonly greetingName = computed(() => resolveDisplayName(this.user()));
 
   /** Salutation complète : « Bonjour, {nom} » ou « Bonjour 👋 » à défaut. */
   readonly greeting = computed(() => {

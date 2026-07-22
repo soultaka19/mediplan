@@ -35,3 +35,6 @@ Thumbs.db
 
 # Dossier personnel (brouillons, non versionné)
 creation-diagramme-cas-d'utilisation/
+
+# Companion visuel de brainstorming (local)
+.superpowers/
