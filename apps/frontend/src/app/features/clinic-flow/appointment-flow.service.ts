@@ -23,4 +23,12 @@ export class AppointmentFlowService {
       payload,
     );
   }
+
+  /** Annule un rendez-vous avec un motif obligatoire (libère le créneau). */
+  cancel(appointmentId: string, cancellationReason: string): Observable<AppointmentFlowItem> {
+    return this.http.patch<AppointmentFlowItem>(
+      `${this.apiUrl}/appointments/${appointmentId}/cancel`,
+      { cancellationReason },
+    );
+  }
 }
