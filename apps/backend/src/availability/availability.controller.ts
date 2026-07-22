@@ -45,6 +45,15 @@ export class AvailabilityController {
     return this.availabilityService.generateSlots(user, id);
   }
 
+  /**
+   * Matérialise et renvoie les créneaux réservables (avec `id` + `isBooked`).
+   * Prérequis à la prise de RDV par la réception (réservation par `slotId`).
+   */
+  @Post(':id/slots')
+  materializeSlots(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.availabilityService.materializeSlots(user, id);
+  }
+
   @Patch(':id')
   update(
     @CurrentUser() user: AuthenticatedUser,

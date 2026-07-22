@@ -14,6 +14,7 @@ const item: AppointmentFlowItem = {
   createdById: 'u1',
   status: 'booked',
   reason: null,
+  cancellationReason: null,
   startAt: '2026-07-05T13:00:00.000Z',
   endAt: '2026-07-05T13:30:00.000Z',
   createdAt: '2026-07-05T12:00:00.000Z',

@@ -100,6 +100,18 @@
               >
                 Absent
               </button>
+              @if (canCancel() && isCancellable(appointment.status)) {
+                <button
+                  matButton="outlined"
+                  type="button"
+                  class="flow-actions__cancel"
+                  [disabled]="updatingId() === appointment.id"
+                  (click)="cancel(appointment)"
+                  data-testid="flow-cancel"
+                >
+                  Annuler
+                </button>
+              }
             </div>
           </td>
         </ng-container>

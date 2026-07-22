@@ -1,16 +1,27 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 
-import { AuthFacade } from '@core/auth';
+import { AuthFacade, UserRole } from '@core/auth';
+import { AppointmentFlowService } from '@features/clinic-flow/appointment-flow.service';
 import { Avatar, EmptyState, RoleBadge, StatCard, roleLabel } from '@shared/ui';
 import { resolveDisplayName } from '@shared/user/display-name';
 
-/** Description d'une carte de statistique placeholder (par rôle). */
+/**
+ * Description d'une carte de statistique (par rôle).
+ *
+ * `value`/`hint` sont optionnels : une carte alimentée par une donnée réelle
+ * (ex. « RDV du jour ») les reçoit dynamiquement ; une carte encore sans source
+ * garde `hint: 'bientôt'` et la valeur placeholder « — ». `live` marque la carte
+ * branchée sur une vraie donnée.
+ */
 interface StatSpec {
   readonly icon: string;
   readonly label: string;
+  readonly value?: string;
+  readonly hint?: string;
+  readonly live?: 'today';
 }
 
 /**
@@ -23,19 +34,30 @@ interface QuickAction {
   readonly icon: string;
   readonly label: string;
   readonly route?: string;
+  /**
+   * Rôles autorisés à voir l'accès rapide (RBAC d'affichage, aligné sur la
+   * sidenav). Absent = visible par tous. Le masquage est purement UX :
+   * l'autorisation réelle reste assurée par le `roleGuard` de la route.
+   */
+  readonly roles?: readonly UserRole[];
 }
 
-/** KPI placeholder du patient. */
+/** KPI du patient (encore sans source de données → placeholder « bientôt »). */
 const PATIENT_STATS: readonly StatSpec[] = [
-  { icon: 'event_upcoming', label: 'Rendez-vous à venir' },
-  { icon: 'event_available', label: 'Rendez-vous passés' },
+  { icon: 'event_upcoming', label: 'Rendez-vous à venir', hint: 'bientôt' },
+  { icon: 'event_available', label: 'Rendez-vous passés', hint: 'bientôt' },
 ];
 
-/** KPI placeholder de l'administration (clinique / super admin). */
+/**
+ * KPI de l'administration (clinique / super admin) et du médecin.
+ *
+ * « RDV du jour » est alimenté en direct par `GET /appointments/today`. Les deux
+ * autres restent en placeholder tant qu'aucun endpoint ne les fournit.
+ */
 const ADMIN_STATS: readonly StatSpec[] = [
-  { icon: 'today', label: 'RDV du jour' },
-  { icon: 'stethoscope', label: 'Médecins actifs' },
-  { icon: 'donut_large', label: 'Taux de remplissage' },
+  { icon: 'today', label: 'RDV du jour', live: 'today' },
+  { icon: 'stethoscope', label: 'Médecins actifs', hint: 'bientôt' },
+  { icon: 'donut_large', label: 'Taux de remplissage', hint: 'bientôt' },
 ];
 
 /** Accès rapides du patient. */
@@ -45,10 +67,11 @@ const PATIENT_ACTIONS: readonly QuickAction[] = [
   { icon: 'person', label: 'Mon profil' },
 ];
 
-/** Accès rapides de l'administration. */
+/** Accès rapides de l'administration et du médecin. */
 const ADMIN_ACTIONS: readonly QuickAction[] = [
-  // L'écran de gestion des utilisateurs existe (/admin/users) → lien actif.
-  { icon: 'group', label: 'Utilisateurs', route: '/admin/users' },
+  // « Utilisateurs » (/admin/users) est réservé aux admins : masqué au médecin
+  // (comme la sidenav), même si le roleGuard bloque déjà l'accès à la route.
+  { icon: 'group', label: 'Utilisateurs', route: '/admin/users', roles: ['clinic_admin', 'super_admin'] },
   { icon: 'medical_services', label: 'Médecins' },
   { icon: 'event_note', label: 'Disponibilités', route: '/availabilities' },
 ];
@@ -62,10 +85,10 @@ const ADMIN_ACTIONS: readonly QuickAction[] = [
  * accès rapides (liens actifs si l'écran existe, sinon « bientôt »), et carte
  * « Mon compte » secondaire.
  *
- * ⚠️ UI pure : le backend RDV/stats n'existe pas encore. Aucune donnée n'est
- * inventée — les valeurs de KPI restent « — ». Seuls les accès rapides dont
- * l'écran est déjà livré (ex. « Utilisateurs » → /admin/users) sont actifs.
- * Aucun appel HTTP : tout passe par la façade.
+ * Le KPI « RDV du jour » est réel (`GET /appointments/today`, comptage) pour la
+ * réception et le médecin ; les autres KPI restent des placeholders tant qu'un
+ * endpoint ne les fournit pas. Seuls les accès rapides dont l'écran est déjà
+ * livré (ex. « Utilisateurs » → /admin/users) sont actifs.
  */
 @Component({
   selector: 'app-dashboard-page',
@@ -76,9 +99,29 @@ const ADMIN_ACTIONS: readonly QuickAction[] = [
 })
 export class DashboardPage {
   private readonly auth = inject(AuthFacade);
+  private readonly appointmentFlow = inject(AppointmentFlowService);
 
   /** Utilisateur connecté (signal en lecture seule). */
   readonly user = this.auth.currentUser;
+
+  /**
+   * Nombre de RDV du jour (`null` tant que non chargé ou indisponible → le KPI
+   * reste alors un placeholder « — »).
+   */
+  private readonly todayCount = signal<number | null>(null);
+
+  constructor() {
+    // KPI « RDV du jour » réel pour la réception/médecin (le patient n'a pas
+    // accès à la file du jour). Résilient : en cas d'erreur, on garde le
+    // placeholder plutôt que d'inventer une valeur.
+    const role = this.user()?.role;
+    if (role && role !== 'patient') {
+      this.appointmentFlow.listToday().subscribe({
+        next: (items) => this.todayCount.set(items.length),
+        error: () => this.todayCount.set(null),
+      });
+    }
+  }
 
   /** Nom affichable : prénom/nom si présents, sinon la partie locale de l'e-mail. */
   readonly displayName = computed(() => resolveDisplayName(this.user()));
@@ -109,13 +152,29 @@ export class DashboardPage {
       : 'Voici un aperçu de l’activité de votre clinique.',
   );
 
-  /** KPI placeholder visibles selon le rôle. */
-  readonly stats = computed<readonly StatSpec[]>(() =>
-    this.isPatient() ? PATIENT_STATS : ADMIN_STATS,
-  );
+  /**
+   * KPI visibles selon le rôle. La carte `live: 'today'` reçoit le comptage réel
+   * des RDV du jour dès qu'il est chargé ; sinon elle reste en placeholder.
+   */
+  readonly stats = computed<readonly StatSpec[]>(() => {
+    const base = this.isPatient() ? PATIENT_STATS : ADMIN_STATS;
+    const count = this.todayCount();
+    if (count === null) {
+      return base;
+    }
+    return base.map((stat) =>
+      stat.live === 'today' ? { ...stat, value: String(count), hint: '' } : stat,
+    );
+  });
 
-  /** Accès rapides selon le rôle (lien actif si `route`, sinon « bientôt »). */
-  readonly quickActions = computed<readonly QuickAction[]>(() =>
-    this.isPatient() ? PATIENT_ACTIONS : ADMIN_ACTIONS,
-  );
+  /**
+   * Accès rapides selon le rôle (lien actif si `route`, sinon « bientôt »),
+   * filtrés par RBAC d'affichage comme la sidenav : un accès restreint
+   * (ex. « Utilisateurs ») n'apparaît que pour les rôles autorisés.
+   */
+  readonly quickActions = computed<readonly QuickAction[]>(() => {
+    const base = this.isPatient() ? PATIENT_ACTIONS : ADMIN_ACTIONS;
+    const role = this.user()?.role ?? null;
+    return base.filter((action) => !action.roles || (role !== null && action.roles.includes(role)));
+  });
 }

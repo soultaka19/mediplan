@@ -13,12 +13,19 @@ import { UsersService } from '../user/users.service';
 import { AppointmentSlot } from './appointment-slot.entity';
 import { AppointmentStatus } from './appointment-status.enum';
 import { Appointment } from './appointment.entity';
+import { CancelAppointmentDto } from './dto/cancel-appointment.dto';
 import { CreateReceptionAppointmentDto } from './dto/create-reception-appointment.dto';
 import { AppointmentResponse, toAppointmentResponse } from './dto/appointment-response.dto';
 import {
   FLOW_APPOINTMENT_STATUSES,
   UpdateAppointmentStatusDto,
 } from './dto/update-appointment-status.dto';
+
+/** Statuts depuis lesquels un rendez-vous peut encore être annulé. */
+const CANCELLABLE_STATUSES: readonly AppointmentStatus[] = [
+  AppointmentStatus.BOOKED,
+  AppointmentStatus.ARRIVED,
+];
 
 @Injectable()
 export class AppointmentsService {
@@ -63,11 +70,7 @@ export class AppointmentsService {
     dto: UpdateAppointmentStatusDto,
   ): Promise<AppointmentResponse> {
     return this.dataSource.transaction(async (manager) => {
-      const appointment = await manager.findOne(Appointment, {
-        where: { id: appointmentId },
-        relations: { slot: true, patient: true, doctor: true },
-        lock: { mode: 'pessimistic_write' },
-      });
+      const appointment = await this.lockAppointmentRow(manager, appointmentId);
 
       if (!appointment) {
         throw new NotFoundException('Rendez-vous introuvable.');
@@ -83,9 +86,77 @@ export class AppointmentsService {
       }
 
       appointment.status = dto.status;
-      const saved = await manager.save(Appointment, appointment);
-      return toAppointmentResponse(saved);
+      await manager.save(Appointment, appointment);
+      return this.buildResponse(manager, appointment);
     });
+  }
+
+  /**
+   * Annule un rendez-vous (motif obligatoire) et **libère le créneau**.
+   *
+   * Réservé à la réception (garde `@Roles` côté contrôleur). Le créneau redevient
+   * réservable (`isBooked = false`) et, l'annulation étant hors de l'index unique
+   * partiel `WHERE status <> 'cancelled'`, il peut être re-réservé.
+   */
+  async cancel(
+    currentUser: AuthenticatedUser,
+    appointmentId: string,
+    dto: CancelAppointmentDto,
+  ): Promise<AppointmentResponse> {
+    return this.dataSource.transaction(async (manager) => {
+      const appointment = await this.lockAppointmentRow(manager, appointmentId);
+
+      if (!appointment) {
+        throw new NotFoundException('Rendez-vous introuvable.');
+      }
+      this.assertCanFollowAppointment(currentUser, appointment);
+
+      if (!CANCELLABLE_STATUSES.includes(appointment.status)) {
+        throw new BadRequestException('Ce rendez-vous ne peut plus être annulé.');
+      }
+
+      appointment.status = AppointmentStatus.CANCELLED;
+      appointment.cancellationReason = dto.cancellationReason.trim();
+      await manager.save(Appointment, appointment);
+
+      // Libère le créneau (verrou sur la ligne créneau seule) : redevient réservable.
+      const slot = await manager.findOne(AppointmentSlot, {
+        where: { id: appointment.slotId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (slot) {
+        slot.isBooked = false;
+        await manager.save(AppointmentSlot, slot);
+      }
+
+      return this.buildResponse(manager, appointment);
+    });
+  }
+
+  /**
+   * Verrouille la SEULE ligne du rendez-vous (`FOR UPDATE`).
+   *
+   * On ne charge aucune relation ici : `FOR UPDATE` est interdit sur le côté
+   * nullable d'une jointure externe (patient/médecin/créneau sont des jointures
+   * LEFT). Les relations sont rechargées après coup pour construire la réponse.
+   */
+  private lockAppointmentRow(manager: EntityManager, id: string): Promise<Appointment | null> {
+    return manager.findOne(Appointment, {
+      where: { id },
+      lock: { mode: 'pessimistic_write' },
+    });
+  }
+
+  /** Recharge le rendez-vous avec ses relations (sans verrou) pour la réponse. */
+  private async buildResponse(
+    manager: EntityManager,
+    appointment: Appointment,
+  ): Promise<AppointmentResponse> {
+    const full = await manager.findOne(Appointment, {
+      where: { id: appointment.id },
+      relations: { slot: true, patient: true, doctor: true },
+    });
+    return toAppointmentResponse(full ?? appointment);
   }
 
   async createByReception(

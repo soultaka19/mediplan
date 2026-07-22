@@ -10,6 +10,7 @@ export interface AppointmentResponse {
   createdById: string;
   status: AppointmentStatus;
   reason: string | null;
+  cancellationReason: string | null;
   startAt?: Date;
   endAt?: Date;
   patientName?: string;
@@ -27,6 +28,7 @@ export function toAppointmentResponse(appointment: Appointment): AppointmentResp
     createdById: appointment.createdById,
     status: appointment.status,
     reason: appointment.reason,
+    cancellationReason: appointment.cancellationReason,
     startAt: appointment.slot?.startAt,
     endAt: appointment.slot?.endAt,
     patientName: displayUserName(appointment.patient),
