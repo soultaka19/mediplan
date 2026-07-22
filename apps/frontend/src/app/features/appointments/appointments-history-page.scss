@@ -1,0 +1,143 @@
+:host {
+  display: block;
+}
+
+.history-page {
+  display: grid;
+  gap: var(--mp-space-5);
+}
+
+.history-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+}
+
+.history-page__title {
+  margin: 0;
+  font-family: var(--mp-font-display-family);
+  font-size: var(--mp-font-title-size);
+  line-height: var(--mp-font-title-line);
+  font-weight: var(--mp-font-title-weight);
+  color: var(--mp-color-text);
+}
+
+.history-page__subtitle {
+  margin: var(--mp-space-2) 0 0;
+  color: var(--mp-color-text-secondary);
+}
+
+.history-skeleton {
+  display: grid;
+  gap: var(--mp-space-3);
+}
+
+.history-toolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.history-search {
+  width: min(460px, 100%);
+}
+
+.history-search mat-icon[matPrefix] {
+  margin-inline: var(--mp-space-2) var(--mp-space-1);
+  color: var(--mp-color-text-secondary);
+}
+
+.history-table__wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-surface);
+}
+
+.history-table {
+  width: 100%;
+  min-width: 820px;
+  background: transparent;
+}
+
+.history-table th.mat-mdc-header-cell {
+  background: var(--mp-color-surface-variant);
+  color: var(--mp-color-text);
+  font-weight: 600;
+}
+
+.history-table th.mat-mdc-header-cell,
+.history-table td.mat-mdc-cell {
+  color: var(--mp-color-text);
+  border-bottom-color: var(--mp-color-border);
+  padding-block: var(--mp-space-3);
+}
+
+.history-when {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-when__date {
+  font-weight: 600;
+}
+
+.history-when__time {
+  color: var(--mp-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.history-reason {
+  max-width: 26ch;
+  color: var(--mp-color-text-secondary);
+}
+
+// Pastille de statut : texte + fond tonal (jamais la couleur seule).
+.history-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 var(--mp-space-3);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.history-status[data-status='booked'] {
+  background: color-mix(in srgb, var(--mp-color-info) 12%, var(--mp-color-surface));
+}
+
+.history-status[data-status='arrived'] {
+  background: color-mix(in srgb, var(--mp-color-info) 12%, var(--mp-color-surface));
+}
+
+.history-status[data-status='in_consultation'] {
+  background: var(--mp-color-primary-container);
+}
+
+.history-status[data-status='completed'] {
+  background: color-mix(in srgb, var(--mp-color-success) 14%, var(--mp-color-surface));
+}
+
+.history-status[data-status='absent'] {
+  background: color-mix(in srgb, var(--mp-color-warning) 14%, var(--mp-color-surface));
+}
+
+.history-status[data-status='cancelled'] {
+  background: color-mix(in srgb, var(--mp-color-error) 12%, var(--mp-color-surface));
+  color: var(--mp-color-error);
+}
+
+mat-paginator {
+  background: transparent;
+}
+
+@media (max-width: 720px) {
+  .history-page__header {
+    flex-direction: column;
+  }
+}

@@ -1,13 +1,31 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { AuthFacade } from '@core/auth';
 import { authErrorMessage } from '@shared/http/http-error-message';
-import { Alert, EmptyState, NotificationService, Skeleton } from '@shared/ui';
+import {
+  ConfirmDialog,
+  ConfirmDialogData,
+  EmptyState,
+  ErrorState,
+  NotificationService,
+  Skeleton,
+} from '@shared/ui';
 import {
   AppointmentFlowItem,
   AppointmentStatus,
@@ -19,10 +37,43 @@ import { CancelAppointmentDialog, CancelDialogData } from './cancel-appointment-
 /** Statuts depuis lesquels un rendez-vous peut encore être annulé. */
 const CANCELLABLE_STATUSES: readonly AppointmentStatus[] = ['booked', 'arrived'];
 
+/** Action de changement de statut proposée dans le menu « Actions ». */
+interface FlowAction {
+  status: UpdateAppointmentStatusPayload['status'];
+  label: string;
+  icon: string;
+}
+
+/** Catalogue des transitions possibles (filtré par ligne selon le statut courant). */
+const FLOW_ACTIONS: readonly FlowAction[] = [
+  { status: 'arrived', label: 'Arrivé', icon: 'login' },
+  { status: 'in_consultation', label: 'En consultation', icon: 'stethoscope' },
+  { status: 'completed', label: 'Terminé', icon: 'task_alt' },
+  { status: 'absent', label: 'Absent', icon: 'person_off' },
+];
+
+/**
+ * Statuts « terminaux » (irréversibles) : on demande une confirmation explicite
+ * avant de les appliquer. Les étapes intermédiaires (Arrivé, En consultation)
+ * s'appliquent directement pour ne pas alourdir le geste courant.
+ */
+const CONFIRM_STATUSES: readonly AppointmentStatus[] = ['completed', 'absent'];
+
 @Component({
   selector: 'app-clinic-flow-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, MatButtonModule, MatIconModule, MatTableModule, Alert, EmptyState, Skeleton],
+  imports: [
+    DatePipe,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatPaginatorModule,
+    MatTableModule,
+    EmptyState,
+    ErrorState,
+    Skeleton,
+  ],
   templateUrl: './clinic-flow-page.html',
   styleUrl: './clinic-flow-page.scss',
 })
@@ -36,6 +87,14 @@ export class ClinicFlowPage {
   readonly updatingId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly appointments = signal<readonly AppointmentFlowItem[]>([]);
+  /** Terme de recherche courant (pour le message « aucun résultat »). */
+  readonly searchTerm = signal('');
+  /** Nombre de lignes après filtre (0 = aucun résultat pour la recherche). */
+  readonly filteredCount = signal(0);
+
+  /** Source de données Material : pilote filtre + pagination sur la table. */
+  readonly dataSource = new MatTableDataSource<AppointmentFlowItem>([]);
+  private readonly paginator = viewChild(MatPaginator);
 
   /** L'annulation est une action de réception (clinic_admin/super_admin). */
   readonly canCancel = computed(() => {
@@ -51,6 +110,23 @@ export class ClinicFlowPage {
   protected readonly skeletonRows = Array.from({ length: 5 });
 
   constructor() {
+    // Filtre sur patient + médecin + libellé de statut (recherche « humaine »).
+    this.dataSource.filterPredicate = (item, filter) => {
+      const haystack = [
+        this.patientLabel(item),
+        this.doctorLabel(item),
+        this.statusLabel(item.status),
+      ]
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+
+    // Branche la pagination dès que le composant paginator apparaît (état succès).
+    effect(() => {
+      this.dataSource.paginator = this.paginator() ?? null;
+    });
+
     this.load();
   }
 
@@ -61,6 +137,8 @@ export class ClinicFlowPage {
     this.flowService.listToday().subscribe({
       next: (appointments) => {
         this.appointments.set(appointments);
+        this.dataSource.data = [...appointments];
+        this.applyFilter(this.searchTerm());
         this.loading.set(false);
       },
       error: (err: unknown) => {
@@ -70,20 +148,73 @@ export class ClinicFlowPage {
     });
   }
 
+  /** Applique le filtre de recherche et met à jour le compteur de résultats. */
+  applyFilter(value: string): void {
+    this.searchTerm.set(value);
+    this.dataSource.filter = value.trim().toLowerCase();
+    this.filteredCount.set(this.dataSource.filteredData.length);
+    this.dataSource.paginator?.firstPage();
+  }
+
+  /** Actions de statut valides pour ce rendez-vous (menu contextuel). */
+  protected availableActions(appointment: AppointmentFlowItem): FlowAction[] {
+    return FLOW_ACTIONS.filter((action) => this.canSetStatus(appointment.status, action.status));
+  }
+
+  /** Vrai s'il existe au moins une action (statut ou annulation) pour la ligne. */
+  protected hasActions(appointment: AppointmentFlowItem): boolean {
+    return (
+      this.availableActions(appointment).length > 0 ||
+      (this.canCancel() && this.isCancellable(appointment.status))
+    );
+  }
+
   updateStatus(
     appointment: AppointmentFlowItem,
     status: UpdateAppointmentStatusPayload['status'],
   ): void {
-    if (!this.canSetStatus(appointment.status, status)) {
+    if (!this.canSetStatus(appointment.status, status) || this.updatingId() === appointment.id) {
       return;
     }
 
+    // Étapes intermédiaires : appliquées directement. Statuts terminaux
+    // (Terminé / Absent) : confirmation explicite au préalable.
+    if (!CONFIRM_STATUSES.includes(status)) {
+      this.applyStatus(appointment, status);
+      return;
+    }
+
+    const label = FLOW_ACTIONS.find((action) => action.status === status)?.label ?? '';
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: 'Confirmer l’action',
+          message: `Marquer le rendez-vous de ${this.patientLabel(appointment)} comme « ${label} » ?`,
+          confirmLabel: label,
+          icon: status === 'absent' ? 'person_off' : 'task_alt',
+          danger: status === 'absent',
+        } satisfies ConfirmDialogData,
+      })
+      .afterClosed()
+      .subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          this.applyStatus(appointment, status);
+        }
+      });
+  }
+
+  private applyStatus(
+    appointment: AppointmentFlowItem,
+    status: UpdateAppointmentStatusPayload['status'],
+  ): void {
     this.updatingId.set(appointment.id);
     this.flowService.updateStatus(appointment.id, { status }).subscribe({
       next: (updated) => {
         this.appointments.update((items) =>
           items.map((item) => (item.id === updated.id ? updated : item)),
         );
+        this.dataSource.data = [...this.appointments()];
+        this.applyFilter(this.searchTerm());
         this.updatingId.set(null);
         this.notifications.success('Statut du rendez-vous mis a jour.');
       },
@@ -113,7 +244,10 @@ export class ClinicFlowPage {
         this.flowService.cancel(appointment.id, reason).subscribe({
           next: () => {
             this.updatingId.set(null);
-            this.notifications.success('Rendez-vous annulé.');
+            this.notifications.successDialog(
+              'Rendez-vous annulé',
+              `Le rendez-vous de ${this.patientLabel(appointment)} a été annulé. Le créneau est de nouveau disponible.`,
+            );
             this.load();
           },
           error: (err: unknown) => {

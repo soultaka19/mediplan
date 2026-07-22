@@ -21,6 +21,21 @@
 
   <span class="grow"></span>
 
+  <!-- Raccourci de prise de rendez-vous (réservé aux administrateurs) -->
+  @if (canBookAppointment()) {
+    <button
+      matButton="filled"
+      type="button"
+      class="mp-toolbar__cta"
+      (click)="openBooking()"
+      aria-label="Nouveau rendez-vous"
+      data-testid="shell-add-appointment"
+    >
+      <mat-icon>add</mat-icon>
+      <span class="mp-toolbar__cta-label">Nouveau rendez-vous</span>
+    </button>
+  }
+
   <!-- Bascule de thème clair/sombre -->
   <button
     matIconButton

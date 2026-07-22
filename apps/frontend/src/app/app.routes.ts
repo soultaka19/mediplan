@@ -83,11 +83,11 @@ export const routes: Routes = [
           import('@features/clinic-flow/clinic-flow-page').then((m) => m.ClinicFlowPage),
       },
       {
-        path: 'appointments/new',
+        path: 'appointments',
         canActivate: [roleGuard('clinic_admin', 'super_admin')],
         loadComponent: () =>
-          import('@features/appointments/appointment-booking-page').then(
-            (m) => m.AppointmentBookingPage,
+          import('@features/appointments/appointments-history-page').then(
+            (m) => m.AppointmentsHistoryPage,
           ),
       },
       {

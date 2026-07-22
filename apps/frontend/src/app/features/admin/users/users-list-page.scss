@@ -29,6 +29,28 @@
   gap: var(--mp-space-2);
 }
 
+// --- Barre d'outils (recherche) ----------------------------------------------
+.users-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: var(--mp-space-3);
+}
+
+.users-search {
+  width: min(420px, 100%);
+}
+
+.users-search mat-icon[matPrefix] {
+  margin-inline: var(--mp-space-2) var(--mp-space-1);
+  color: var(--mp-color-text-secondary);
+}
+
+// --- Pagination --------------------------------------------------------------
+mat-paginator {
+  background: transparent;
+  margin-top: var(--mp-space-2);
+}
+
 // --- Tableau -----------------------------------------------------------------
 // Conteneur : surface tonale + bord + rayon, débordement horizontal géré sur
 // les petits écrans (cf. design-system §3.2 surfaces tonales).

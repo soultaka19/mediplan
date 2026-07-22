@@ -32,6 +32,13 @@ export class AppointmentsController {
     return this.appointmentsService.findToday(user);
   }
 
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DOCTOR, UserRole.CLINIC_ADMIN, UserRole.SUPER_ADMIN)
+  findAll(@CurrentUser() user: AuthenticatedUser): Promise<AppointmentResponse[]> {
+    return this.appointmentsService.findAll(user);
+  }
+
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.DOCTOR, UserRole.CLINIC_ADMIN, UserRole.SUPER_ADMIN)

@@ -15,7 +15,22 @@
   }
 
   <mat-card-content>
-    <form [formGroup]="form" (ngSubmit)="submit()" class="booking-form">
+    @if (loadError(); as message) {
+      <app-error-state
+        [message]="message"
+        title="Impossible de charger le formulaire"
+        (retry)="load()"
+        data-testid="booking-load-error"
+      />
+    } @else if (noDoctors()) {
+      <app-empty-state
+        icon="stethoscope"
+        title="Aucun médecin disponible"
+        description="Ajoutez d'abord un médecin et ses disponibilités pour pouvoir réserver un rendez-vous."
+        data-testid="booking-empty"
+      />
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()" class="booking-form">
       <!-- Médecin -->
       <mat-form-field appearance="outline">
         <mat-label>Médecin</mat-label>
@@ -115,6 +130,7 @@
           Réserver
         </button>
       </div>
-    </form>
+      </form>
+    }
   </mat-card-content>
 </mat-card>

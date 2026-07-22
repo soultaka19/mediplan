@@ -1,41 +1,38 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
-import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import { PublicUser } from '@core/auth';
 import { UserService } from '@features/admin/users/user.service';
-import {
-  Availability,
-  MaterializedSlot,
-} from '@features/availabilities/availability.models';
+import { Availability, MaterializedSlot } from '@features/availabilities/availability.models';
 import { AvailabilityService } from '@features/availabilities/availability.service';
 import { authErrorMessage } from '@shared/http/http-error-message';
 import { Alert, EmptyState, ErrorState, NotificationService } from '@shared/ui';
 import { AppointmentBookingService } from './appointment-booking.service';
 
 /**
- * Prise de rendez-vous par la réception (écran réservé `clinic_admin`/`super_admin`).
+ * Dialogue de prise de rendez-vous par la réception.
  *
- * Parcours : choisir un médecin → une de ses disponibilités → un créneau libre
- * (matérialisé à la volée) → renseigner un patient léger (créé au comptoir) →
- * réserver. En cas de succès, on redirige vers le flux du jour.
+ * Même parcours que l'écran dédié — médecin → disponibilité → créneau libre →
+ * patient léger → motif — mais dans une modale, ouverte depuis l'historique des
+ * rendez-vous. En cas de succès, affiche un popup de confirmation puis se ferme
+ * en renvoyant `true` (l'appelant recharge la liste).
  */
 @Component({
-  selector: 'app-appointment-booking-page',
+  selector: 'app-book-appointment-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    MatDialogModule,
     MatButtonModule,
-    MatCardModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -45,43 +42,38 @@ import { AppointmentBookingService } from './appointment-booking.service';
     EmptyState,
     ErrorState,
   ],
-  templateUrl: './appointment-booking-page.html',
-  styleUrl: './appointment-booking-page.scss',
+  templateUrl: './book-appointment-dialog.html',
+  styleUrl: './book-appointment-dialog.scss',
 })
-export class AppointmentBookingPage {
+export class BookAppointmentDialog {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly availabilityService = inject(AvailabilityService);
   private readonly userService = inject(UserService);
   private readonly bookingService = inject(AppointmentBookingService);
   private readonly notifications = inject(NotificationService);
-  private readonly router = inject(Router);
+  private readonly dialogRef = inject(MatDialogRef<BookAppointmentDialog, boolean>);
 
   readonly loading = signal(true);
   readonly loadingSlots = signal(false);
   readonly saving = signal(false);
-  /** Erreur inline du formulaire (soumission de la réservation). */
   readonly error = signal<string | null>(null);
-  /** Erreur de chargement des données du formulaire (médecins/disponibilités). */
   readonly loadError = signal<string | null>(null);
   readonly doctors = signal<readonly PublicUser[]>([]);
   readonly availabilities = signal<readonly Availability[]>([]);
   readonly slots = signal<readonly MaterializedSlot[]>([]);
 
-  /** Vrai quand le chargement a réussi mais aucun médecin n'est disponible. */
+  private readonly selectedDoctorId = signal<string | null>(null);
+
   readonly noDoctors = computed(
     () => !this.loading() && this.loadError() === null && this.doctors().length === 0,
   );
 
-  private readonly selectedDoctorId = signal<string | null>(null);
-
-  /** Disponibilités « available » du médecin sélectionné. */
   readonly doctorAvailabilities = computed(() =>
     this.availabilities().filter(
       (a) => a.doctorId === this.selectedDoctorId() && a.type === 'available',
     ),
   );
 
-  /** Créneaux libres (non réservés) de la disponibilité choisie. */
   readonly freeSlots = computed(() => this.slots().filter((s) => !s.isBooked));
 
   readonly form = this.fb.group({
@@ -116,14 +108,12 @@ export class AppointmentBookingPage {
       });
   }
 
-  /** Changement de médecin : réinitialise dispo/créneau et vide la liste. */
   onDoctorChange(doctorId: string): void {
     this.selectedDoctorId.set(doctorId || null);
     this.form.patchValue({ availabilityId: '', slotId: '' });
     this.slots.set([]);
   }
 
-  /** Changement de disponibilité : matérialise et charge les créneaux libres. */
   onAvailabilityChange(availabilityId: string): void {
     this.form.patchValue({ slotId: '' });
     this.slots.set([]);
@@ -172,14 +162,20 @@ export class AppointmentBookingPage {
           const when = slot
             ? `${new Intl.DateTimeFormat('fr-CA', { dateStyle: 'long' }).format(new Date(slot.startAt))} à ${new Intl.DateTimeFormat('fr-CA', { timeStyle: 'short' }).format(new Date(slot.startAt))}`
             : '';
-          const message = `${patient} — avec ${doctorName}${when ? `, le ${when}` : ''}.`;
           this.notifications
-            .successDialog('Rendez-vous réservé', message)
+            .successDialog(
+              'Rendez-vous réservé',
+              `${patient} — avec ${doctorName}${when ? `, le ${when}` : ''}.`,
+            )
             .afterClosed()
-            .subscribe(() => void this.router.navigate(['/clinic-flow/today']));
+            .subscribe(() => this.dialogRef.close(true));
         },
         error: (err: unknown) => this.error.set(authErrorMessage(err)),
       });
+  }
+
+  cancel(): void {
+    this.dialogRef.close(false);
   }
 
   protected doctorLabel(doctor: PublicUser): string {

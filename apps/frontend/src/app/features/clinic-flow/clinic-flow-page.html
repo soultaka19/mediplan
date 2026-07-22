@@ -17,8 +17,13 @@
         <app-skeleton height="52px" />
       }
     </div>
-  } @else if (error()) {
-    <app-alert variant="error" [message]="error()!" data-testid="flow-error" />
+  } @else if (error(); as message) {
+    <app-error-state
+      [message]="message"
+      title="Impossible de charger le flux du jour"
+      (retry)="load()"
+      data-testid="flow-error"
+    />
   } @else if (isEmpty()) {
     <app-empty-state
       icon="event_busy"
@@ -27,98 +32,116 @@
       data-testid="flow-empty"
     />
   } @else {
-    <div class="flow-table__wrapper">
-      <table mat-table [dataSource]="appointments()" class="flow-table" data-testid="flow-table">
-        <ng-container matColumnDef="time">
-          <th mat-header-cell *matHeaderCellDef scope="col">Heure</th>
-          <td mat-cell *matCellDef="let appointment">
-            {{ appointment.startAt | date: 'HH:mm' }} - {{ appointment.endAt | date: 'HH:mm' }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="patient">
-          <th mat-header-cell *matHeaderCellDef scope="col">Patient</th>
-          <td mat-cell *matCellDef="let appointment">{{ patientLabel(appointment) }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="doctor">
-          <th mat-header-cell *matHeaderCellDef scope="col">Medecin</th>
-          <td mat-cell *matCellDef="let appointment">{{ doctorLabel(appointment) }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef scope="col">Statut</th>
-          <td mat-cell *matCellDef="let appointment">
-            <span class="flow-status" [attr.data-status]="appointment.status">
-              {{ statusLabel(appointment.status) }}
-            </span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
-          <td mat-cell *matCellDef="let appointment">
-            <div class="flow-actions">
-              <button
-                matButton="outlined"
-                type="button"
-                [disabled]="
-                  !canSetStatus(appointment.status, 'arrived') || updatingId() === appointment.id
-                "
-                (click)="updateStatus(appointment, 'arrived')"
-              >
-                Arrive
-              </button>
-              <button
-                matButton="outlined"
-                type="button"
-                [disabled]="
-                  !canSetStatus(appointment.status, 'in_consultation') ||
-                  updatingId() === appointment.id
-                "
-                (click)="updateStatus(appointment, 'in_consultation')"
-              >
-                Consultation
-              </button>
-              <button
-                matButton="outlined"
-                type="button"
-                [disabled]="
-                  !canSetStatus(appointment.status, 'completed') || updatingId() === appointment.id
-                "
-                (click)="updateStatus(appointment, 'completed')"
-              >
-                Termine
-              </button>
-              <button
-                matButton="outlined"
-                type="button"
-                [disabled]="
-                  !canSetStatus(appointment.status, 'absent') || updatingId() === appointment.id
-                "
-                (click)="updateStatus(appointment, 'absent')"
-              >
-                Absent
-              </button>
-              @if (canCancel() && isCancellable(appointment.status)) {
-                <button
-                  matButton="outlined"
-                  type="button"
-                  class="flow-actions__cancel"
-                  [disabled]="updatingId() === appointment.id"
-                  (click)="cancel(appointment)"
-                  data-testid="flow-cancel"
-                >
-                  Annuler
-                </button>
-              }
-            </div>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="flow-row"></tr>
-      </table>
+    <div class="flow-toolbar">
+      <mat-form-field appearance="outline" class="flow-search" subscriptSizing="dynamic">
+        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+        <mat-label>Rechercher</mat-label>
+        <input
+          matInput
+          #search
+          (input)="applyFilter(search.value)"
+          placeholder="Patient, médecin, statut…"
+          data-testid="flow-search"
+        />
+        @if (search.value) {
+          <button
+            matIconButton
+            matSuffix
+            type="button"
+            aria-label="Effacer la recherche"
+            (click)="search.value = ''; applyFilter('')"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
     </div>
+
+    @if (filteredCount() === 0) {
+      <app-empty-state
+        icon="search_off"
+        title="Aucun résultat"
+        [description]="'Aucun rendez-vous ne correspond à « ' + searchTerm() + ' ».'"
+        data-testid="flow-no-results"
+      />
+    } @else {
+      <div class="flow-table__wrapper">
+        <table mat-table [dataSource]="dataSource" class="flow-table" data-testid="flow-table">
+          <ng-container matColumnDef="time">
+            <th mat-header-cell *matHeaderCellDef scope="col">Heure</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ appointment.startAt | date: 'HH:mm' }} - {{ appointment.endAt | date: 'HH:mm' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="patient">
+            <th mat-header-cell *matHeaderCellDef scope="col">Patient</th>
+            <td mat-cell *matCellDef="let appointment">{{ patientLabel(appointment) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="doctor">
+            <th mat-header-cell *matHeaderCellDef scope="col">Medecin</th>
+            <td mat-cell *matCellDef="let appointment">{{ doctorLabel(appointment) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef scope="col">Statut</th>
+            <td mat-cell *matCellDef="let appointment">
+              <span class="flow-status" [attr.data-status]="appointment.status">
+                {{ statusLabel(appointment.status) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
+            <td mat-cell *matCellDef="let appointment">
+              <div class="flow-actions">
+                @for (action of availableActions(appointment); track action.status) {
+                  <button
+                    matButton="outlined"
+                    type="button"
+                    class="flow-action"
+                    [attr.data-action]="action.status"
+                    [disabled]="updatingId() === appointment.id"
+                    (click)="updateStatus(appointment, action.status)"
+                    [attr.data-testid]="'flow-action-' + action.status"
+                  >
+                    <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
+                    {{ action.label }}
+                  </button>
+                }
+                @if (canCancel() && isCancellable(appointment.status)) {
+                  <button
+                    matButton="outlined"
+                    type="button"
+                    class="flow-action flow-action--cancel"
+                    [disabled]="updatingId() === appointment.id"
+                    (click)="cancel(appointment)"
+                    data-testid="flow-cancel"
+                  >
+                    <mat-icon aria-hidden="true">cancel</mat-icon>
+                    Annuler
+                  </button>
+                }
+                @if (!hasActions(appointment)) {
+                  <span class="flow-actions__empty">—</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="flow-row"></tr>
+        </table>
+      </div>
+    }
+
+    <mat-paginator
+      [pageSize]="10"
+      [pageSizeOptions]="[10, 25, 50]"
+      [hidden]="filteredCount() === 0"
+      aria-label="Pagination des rendez-vous"
+    />
   }
 </section>

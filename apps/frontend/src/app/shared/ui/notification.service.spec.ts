@@ -1,15 +1,22 @@
 import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NotificationService } from './notification.service';
 
 describe('NotificationService', () => {
   let snackBar: { open: ReturnType<typeof vi.fn> };
+  let dialog: { open: ReturnType<typeof vi.fn> };
 
   function setup() {
     snackBar = { open: vi.fn() };
+    dialog = { open: vi.fn(() => ({ afterClosed: vi.fn() })) };
     TestBed.configureTestingModule({
-      providers: [NotificationService, { provide: MatSnackBar, useValue: snackBar }],
+      providers: [
+        NotificationService,
+        { provide: MatSnackBar, useValue: snackBar },
+        { provide: MatDialog, useValue: dialog },
+      ],
     });
     return TestBed.inject(NotificationService);
   }
@@ -33,5 +40,18 @@ describe('NotificationService', () => {
     expect(message).toBe('Échec de la requête');
     expect(action).toBe('Fermer');
     expect(config).toMatchObject({ duration: 5000, politeness: 'assertive' });
+  });
+
+  it('successDialog() ouvre un popup de succès avec titre et message', () => {
+    const service = setup();
+    service.successDialog('Disponibilité ajoutée', 'Détails de la plage.');
+
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    const config = dialog.open.mock.calls[0][1];
+    expect(config.data).toMatchObject({
+      title: 'Disponibilité ajoutée',
+      message: 'Détails de la plage.',
+      variant: 'success',
+    });
   });
 });

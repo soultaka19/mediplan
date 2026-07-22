@@ -14,6 +14,11 @@ export class AppointmentFlowService {
     return this.http.get<AppointmentFlowItem[]>(`${this.apiUrl}/appointments/today`);
   }
 
+  /** Historique complet du périmètre (tous statuts, plus récents d'abord). */
+  listAll(): Observable<AppointmentFlowItem[]> {
+    return this.http.get<AppointmentFlowItem[]>(`${this.apiUrl}/appointments`);
+  }
+
   updateStatus(
     appointmentId: string,
     payload: UpdateAppointmentStatusPayload,
