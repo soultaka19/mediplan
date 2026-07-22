@@ -47,8 +47,16 @@ export class AuthFacade {
     const user = userFromAccessToken(token);
     if (user) {
       this.userState.set(user);
-      // Le JWT est la source initiale ; /users/me affine le profil.
-      this.refreshCurrentUser();
+      // Le JWT est la source initiale ; /users/me affine le profil (prénom/nom).
+      //
+      // ⚠️ Différé hors du constructeur (microtask) : l'appel /users/me traverse
+      // `authErrorInterceptor`, qui fait `inject(AuthFacade)`. Déclenché pendant
+      // la construction de la façade, cela lève NG0200 (dépendance circulaire) et
+      // la requête échoue sans partir → le profil n'était jamais rafraîchi au
+      // rechargement (l'en-tête retombait sur la partie locale de l'e-mail). Le
+      // microtask garantit que la façade est entièrement construite (et en cache
+      // dans l'injecteur) avant que l'intercepteur ne la réinjecte.
+      queueMicrotask(() => this.refreshCurrentUser());
     } else {
       this.tokenStorage.clear();
     }
