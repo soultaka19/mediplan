@@ -3,7 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 
-import { AuthFacade } from '@core/auth';
+import { AuthFacade, UserRole } from '@core/auth';
 import { AppointmentFlowService } from '@features/clinic-flow/appointment-flow.service';
 import { Avatar, EmptyState, RoleBadge, StatCard, roleLabel } from '@shared/ui';
 import { resolveDisplayName } from '@shared/user/display-name';
@@ -34,6 +34,12 @@ interface QuickAction {
   readonly icon: string;
   readonly label: string;
   readonly route?: string;
+  /**
+   * Rôles autorisés à voir l'accès rapide (RBAC d'affichage, aligné sur la
+   * sidenav). Absent = visible par tous. Le masquage est purement UX :
+   * l'autorisation réelle reste assurée par le `roleGuard` de la route.
+   */
+  readonly roles?: readonly UserRole[];
 }
 
 /** KPI du patient (encore sans source de données → placeholder « bientôt »). */
@@ -61,10 +67,11 @@ const PATIENT_ACTIONS: readonly QuickAction[] = [
   { icon: 'person', label: 'Mon profil' },
 ];
 
-/** Accès rapides de l'administration. */
+/** Accès rapides de l'administration et du médecin. */
 const ADMIN_ACTIONS: readonly QuickAction[] = [
-  // L'écran de gestion des utilisateurs existe (/admin/users) → lien actif.
-  { icon: 'group', label: 'Utilisateurs', route: '/admin/users' },
+  // « Utilisateurs » (/admin/users) est réservé aux admins : masqué au médecin
+  // (comme la sidenav), même si le roleGuard bloque déjà l'accès à la route.
+  { icon: 'group', label: 'Utilisateurs', route: '/admin/users', roles: ['clinic_admin', 'super_admin'] },
   { icon: 'medical_services', label: 'Médecins' },
   { icon: 'event_note', label: 'Disponibilités', route: '/availabilities' },
 ];
@@ -160,8 +167,14 @@ export class DashboardPage {
     );
   });
 
-  /** Accès rapides selon le rôle (lien actif si `route`, sinon « bientôt »). */
-  readonly quickActions = computed<readonly QuickAction[]>(() =>
-    this.isPatient() ? PATIENT_ACTIONS : ADMIN_ACTIONS,
-  );
+  /**
+   * Accès rapides selon le rôle (lien actif si `route`, sinon « bientôt »),
+   * filtrés par RBAC d'affichage comme la sidenav : un accès restreint
+   * (ex. « Utilisateurs ») n'apparaît que pour les rôles autorisés.
+   */
+  readonly quickActions = computed<readonly QuickAction[]>(() => {
+    const base = this.isPatient() ? PATIENT_ACTIONS : ADMIN_ACTIONS;
+    const role = this.user()?.role ?? null;
+    return base.filter((action) => !action.roles || (role !== null && action.roles.includes(role)));
+  });
 }
