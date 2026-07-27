@@ -1,123 +1,166 @@
-<section class="history-page">
-  <header class="history-page__header">
+<div class="rdv">
+  <header class="rdv__header">
     <div>
-      <h1 class="history-page__title">Rendez-vous</h1>
-      <p class="history-page__subtitle">Historique des rendez-vous et prise de rendez-vous.</p>
+      <h1 class="rdv__title">Rendez-vous</h1>
+      <p class="rdv__subtitle">Historique et prise de rendez-vous.</p>
     </div>
-
-    <button matButton="filled" type="button" (click)="openBooking()" data-testid="history-add">
+    <button type="button" class="mp-btn-primary" (click)="openBooking()" data-testid="history-add">
       <mat-icon aria-hidden="true">add</mat-icon>
       Ajouter un rendez-vous
     </button>
   </header>
 
-  @if (loading()) {
-    <div class="history-skeleton" aria-busy="true" aria-live="polite" data-testid="history-loading">
-      @for (row of skeletonRows; track $index) {
-        <app-skeleton height="52px" />
+  @if (error(); as err) {
+    <div class="mp-banner mp-banner--error" role="alert">
+      <span class="mp-banner__mark" aria-hidden="true">!</span>
+      <span class="mp-banner__text">{{ err }}</span>
+      <button type="button" class="mp-banner__action" (click)="load()">Réessayer</button>
+    </div>
+  }
+
+  <!-- Recherche + filtres de statut -->
+  <div class="rdv-toolbar">
+    <div class="mp-search">
+      <mat-icon class="mp-search__icon" aria-hidden="true">search</mat-icon>
+      <input
+        class="mp-search__input"
+        type="search"
+        [value]="search()"
+        (input)="onSearch($any($event.target).value)"
+        placeholder="Rechercher un patient ou un médecin"
+        aria-label="Rechercher"
+        data-testid="history-search"
+      />
+    </div>
+    <div class="rdv-chips">
+      @for (c of statusChips(); track c.status) {
+        <button
+          type="button"
+          class="mp-chip-filter"
+          [class.mp-chip-filter--on]="isStatusSelected(c.status)"
+          (click)="toggleStatus(c.status)"
+        >
+          <span class="mp-chip-filter__dot" [style.background]="'var(--mp-status-' + c.chip.tone + '-fg)'"></span>
+          {{ c.label }}
+        </button>
       }
     </div>
-  } @else if (error(); as message) {
-    <app-error-state
-      [message]="message"
-      title="Impossible de charger les rendez-vous"
-      (retry)="load()"
-      data-testid="history-error"
-    />
-  } @else if (isEmpty()) {
-    <app-empty-state
-      icon="event_note"
-      title="Aucun rendez-vous"
-      description="Aucun rendez-vous n'a encore été pris. Cliquez sur « Ajouter un rendez-vous » pour commencer."
-      actionLabel="Ajouter un rendez-vous"
-      (action)="openBooking()"
-      data-testid="history-empty"
-    />
-  } @else {
-    <div class="history-toolbar">
-      <mat-form-field appearance="outline" class="history-search" subscriptSizing="dynamic">
-        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
-        <mat-label>Rechercher</mat-label>
-        <input
-          matInput
-          #search
-          (input)="applyFilter(search.value)"
-          placeholder="Patient, médecin, statut, motif…"
-          data-testid="history-search"
-        />
-        @if (search.value) {
-          <button
-            matIconButton
-            matSuffix
-            type="button"
-            aria-label="Effacer la recherche"
-            (click)="search.value = ''; applyFilter('')"
-          >
-            <mat-icon>close</mat-icon>
-          </button>
+  </div>
+
+  @if (hasActiveFilters()) {
+    <div class="rdv-active-filters">
+      <span>Filtres actifs</span>
+      <button type="button" class="mp-link" (click)="clearFilters()">Effacer les filtres</button>
+    </div>
+  }
+
+  <!-- Table -->
+  <div class="mp-table">
+    <div class="mp-table__scroll">
+      <div class="mp-table__grid rdv-grid mp-table__head">
+        <div>Date</div>
+        <div>Patient</div>
+        <div>Médecin</div>
+        <div>Statut</div>
+        <div>Motif</div>
+      </div>
+
+      @if (loading()) {
+        @for (s of skeletonRows; track $index) {
+          <div class="mp-table__grid rdv-grid mp-table__row">
+            <span class="mp-skel"></span>
+            <span class="mp-skel mp-skel--70"></span>
+            <span class="mp-skel mp-skel--60"></span>
+            <span class="mp-skel mp-skel--chip"></span>
+            <span class="mp-skel mp-skel--80"></span>
+          </div>
         }
-      </mat-form-field>
+      } @else if (hasRows()) {
+        @for (r of pagedRows(); track r.item.id) {
+          <div
+            class="mp-table__grid rdv-grid mp-table__row mp-table__row--click"
+            tabindex="0"
+            role="button"
+            (click)="open(r.item)"
+            (keydown.enter)="open(r.item)"
+            data-testid="history-row"
+          >
+            <div class="mp-tnum">
+              <div class="rdv-cell__date">{{ r.date }}</div>
+              <div class="rdv-cell__time">{{ r.time }}</div>
+            </div>
+            <div class="rdv-cell__patient" [class.rdv-cell--placeholder]="r.patientPlaceholder">
+              {{ r.patient }}
+            </div>
+            <div class="rdv-cell__doctor">{{ r.doctor }}</div>
+            <div><app-status-chip [model]="r.chip" /></div>
+            <div class="rdv-cell__motif" [class.rdv-cell--placeholder]="r.motifMuted" [title]="r.motif">
+              {{ r.motif }}
+            </div>
+          </div>
+        }
+      }
     </div>
 
-    @if (filteredCount() === 0) {
-      <app-empty-state
-        icon="search_off"
-        title="Aucun résultat"
-        [description]="'Aucun rendez-vous ne correspond à « ' + searchTerm() + ' ».'"
-        data-testid="history-no-results"
-      />
-    } @else {
-      <div class="history-table__wrapper">
-        <table mat-table [dataSource]="dataSource" class="history-table" data-testid="history-table">
-          <ng-container matColumnDef="datetime">
-            <th mat-header-cell *matHeaderCellDef scope="col">Date</th>
-            <td mat-cell *matCellDef="let appointment">
-              <div class="history-when">
-                <span class="history-when__date">{{ appointment.startAt | date: 'd MMM y' }}</span>
-                <span class="history-when__time">
-                  {{ appointment.startAt | date: 'HH:mm' }} – {{ appointment.endAt | date: 'HH:mm' }}
-                </span>
-              </div>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="patient">
-            <th mat-header-cell *matHeaderCellDef scope="col">Patient</th>
-            <td mat-cell *matCellDef="let appointment">{{ patientLabel(appointment) }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="doctor">
-            <th mat-header-cell *matHeaderCellDef scope="col">Médecin</th>
-            <td mat-cell *matCellDef="let appointment">{{ doctorLabel(appointment) }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef scope="col">Statut</th>
-            <td mat-cell *matCellDef="let appointment">
-              <span class="history-status" [attr.data-status]="appointment.status">
-                {{ statusLabel(appointment.status) }}
-              </span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="reason">
-            <th mat-header-cell *matHeaderCellDef scope="col">Motif</th>
-            <td mat-cell *matCellDef="let appointment" class="history-reason">
-              {{ reasonLabel(appointment) }}
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="history-row"></tr>
-        </table>
+    @if (isEmptyFiltered()) {
+      <div class="mp-table__empty">
+        <div class="mp-table__empty-title">Aucun résultat pour ces filtres</div>
+        <div class="mp-table__empty-text">Essayez un autre terme ou retirez les filtres de statut.</div>
+        <button type="button" class="mp-btn-outline" (click)="clearFilters()">Effacer les filtres</button>
+      </div>
+    } @else if (isEmptyAll()) {
+      <div class="mp-table__empty">
+        <div class="mp-table__empty-title">Aucun rendez-vous enregistré</div>
+        <div class="mp-table__empty-text">
+          Les rendez-vous réservés au comptoir apparaîtront dans cette table.
+        </div>
+        <button type="button" class="mp-btn-primary" (click)="openBooking()">
+          Réserver un rendez-vous
+        </button>
       </div>
     }
 
-    <mat-paginator
-      [pageSize]="10"
-      [pageSizeOptions]="[10, 25, 50]"
-      [hidden]="filteredCount() === 0"
-      aria-label="Pagination des rendez-vous"
-    />
-  }
-</section>
+    @if (hasRows()) {
+      <div class="mp-table__foot">
+        <span class="mp-tnum">{{ rangeLabel() }}</span>
+        <div class="mp-pager">
+          <button type="button" aria-label="Page précédente" (click)="prevPage()" [disabled]="!canPrev()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button type="button" aria-label="Page suivante" (click)="nextPage()" [disabled]="!canNext()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Panneau de détail -->
+@if (selected(); as item) {
+  <div class="mp-panel-backdrop" (click)="closeDetail()"></div>
+  <aside class="mp-panel" role="dialog" aria-label="Détail du rendez-vous">
+    <div class="mp-panel__head">
+      <div>
+        <div class="mp-panel__eyebrow">Rendez-vous</div>
+        <div class="mp-panel__title">{{ item.patientName || 'Patient' }}</div>
+      </div>
+      <button type="button" class="mp-panel__close" (click)="closeDetail()" aria-label="Fermer">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="mp-panel__body">
+      @if (detailChip(); as chip) {
+        <app-status-chip [model]="chip" size="md" />
+      }
+      <dl class="mp-panel__fields">
+        @for (f of detailFields(); track f.k) {
+          <div class="mp-panel__field">
+            <dt>{{ f.k }}</dt>
+            <dd [class.rdv-cell--placeholder]="f.muted">{{ f.v }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  </aside>
+}

@@ -1,12 +1,21 @@
 /*
  * Polices auto-hébergées — AUCUN appel réseau externe (pas de CDN).
- * - Roboto via @fontsource (poids 400/500/700) : conservée pour repli/Material.
- * - Inter via @fontsource (poids 400/500/600/700/800) : police UI complète
- *   (corps + titrage, --mp-font-family / --mp-font-display-family).
+ * - IBM Plex Sans via @fontsource (poids 400/500/600/700) : police UI complète
+ *   (corps + titrage, --mp-font-family / --mp-font-display-family) — direction
+ *   visuelle du redesign (MediPlan.dc.html).
+ * - IBM Plex Mono via @fontsource (poids 400/500) : chiffres/heures/notes tech
+ *   (--mp-font-mono).
+ * - Inter / Roboto via @fontsource : conservées en repli (Material, anciens écrans).
  * - Material Symbols : icônes.
  * Fichier .css dédié référencé dans angular.json (styles[]) : dart-sass ne peut
  * pas `@use` ces feuilles CSS tierces.
  */
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-sans/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 @import '@fontsource/roboto/400.css';
 @import '@fontsource/roboto/500.css';
 @import '@fontsource/roboto/700.css';
@@ -14,5 +23,4 @@
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
 @import '@fontsource/inter/700.css';
-@import '@fontsource/inter/800.css';
 @import 'material-symbols/outlined.css';

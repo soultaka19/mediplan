@@ -27,9 +27,9 @@ export class NotificationService {
     verticalPosition: 'bottom',
   };
 
-  /** Confirmation légère (snackbar transitoire). */
+  /** Confirmation légère (snackbar transitoire, préfixée d'un « ✓ » de succès). */
   success(message: string): void {
-    this.snackBar.open(message, undefined, {
+    this.snackBar.open(`✓  ${message}`, undefined, {
       ...NotificationService.BASE,
       duration: 3000,
       politeness: 'polite',

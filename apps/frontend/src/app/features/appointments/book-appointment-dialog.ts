@@ -15,7 +15,7 @@ import { UserService } from '@features/admin/users/user.service';
 import { Availability, MaterializedSlot } from '@features/availabilities/availability.models';
 import { AvailabilityService } from '@features/availabilities/availability.service';
 import { authErrorMessage } from '@shared/http/http-error-message';
-import { Alert, EmptyState, ErrorState, NotificationService } from '@shared/ui';
+import { EmptyState, ErrorState, NotificationService } from '@shared/ui';
 import { AppointmentBookingService } from './appointment-booking.service';
 
 /**
@@ -38,7 +38,6 @@ import { AppointmentBookingService } from './appointment-booking.service';
     MatInputModule,
     MatProgressBarModule,
     MatSelectModule,
-    Alert,
     EmptyState,
     ErrorState,
   ],
@@ -76,10 +75,14 @@ export class BookAppointmentDialog {
 
   readonly freeSlots = computed(() => this.slots().filter((s) => !s.isBooked));
 
+  // `availabilityId`/`slotId` sont créés désactivés et (dé)activés en cascade
+  // dans les handlers — le patron recommandé par Angular pour l'état désactivé
+  // d'un contrôle réactif (au lieu de `[disabled]` dans le template, qui émet un
+  // avertissement).
   readonly form = this.fb.group({
     doctorId: ['', [Validators.required]],
-    availabilityId: ['', [Validators.required]],
-    slotId: ['', [Validators.required]],
+    availabilityId: this.fb.control({ value: '', disabled: true }, [Validators.required]),
+    slotId: this.fb.control({ value: '', disabled: true }, [Validators.required]),
     firstName: ['', [Validators.required]],
     lastName: ['', [Validators.required]],
     email: ['', [Validators.email]],
@@ -110,12 +113,19 @@ export class BookAppointmentDialog {
 
   onDoctorChange(doctorId: string): void {
     this.selectedDoctorId.set(doctorId || null);
-    this.form.patchValue({ availabilityId: '', slotId: '' });
+    const { availabilityId, slotId } = this.form.controls;
+    availabilityId.reset('');
+    slotId.reset('');
+    slotId.disable();
     this.slots.set([]);
+    if (doctorId) availabilityId.enable();
+    else availabilityId.disable();
   }
 
   onAvailabilityChange(availabilityId: string): void {
-    this.form.patchValue({ slotId: '' });
+    const slotId = this.form.controls.slotId;
+    slotId.reset('');
+    slotId.disable();
     this.slots.set([]);
     if (!availabilityId) {
       return;
@@ -126,7 +136,10 @@ export class BookAppointmentDialog {
       .materializeSlots(availabilityId)
       .pipe(finalize(() => this.loadingSlots.set(false)))
       .subscribe({
-        next: (slots) => this.slots.set(slots),
+        next: (slots) => {
+          this.slots.set(slots);
+          slotId.enable();
+        },
         error: (err: unknown) => this.notifications.error(authErrorMessage(err)),
       });
   }
@@ -162,13 +175,14 @@ export class BookAppointmentDialog {
           const when = slot
             ? `${new Intl.DateTimeFormat('fr-CA', { dateStyle: 'long' }).format(new Date(slot.startAt))} à ${new Intl.DateTimeFormat('fr-CA', { timeStyle: 'short' }).format(new Date(slot.startAt))}`
             : '';
-          this.notifications
-            .successDialog(
-              'Rendez-vous réservé',
-              `${patient} — avec ${doctorName}${when ? `, le ${when}` : ''}.`,
-            )
-            .afterClosed()
-            .subscribe(() => this.dialogRef.close(true));
+          // Fermer d'abord la modale de réservation, PUIS afficher la confirmation
+          // (évite l'empilement de deux dialogues). L'appelant recharge la liste
+          // via `afterClosed(true)` ; le popup de succès s'affiche par-dessus.
+          this.dialogRef.close(true);
+          this.notifications.successDialog(
+            'Rendez-vous réservé',
+            `${patient} — avec ${doctorName}${when ? `, le ${when}` : ''}.`,
+          );
         },
         error: (err: unknown) => this.error.set(authErrorMessage(err)),
       });

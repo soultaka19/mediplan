@@ -1,182 +1,24 @@
-<section class="availabilities-page">
-  <header class="availabilities-page__header">
+<div class="dispo">
+  <header class="dispo__header">
     <div>
-      <h1 class="availabilities-page__title">Disponibilités</h1>
-      <p class="availabilities-page__subtitle">Planifiez les plages réservables et les congés.</p>
+      <h1 class="dispo__title">Disponibilités</h1>
+      <p class="dispo__subtitle">Planifiez les plages réservables et les congés.</p>
     </div>
-    <button matButton="outlined" type="button" (click)="load()" [disabled]="loading() || saving()">
-      <mat-icon>refresh</mat-icon>
-      Actualiser
+    <button type="button" class="mp-btn-primary" (click)="openPanel()" data-testid="availability-open">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Ajouter une plage
     </button>
   </header>
 
-  @if (error(); as message) {
-    <app-alert variant="error" [message]="message" data-testid="availabilities-error" />
-  }
-
-  <mat-card class="availability-form-card" appearance="outlined">
-    @if (saving()) {
-      <mat-progress-bar mode="indeterminate" />
-    }
-
-    <mat-card-content>
-      <form [formGroup]="form" class="availability-form" (ngSubmit)="submit()" novalidate>
-        @if (!isDoctor()) {
-          <mat-form-field appearance="outline">
-            <mat-label>Médecin</mat-label>
-            <mat-select formControlName="doctorId" data-testid="availability-doctor">
-              @for (doctor of doctors(); track doctor.id) {
-                <mat-option [value]="doctor.id">{{ doctorName(doctor.id) }}</mat-option>
-              }
-            </mat-select>
-            @if (form.controls.doctorId.touched && form.controls.doctorId.invalid) {
-              <mat-error>Le médecin est requis.</mat-error>
-            }
-          </mat-form-field>
-        }
-
-        <mat-form-field appearance="outline" class="availability-form__date" subscriptSizing="dynamic">
-          <mat-label>Du</mat-label>
-          <input
-            matInput
-            [matDatepicker]="startDatePicker"
-            [min]="minDate"
-            formControlName="startDate"
-            placeholder="jj/mm/aaaa"
-            data-testid="availability-start-date"
-          />
-          <mat-datepicker-toggle matIconSuffix [for]="startDatePicker" />
-          <mat-datepicker #startDatePicker />
-          @if (form.controls.startDate.touched && form.controls.startDate.invalid) {
-            <mat-error>La date de début est requise.</mat-error>
-          } @else {
-            <mat-hint>Premier jour de la plage.</mat-hint>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="availability-form__date" subscriptSizing="dynamic">
-          <mat-label>Au</mat-label>
-          <input
-            matInput
-            [matDatepicker]="endDatePicker"
-            [min]="form.controls.startDate.value ?? minDate"
-            formControlName="endDate"
-            placeholder="jj/mm/aaaa"
-            data-testid="availability-end-date"
-          />
-          <mat-datepicker-toggle matIconSuffix [for]="endDatePicker" />
-          <mat-datepicker #endDatePicker />
-          @if (form.controls.endDate.touched && form.controls.endDate.hasError('required')) {
-            <mat-error>La date de fin est requise.</mat-error>
-          } @else if (form.controls.endDate.touched && form.controls.endDate.hasError('endDateBeforeStart')) {
-            <mat-error>La fin précède le début.</mat-error>
-          } @else {
-            <mat-hint>Même jour = une seule journée.</mat-hint>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Heure de début</mat-label>
-          <input
-            matInput
-            [matTimepicker]="startPicker"
-            formControlName="startTime"
-            data-testid="availability-start"
-          />
-          <mat-timepicker-toggle matIconSuffix [for]="startPicker" />
-          <mat-timepicker #startPicker interval="30min" />
-          @if (form.controls.startTime.touched && form.controls.startTime.invalid) {
-            <mat-error>L'heure de début est requise.</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Heure de fin</mat-label>
-          <input
-            matInput
-            [matTimepicker]="endPicker"
-            formControlName="endTime"
-            data-testid="availability-end"
-          />
-          <mat-timepicker-toggle matIconSuffix [for]="endPicker" />
-          <mat-timepicker #endPicker interval="30min" />
-          @if (form.controls.endTime.touched && form.controls.endTime.hasError('required')) {
-            <mat-error>L'heure de fin est requise.</mat-error>
-          } @else if (form.controls.endTime.touched && form.controls.endTime.hasError('endBeforeStart')) {
-            <mat-error>L'heure de fin doit suivre l'heure de début.</mat-error>
-          }
-        </mat-form-field>
-
-        @if (slotPreview(); as preview) {
-          <p class="availability-form__preview" data-testid="availability-preview">
-            <mat-icon aria-hidden="true">grid_view</mat-icon>
-            <span>{{ preview }}</span>
-          </p>
-        }
-
-        <div class="availability-form__advanced-toggle">
-          <button
-            matButton
-            type="button"
-            (click)="toggleAdvanced()"
-            [attr.aria-expanded]="showAdvanced()"
-          >
-            <mat-icon aria-hidden="true">{{ showAdvanced() ? 'expand_less' : 'expand_more' }}</mat-icon>
-            Options (type, durée, note)
-          </button>
-        </div>
-
-        @if (showAdvanced()) {
-          <div class="availability-form__advanced">
-            <mat-form-field appearance="outline">
-              <mat-label>Type</mat-label>
-              <mat-select formControlName="type" data-testid="availability-type">
-                <mat-option value="available">Disponible</mat-option>
-                <mat-option value="time_off">Congé</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Durée d'un créneau</mat-label>
-              <mat-select formControlName="slotDurationMin" data-testid="availability-duration">
-                @for (duration of slotDurationOptions; track duration) {
-                  <mat-option [value]="duration">{{ duration }} min</mat-option>
-                }
-              </mat-select>
-              <mat-hint>Pas de réservation, non la durée de consultation.</mat-hint>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="availability-form__note">
-              <mat-label>Note (optionnel)</mat-label>
-              <input matInput formControlName="note" data-testid="availability-note" />
-            </mat-form-field>
-          </div>
-        }
-
-        <button
-          matButton="filled"
-          type="submit"
-          class="availability-form__submit"
-          [disabled]="saving()"
-          data-testid="availability-submit"
-        >
-          @if (saving()) {
-            <mat-icon aria-hidden="true">hourglass_top</mat-icon>
-            Ajout en cours…
-          } @else {
-            <mat-icon aria-hidden="true">add</mat-icon>
-            Ajouter
-          }
-        </button>
-      </form>
-    </mat-card-content>
-  </mat-card>
-
-  <div #listAnchor class="availability-list">
   @if (loading()) {
-    <div class="availability-skeleton" aria-busy="true" aria-live="polite">
+    <div class="dispo-list" aria-busy="true">
       @for (row of skeletonRows; track $index) {
-        <app-skeleton height="56px" />
+        <div class="dispo-group">
+          <div class="dispo-group__head">
+            <span class="mp-skel mp-skel--avatar"></span>
+            <span class="mp-skel mp-skel--70"></span>
+          </div>
+        </div>
       }
     </div>
   } @else if (loadError(); as message) {
@@ -190,150 +32,195 @@
     <app-empty-state
       icon="event_busy"
       title="Aucune disponibilité"
-      description="Ajoutez une première plage ci-dessus pour ouvrir des créneaux réservables."
+      description="Ajoutez une première plage pour ouvrir des créneaux réservables."
+      actionLabel="Ajouter une plage"
+      (action)="openPanel()"
     />
   } @else {
-    <div class="availability-toolbar">
-      <mat-form-field appearance="outline" class="availability-search" subscriptSizing="dynamic">
-        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
-        <mat-label>Rechercher</mat-label>
-        <input
-          matInput
-          #availSearch
-          (input)="applyFilter(availSearch.value)"
-          placeholder="Médecin, type, note…"
-          data-testid="availability-search"
-        />
-        @if (availSearch.value) {
-          <button
-            matIconButton
-            matSuffix
-            type="button"
-            aria-label="Effacer la recherche"
-            (click)="availSearch.value = ''; applyFilter('')"
-          >
-            <mat-icon>close</mat-icon>
+    <div class="dispo-list">
+      @for (g of doctorGroups(); track g.doctorId) {
+        <section class="dispo-group">
+          <button type="button" class="dispo-group__head" (click)="toggleGroup(g.doctorId)" [attr.aria-expanded]="g.open">
+            <mat-icon class="dispo-group__caret" [class.dispo-group__caret--open]="g.open">chevron_right</mat-icon>
+            <span class="dispo-group__avatar">{{ g.initials }}</span>
+            <span class="dispo-group__name">{{ g.name }}</span>
+            <span class="dispo-group__summary mp-tnum">{{ g.summary }}</span>
           </button>
-        }
-      </mat-form-field>
+
+          @if (g.open) {
+            <div class="mp-table__scroll">
+              <div class="mp-table__grid dispo-grid dispo-subhead">
+                <div>Type</div>
+                <div>Période</div>
+                <div>Créneau</div>
+                <div>Note</div>
+                <div class="dispo-actions-col">Actions</div>
+              </div>
+              @for (r of g.rows; track r.item.id) {
+                <div class="mp-table__grid dispo-grid dispo-row">
+                  <div><app-status-chip [model]="r.chip" /></div>
+                  <div class="mp-tnum">
+                    <div class="dispo-cell__date">{{ r.date }}</div>
+                    <div class="dispo-cell__hours">{{ r.hours }}</div>
+                  </div>
+                  <div class="dispo-cell__slot mp-tnum">{{ r.slot }}</div>
+                  <div class="dispo-cell__note" [class.rdv-cell--placeholder]="r.notePlaceholder" [title]="r.note">
+                    {{ r.note }}
+                  </div>
+                  <div class="dispo-actions">
+                    <button
+                      type="button"
+                      class="dispo-icon-btn dispo-icon-btn--danger"
+                      aria-label="Supprimer la plage"
+                      (click)="deleteAvailability(r.item)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
     </div>
-
-    @if (filteredCount() === 0) {
-      <app-empty-state
-        icon="search_off"
-        title="Aucun résultat"
-        [description]="'Aucune disponibilité ne correspond à « ' + searchTerm() + ' ».'"
-        data-testid="availability-no-results"
-      />
-    } @else {
-    <div class="availability-table__wrapper">
-      <table mat-table [dataSource]="groupedRows()" class="availability-table">
-        <!-- En-tête de groupe : nom du médecin affiché une seule fois. -->
-        <ng-container matColumnDef="groupHeader">
-          <td
-            mat-cell
-            *matCellDef="let row"
-            [attr.colspan]="displayedColumns.length"
-            class="availability-group"
-          >
-            <div class="availability-group__inner">
-              <mat-icon aria-hidden="true">person</mat-icon>
-              <span class="availability-group__name">{{ row.doctorName }}</span>
-              <span class="availability-group__count"
-                >{{ row.count }} plage{{ row.count > 1 ? 's' : '' }}</span
-              >
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef scope="col">Type</th>
-          <td mat-cell *matCellDef="let availability">
-            <span
-              class="availability-type"
-              [class.availability-type--off]="availability.type === 'time_off'"
-            >
-              {{ typeLabel(availability.type) }}
-            </span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="period">
-          <th mat-header-cell *matHeaderCellDef scope="col">Période</th>
-          <td mat-cell *matCellDef="let availability">
-            <div class="availability-period">
-              <span class="availability-period__date">{{ formatDate(availability.startAt) }}</span>
-              <span class="availability-period__time">
-                {{ formatTime(availability.startAt) }} – {{ formatTime(availability.endAt) }}
-              </span>
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="duration">
-          <th mat-header-cell *matHeaderCellDef scope="col">Créneau</th>
-          <td mat-cell *matCellDef="let availability">{{ availability.slotDurationMin }} min</td>
-        </ng-container>
-
-        <ng-container matColumnDef="note">
-          <th mat-header-cell *matHeaderCellDef scope="col">Note</th>
-          <td mat-cell *matCellDef="let availability">{{ availability.note || '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
-          <td mat-cell *matCellDef="let availability">
-            <div class="availability-actions">
-              <button
-                matIconButton
-                type="button"
-                aria-label="Voir les créneaux"
-                (click)="showSlots(availability)"
-                [disabled]="availability.type !== 'available'"
-              >
-                <mat-icon>view_timeline</mat-icon>
-              </button>
-              <button
-                matIconButton
-                type="button"
-                aria-label="Supprimer"
-                (click)="deleteAvailability(availability)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr
-          mat-row
-          *matRowDef="let row; columns: ['groupHeader']; when: isGroupRow"
-          class="availability-group-row"
-        ></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    </div>
-    }
   }
-  </div>
+</div>
 
-  @if (selectedAvailabilityId()) {
-    <mat-card class="slots-card" appearance="outlined">
-      <mat-card-content>
-        <h2 class="slots-card__title">Créneaux générés</h2>
-        @if (selectedSlots().length === 0) {
-          <p class="slots-card__empty">Aucun créneau généré pour cette plage.</p>
-        } @else {
-          <div class="slots-list">
-            @for (slot of selectedSlots(); track slot.startAt) {
-              <span class="slot-chip">
-                {{ formatDateTime(slot.startAt) }} - {{ formatDateTime(slot.endAt) }}
-              </span>
+<!-- Panneau latéral : ajout d'une plage -->
+@if (panelOpen()) {
+  <div class="mp-panel-backdrop" (click)="closePanel()"></div>
+  <aside class="mp-panel" role="dialog" aria-label="Ajouter une plage">
+    <div class="mp-panel__head">
+      <div class="mp-panel__title">Ajouter une plage</div>
+      <button type="button" class="mp-panel__close" (click)="closePanel()" aria-label="Fermer">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="form" class="mp-panel__body dispo-form" (ngSubmit)="submit()" novalidate>
+      @if (error(); as message) {
+        <div class="mp-banner mp-banner--error" role="alert" data-testid="availabilities-error">
+          <span class="mp-banner__mark" aria-hidden="true">!</span>
+          <span class="mp-banner__text">{{ message }}</span>
+        </div>
+      }
+
+      @if (!isDoctor()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Médecin</mat-label>
+          <mat-select formControlName="doctorId" data-testid="availability-doctor">
+            @for (doctor of doctors(); track doctor.id) {
+              <mat-option [value]="doctor.id">{{ doctorName(doctor.id) }}</mat-option>
             }
-          </div>
+          </mat-select>
+          @if (form.controls.doctorId.touched && form.controls.doctorId.invalid) {
+            <mat-error>Le médecin est requis.</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <div class="dispo-form__row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Du</mat-label>
+          <input matInput [matDatepicker]="startDatePicker" [min]="minDate" formControlName="startDate" placeholder="jj/mm/aaaa" data-testid="availability-start-date" />
+          <mat-datepicker-toggle matIconSuffix [for]="startDatePicker" aria-label="Ouvrir le calendrier" />
+          <mat-datepicker #startDatePicker />
+          @if (form.controls.startDate.touched && form.controls.startDate.invalid) {
+            <mat-error>Requis.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Au</mat-label>
+          <input matInput [matDatepicker]="endDatePicker" [min]="form.controls.startDate.value ?? minDate" formControlName="endDate" placeholder="jj/mm/aaaa" data-testid="availability-end-date" />
+          <mat-datepicker-toggle matIconSuffix [for]="endDatePicker" aria-label="Ouvrir le calendrier" />
+          <mat-datepicker #endDatePicker />
+          @if (form.controls.endDate.touched && form.controls.endDate.hasError('required')) {
+            <mat-error>Requis.</mat-error>
+          } @else if (form.controls.endDate.touched && form.controls.endDate.hasError('endDateBeforeStart')) {
+            <mat-error>La fin précède le début.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="dispo-form__row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Heure de début</mat-label>
+          <input matInput [matTimepicker]="startPicker" formControlName="startTime" data-testid="availability-start" />
+          <mat-timepicker-toggle matIconSuffix [for]="startPicker" aria-label="Ouvrir les options d'heure" />
+          <mat-timepicker #startPicker interval="30min" />
+          @if (form.controls.startTime.touched && form.controls.startTime.invalid) {
+            <mat-error>Requis.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Heure de fin</mat-label>
+          <input matInput [matTimepicker]="endPicker" formControlName="endTime" data-testid="availability-end" />
+          <mat-timepicker-toggle matIconSuffix [for]="endPicker" aria-label="Ouvrir les options d'heure" />
+          <mat-timepicker #endPicker interval="30min" />
+          @if (form.controls.endTime.touched && form.controls.endTime.hasError('required')) {
+            <mat-error>Requis.</mat-error>
+          } @else if (form.controls.endTime.touched && form.controls.endTime.hasError('endBeforeStart')) {
+            <mat-error>La fin doit suivre le début.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      @if (slotPreview(); as preview) {
+        <p class="dispo-form__preview" data-testid="availability-preview">
+          <mat-icon aria-hidden="true">grid_view</mat-icon>
+          <span>{{ preview }}</span>
+        </p>
+      }
+
+      <button type="button" class="dispo-form__adv-toggle" (click)="toggleAdvanced()" [attr.aria-expanded]="showAdvanced()">
+        <mat-icon [class.dispo-group__caret--open]="showAdvanced()">chevron_right</mat-icon>
+        Options (type, durée, note)
+      </button>
+
+      @if (showAdvanced()) {
+        <div class="dispo-form__advanced">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type" data-testid="availability-type">
+              <mat-option value="available">Disponible</mat-option>
+              <mat-option value="time_off">Congé</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Durée d'un créneau</mat-label>
+            <mat-select formControlName="slotDurationMin" data-testid="availability-duration">
+              @for (duration of slotDurationOptions; track duration) {
+                <mat-option [value]="duration">{{ duration }} min</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Note (optionnel)</mat-label>
+            <input matInput formControlName="note" data-testid="availability-note" />
+          </mat-form-field>
+        </div>
+      }
+    </form>
+
+    <div class="mp-panel__foot">
+      <button type="button" class="mp-btn-outline" (click)="closePanel()">Annuler</button>
+      <button
+        type="button"
+        class="mp-btn-primary dispo-form__submit"
+        [disabled]="saving() || !canSubmit()"
+        (click)="submit()"
+        data-testid="availability-submit"
+      >
+        @if (saving()) {
+          <span class="mp-spinner" aria-hidden="true"></span>
         }
-      </mat-card-content>
-    </mat-card>
-  }
-</section>
+        {{ saving() ? 'Ajout en cours…' : 'Ajouter' }}
+      </button>
+    </div>
+  </aside>
+}

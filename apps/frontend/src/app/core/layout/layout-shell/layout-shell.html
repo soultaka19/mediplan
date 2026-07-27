@@ -1,46 +1,48 @@
 <!-- Lien d'évitement : premier élément focusable (§6.4) -->
 <a class="skip-link" href="#main-content">Aller au contenu</a>
 
-<mat-toolbar class="mp-toolbar">
+<header class="mp-topbar">
   <button
-    matIconButton
     type="button"
-    class="mp-toolbar__burger"
-    (click)="toggleSidenav()"
-    [attr.aria-label]="toggleLabel()"
-    [attr.aria-expanded]="opened()"
+    class="mp-topbar__icon-btn"
+    (click)="onBurger()"
+    [attr.aria-label]="burgerLabel()"
+    [attr.aria-expanded]="isMobile() ? mobileNavOpen() : !railCollapsed()"
     data-testid="shell-burger"
   >
     <mat-icon>menu</mat-icon>
   </button>
 
-  <span class="mp-toolbar__brand">
-    <mat-icon aria-hidden="true" class="mp-toolbar__logo">calendar_month</mat-icon>
-    <span class="mp-toolbar__name">MediPlan</span>
+  <span class="mp-topbar__brand">
+    <span class="mp-topbar__logo" aria-hidden="true">
+      <mat-icon>calendar_month</mat-icon>
+    </span>
+    <span class="mp-topbar__name">MediPlan</span>
   </span>
 
-  <span class="grow"></span>
+  <span class="mp-topbar__spacer"></span>
 
   <!-- Raccourci de prise de rendez-vous (réservé aux administrateurs) -->
   @if (canBookAppointment()) {
     <button
-      matButton="filled"
       type="button"
-      class="mp-toolbar__cta"
+      class="mp-topbar__cta"
       (click)="openBooking()"
       aria-label="Nouveau rendez-vous"
       data-testid="shell-add-appointment"
     >
       <mat-icon>add</mat-icon>
-      <span class="mp-toolbar__cta-label">Nouveau rendez-vous</span>
+      @if (!isMobile()) {
+        <span class="mp-topbar__cta-label">Nouveau rendez-vous</span>
+        <kbd class="mp-kbd mp-kbd--on-primary">N</kbd>
+      }
     </button>
   }
 
   <!-- Bascule de thème clair/sombre -->
   <button
-    matIconButton
     type="button"
-    class="mp-toolbar__theme"
+    class="mp-topbar__icon-btn mp-topbar__icon-btn--outlined"
     (click)="toggleTheme()"
     [attr.aria-label]="themeToggleLabel()"
     [attr.aria-pressed]="isDarkTheme()"
@@ -49,80 +51,166 @@
     <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
   </button>
 
-  <!-- Menu utilisateur -->
-  <button
-    matButton
-    type="button"
-    [matMenuTriggerFor]="userMenu"
-    class="mp-toolbar__user"
-    aria-label="Menu utilisateur"
-    data-testid="shell-user-menu-trigger"
-  >
-    <app-avatar [name]="displayName()" [email]="user()?.email ?? ''" size="sm" />
-    <span class="mp-toolbar__user-name">{{ displayName() }}</span>
-    <mat-icon>arrow_drop_down</mat-icon>
-  </button>
-
-  <mat-menu #userMenu="matMenu">
-    @if (user(); as currentUser) {
-      <div class="mp-user-menu__header" mat-menu-item disabled>
-        <div class="mp-user-menu__name" data-testid="shell-user-name">{{ displayName() }}</div>
-        <div class="mp-user-menu__email" data-testid="shell-user-email">{{ currentUser.email }}</div>
-      </div>
-      <mat-divider />
-    }
-    <button mat-menu-item type="button" (click)="logout()" data-testid="shell-logout">
-      <mat-icon>logout</mat-icon>
-      <span>Se déconnecter</span>
+  <!-- Menu utilisateur (dropdown custom) -->
+  <div class="mp-usermenu">
+    <button
+      type="button"
+      class="mp-usermenu__trigger"
+      (click)="toggleUserMenu($event)"
+      [attr.aria-expanded]="userMenuOpen()"
+      aria-haspopup="menu"
+      aria-label="Menu utilisateur"
+      data-testid="shell-user-menu-trigger"
+    >
+      <app-avatar [name]="displayName()" [email]="user()?.email ?? ''" size="sm" />
+      @if (!isMobile()) {
+        <span class="mp-usermenu__name">{{ displayName() }}</span>
+      }
+      <mat-icon class="mp-usermenu__caret">arrow_drop_down</mat-icon>
     </button>
-  </mat-menu>
-</mat-toolbar>
 
-<mat-sidenav-container class="mp-shell">
-  <mat-sidenav
-    class="mp-sidenav"
-    [mode]="sidenavMode()"
-    [opened]="opened()"
-    (openedChange)="onOpenedChange($event)"
-    [fixedInViewport]="false"
-  >
-    <nav aria-label="Navigation principale">
-      <mat-nav-list>
-        @for (item of navItems(); track item.label) {
-          @if (item.route) {
-            <a
-              mat-list-item
-              [routerLink]="item.route"
-              routerLinkActive="mp-nav--active"
-              #rla="routerLinkActive"
-              [activated]="rla.isActive"
-              [attr.aria-current]="rla.isActive ? 'page' : null"
-              data-testid="shell-nav-item"
-            >
-              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-              <span matListItemTitle>{{ item.label }}</span>
-            </a>
-          } @else {
-            <a
-              mat-list-item
-              disabled
-              aria-disabled="true"
-              class="mp-nav--disabled"
-              data-testid="shell-nav-item-disabled"
-            >
-              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-              <span matListItemTitle>{{ item.label }}</span>
-              <span matListItemMeta class="mp-nav__soon">bientôt</span>
-            </a>
-          }
+    @if (userMenuOpen()) {
+      <div class="mp-usermenu__panel" role="menu" (click)="$event.stopPropagation()">
+        <div class="mp-usermenu__header">
+          <div class="mp-usermenu__header-name" data-testid="shell-user-name">
+            {{ displayName() }}
+          </div>
+          <div class="mp-usermenu__header-role" data-testid="shell-user-email">
+            {{ user()?.email }}
+          </div>
+        </div>
+        <button
+          type="button"
+          class="mp-usermenu__item"
+          role="menuitemcheckbox"
+          [attr.aria-checked]="isDarkTheme()"
+          (click)="toggleTheme()"
+        >
+          <span>Thème sombre</span>
+          <span class="mp-switch" [class.mp-switch--on]="isDarkTheme()" aria-hidden="true">
+            <span class="mp-switch__knob"></span>
+          </span>
+        </button>
+        @if (canBookAppointment()) {
+          <button type="button" class="mp-usermenu__item" role="menuitem" (click)="openBooking()">
+            <span>Nouveau rendez-vous</span>
+            <kbd class="mp-kbd">N</kbd>
+          </button>
         }
-      </mat-nav-list>
-    </nav>
-  </mat-sidenav>
+        <button
+          type="button"
+          class="mp-usermenu__item mp-usermenu__item--danger"
+          role="menuitem"
+          (click)="logout()"
+          data-testid="shell-logout"
+        >
+          <mat-icon>logout</mat-icon>
+          <span>Se déconnecter</span>
+        </button>
+      </div>
+    }
+  </div>
+</header>
 
-  <mat-sidenav-content class="mp-content">
-    <main id="main-content" class="mp-content__inner" tabindex="-1">
+<div class="mp-body">
+  <!-- Rail desktop (en flux, largeur animée) -->
+  @if (!isMobile()) {
+    <nav class="mp-rail" [class.mp-rail--collapsed]="railCollapsed()" aria-label="Navigation principale">
+      <ul class="mp-rail__list">
+        @for (item of navItems(); track item.label) {
+          <li>
+            @if (item.route) {
+              <a
+                class="mp-nav-item"
+                [routerLink]="item.route"
+                routerLinkActive="mp-nav-item--active"
+                [matTooltip]="item.label"
+                matTooltipPosition="right"
+                [matTooltipDisabled]="showLabels()"
+                [attr.aria-label]="item.label"
+                data-testid="shell-nav-item"
+              >
+                <span class="mp-nav-item__liseret" aria-hidden="true"></span>
+                <mat-icon class="mp-nav-item__icon">{{ item.icon }}</mat-icon>
+                @if (showLabels()) {
+                  <span class="mp-nav-item__label">{{ item.label }}</span>
+                }
+              </a>
+            } @else {
+              <span
+                class="mp-nav-item mp-nav-item--disabled"
+                aria-disabled="true"
+                [matTooltip]="item.label + ' (bientôt)'"
+                matTooltipPosition="right"
+                [matTooltipDisabled]="showLabels()"
+                data-testid="shell-nav-item-disabled"
+              >
+                <mat-icon class="mp-nav-item__icon">{{ item.icon }}</mat-icon>
+                @if (showLabels()) {
+                  <span class="mp-nav-item__label">{{ item.label }}</span>
+                  <span class="mp-nav-item__soon">bientôt</span>
+                }
+              </span>
+            }
+          </li>
+        }
+      </ul>
+      <span class="mp-rail__spacer"></span>
+      <button
+        type="button"
+        class="mp-rail__collapse"
+        (click)="toggleRail()"
+        [attr.aria-label]="railToggleLabel()"
+      >
+        <mat-icon class="mp-rail__collapse-caret" [class.mp-rail__collapse-caret--flipped]="railCollapsed()">
+          chevron_left
+        </mat-icon>
+        @if (showLabels()) {
+          <span>Réduire le menu</span>
+        }
+      </button>
+    </nav>
+  }
+
+  <!-- Overlay de navigation mobile -->
+  @if (isMobile() && mobileNavOpen()) {
+    <div class="mp-nav-backdrop" (click)="closeMobileNav()"></div>
+    <nav class="mp-rail mp-rail--overlay" aria-label="Navigation principale">
+      <ul class="mp-rail__list">
+        @for (item of navItems(); track item.label) {
+          <li>
+            @if (item.route) {
+              <a
+                class="mp-nav-item"
+                [routerLink]="item.route"
+                routerLinkActive="mp-nav-item--active"
+                (click)="closeMobileNav()"
+                data-testid="shell-nav-item"
+              >
+                <span class="mp-nav-item__liseret" aria-hidden="true"></span>
+                <mat-icon class="mp-nav-item__icon">{{ item.icon }}</mat-icon>
+                <span class="mp-nav-item__label">{{ item.label }}</span>
+              </a>
+            } @else {
+              <span
+                class="mp-nav-item mp-nav-item--disabled"
+                aria-disabled="true"
+                data-testid="shell-nav-item-disabled"
+              >
+                <mat-icon class="mp-nav-item__icon">{{ item.icon }}</mat-icon>
+                <span class="mp-nav-item__label">{{ item.label }}</span>
+                <span class="mp-nav-item__soon">bientôt</span>
+              </span>
+            }
+          </li>
+        }
+      </ul>
+    </nav>
+  }
+
+  <main id="main-content" class="mp-main" tabindex="-1">
+    <div class="mp-main__inner">
       <router-outlet />
-    </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    </div>
+  </main>
+</div>

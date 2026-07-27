@@ -1,4 +1,12 @@
-<h2 mat-dialog-title>Réserver un rendez-vous</h2>
+<div class="book-head">
+  <div>
+    <h2 mat-dialog-title class="book-head__title">Réserver un rendez-vous</h2>
+    <p class="book-head__subtitle">Médecin, créneau, patient — trois gestes.</p>
+  </div>
+  <button type="button" class="mp-panel__close" (click)="cancel()" aria-label="Fermer">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
 
 @if (loading() || saving()) {
   <mat-progress-bar mode="indeterminate" [attr.aria-label]="saving() ? 'Réservation en cours' : 'Chargement'" />
@@ -6,7 +14,10 @@
 
 <mat-dialog-content>
   @if (error()) {
-    <app-alert variant="error" [message]="error()!" data-testid="book-error" />
+    <div class="mp-banner mp-banner--error" role="alert" data-testid="book-error">
+      <span class="mp-banner__mark" aria-hidden="true">!</span>
+      <span class="mp-banner__text">{{ error() }}</span>
+    </div>
   }
 
   @if (loadError(); as message) {
@@ -25,88 +36,101 @@
     />
   } @else {
     <form [formGroup]="form" (ngSubmit)="submit()" class="book-form" id="book-form">
-      <mat-form-field appearance="outline">
-        <mat-label>Médecin</mat-label>
-        <mat-select
-          formControlName="doctorId"
-          (selectionChange)="onDoctorChange($event.value)"
-          data-testid="book-doctor"
-        >
-          @for (doctor of doctors(); track doctor.id) {
-            <mat-option [value]="doctor.id">{{ doctorLabel(doctor) }}</mat-option>
-          }
-        </mat-select>
-        @if (form.controls.doctorId.touched && form.controls.doctorId.invalid) {
-          <mat-error>Sélectionnez un médecin.</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Disponibilité</mat-label>
-        <mat-select
-          formControlName="availabilityId"
-          (selectionChange)="onAvailabilityChange($event.value)"
-          [disabled]="!form.controls.doctorId.value"
-          data-testid="book-availability"
-        >
-          @for (availability of doctorAvailabilities(); track availability.id) {
-            <mat-option [value]="availability.id">{{ availabilityLabel(availability) }}</mat-option>
-          }
-        </mat-select>
-        @if (form.controls.doctorId.value && doctorAvailabilities().length === 0) {
-          <mat-hint>Aucune disponibilité pour ce médecin.</mat-hint>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Créneau</mat-label>
-        <mat-select
-          formControlName="slotId"
-          [disabled]="!form.controls.availabilityId.value || loadingSlots()"
-          data-testid="book-slot"
-        >
-          @for (slot of freeSlots(); track slot.id) {
-            <mat-option [value]="slot.id">{{ slotLabel(slot) }}</mat-option>
-          }
-        </mat-select>
-        @if (loadingSlots()) {
-          <mat-hint>Chargement des créneaux…</mat-hint>
-        } @else if (form.controls.availabilityId.value && freeSlots().length === 0) {
-          <mat-hint>Aucun créneau libre sur cette disponibilité.</mat-hint>
-        }
-      </mat-form-field>
-
-      <h3 class="book-section-title">Patient</h3>
-      <div class="book-patient__grid">
-        <mat-form-field appearance="outline">
-          <mat-label>Prénom</mat-label>
-          <input matInput formControlName="firstName" autocomplete="off" data-testid="book-firstname" />
-          @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
-            <mat-error>Le prénom est requis.</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Nom</mat-label>
-          <input matInput formControlName="lastName" autocomplete="off" data-testid="book-lastname" />
-          @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
-            <mat-error>Le nom est requis.</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="book-field--full">
-          <mat-label>E-mail (optionnel)</mat-label>
-          <input matInput type="email" formControlName="email" autocomplete="off" data-testid="book-email" />
-          @if (form.controls.email.touched && form.controls.email.hasError('email')) {
-            <mat-error>L'adresse e-mail est invalide.</mat-error>
-          }
-        </mat-form-field>
+      <!-- Étape 1 : Médecin -->
+      <div class="book-step">
+        <div class="book-step__rail">
+          <span class="book-step__num" [class.book-step__num--done]="!!form.controls.doctorId.value">1</span>
+          <span class="book-step__line"></span>
+        </div>
+        <div class="book-step__body">
+          <mat-form-field appearance="outline">
+            <mat-label>Médecin</mat-label>
+            <mat-select formControlName="doctorId" (selectionChange)="onDoctorChange($event.value)" data-testid="book-doctor">
+              @for (doctor of doctors(); track doctor.id) {
+                <mat-option [value]="doctor.id">{{ doctorLabel(doctor) }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.doctorId.touched && form.controls.doctorId.invalid) {
+              <mat-error>Sélectionnez un médecin.</mat-error>
+            }
+          </mat-form-field>
+        </div>
       </div>
 
-      <mat-form-field appearance="outline" class="book-field--full">
-        <mat-label>Motif (optionnel)</mat-label>
-        <input matInput formControlName="reason" maxlength="500" data-testid="book-reason" />
-      </mat-form-field>
+      <!-- Étape 2 : Disponibilité + créneau -->
+      <div class="book-step">
+        <div class="book-step__rail">
+          <span class="book-step__num" [class.book-step__num--done]="!!form.controls.slotId.value">2</span>
+          <span class="book-step__line"></span>
+        </div>
+        <div class="book-step__body">
+          <mat-form-field appearance="outline">
+            <mat-label>Disponibilité</mat-label>
+            <mat-select formControlName="availabilityId" (selectionChange)="onAvailabilityChange($event.value)" data-testid="book-availability">
+              @for (availability of doctorAvailabilities(); track availability.id) {
+                <mat-option [value]="availability.id">{{ availabilityLabel(availability) }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.doctorId.value && doctorAvailabilities().length === 0) {
+              <mat-hint>Aucune disponibilité pour ce médecin.</mat-hint>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Créneau</mat-label>
+            <mat-select formControlName="slotId" data-testid="book-slot">
+              @for (slot of freeSlots(); track slot.id) {
+                <mat-option [value]="slot.id">{{ slotLabel(slot) }}</mat-option>
+              }
+            </mat-select>
+            @if (loadingSlots()) {
+              <mat-hint>Chargement des créneaux…</mat-hint>
+            } @else if (form.controls.availabilityId.value && freeSlots().length === 0) {
+              <mat-hint>Aucun créneau libre sur cette disponibilité.</mat-hint>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Étape 3 : Patient -->
+      <div class="book-step book-step--last">
+        <div class="book-step__rail">
+          <span class="book-step__num">3</span>
+        </div>
+        <div class="book-step__body">
+          <h3 class="book-section-title">Patient</h3>
+          <div class="book-patient__grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Prénom</mat-label>
+              <input matInput formControlName="firstName" autocomplete="off" data-testid="book-firstname" />
+              @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
+                <mat-error>Le prénom est requis.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="lastName" autocomplete="off" data-testid="book-lastname" />
+              @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
+                <mat-error>Le nom est requis.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="book-field--full">
+              <mat-label>E-mail (optionnel)</mat-label>
+              <input matInput type="email" formControlName="email" autocomplete="off" data-testid="book-email" />
+              @if (form.controls.email.touched && form.controls.email.hasError('email')) {
+                <mat-error>L'adresse e-mail est invalide.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="book-field--full">
+            <mat-label>Motif (optionnel)</mat-label>
+            <input matInput formControlName="reason" maxlength="500" data-testid="book-reason" />
+          </mat-form-field>
+        </div>
+      </div>
     </form>
   }
 </mat-dialog-content>
@@ -120,12 +144,7 @@
     [disabled]="saving() || form.invalid || loading() || !!loadError() || noDoctors()"
     data-testid="book-submit"
   >
-    @if (saving()) {
-      <mat-icon aria-hidden="true">hourglass_top</mat-icon>
-      Réservation…
-    } @else {
-      <mat-icon aria-hidden="true">event_available</mat-icon>
-      Réserver
-    }
+    <mat-icon aria-hidden="true">{{ saving() ? 'hourglass_top' : 'event_available' }}</mat-icon>
+    <span>{{ saving() ? 'Réservation…' : 'Réserver' }}</span>
   </button>
 </mat-dialog-actions>

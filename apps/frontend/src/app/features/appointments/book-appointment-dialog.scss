@@ -3,13 +3,35 @@
 }
 
 mat-dialog-content {
-  min-width: min(520px, 82vw);
+  min-width: min(540px, 82vw);
+}
+
+.book-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mp-space-3);
+  padding-bottom: var(--mp-space-3);
+}
+
+.book-head__title {
+  margin: 0;
+  font-family: var(--mp-font-display-family);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.45px;
+  color: var(--mp-color-text);
+}
+
+.book-head__subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--mp-color-text-secondary);
 }
 
 .book-form {
   display: flex;
   flex-direction: column;
-  gap: var(--mp-space-2);
   padding-top: var(--mp-space-2);
 }
 
@@ -17,9 +39,62 @@ mat-dialog-content {
   width: 100%;
 }
 
+// --- Stepper (rail numéroté) -------------------------------------------------
+.book-step {
+  display: flex;
+  gap: var(--mp-space-3);
+
+  &--last .book-step__body {
+    padding-bottom: var(--mp-space-1);
+  }
+}
+
+.book-step__rail {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 26px;
+}
+
+.book-step__num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--mp-color-surface-variant);
+  color: var(--mp-color-text-secondary);
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 140ms var(--mp-ease-standard),
+    color 140ms var(--mp-ease-standard);
+
+  &--done {
+    background: var(--mp-color-primary);
+    color: var(--mp-color-on-primary);
+  }
+}
+
+.book-step__line {
+  flex: 1;
+  width: 1.5px;
+  background: var(--mp-color-border);
+  margin: 6px 0;
+}
+
+.book-step__body {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: var(--mp-space-4);
+}
+
 .book-section-title {
-  margin: var(--mp-space-2) 0 0;
-  font-size: 15px;
+  margin: 1px 0 8px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--mp-color-text);
 }
@@ -32,6 +107,10 @@ mat-dialog-content {
 
 .book-field--full {
   grid-column: 1 / -1;
+}
+
+mat-dialog-actions {
+  gap: var(--mp-space-2);
 }
 
 @media (max-width: 560px) {

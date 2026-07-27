@@ -1,18 +1,33 @@
-<section class="users-page">
-  <header class="users-page__header">
-    <h1 class="users-page__title">Utilisateurs</h1>
-    <p class="users-page__subtitle">Comptes rattachés à votre périmètre.</p>
+<div class="users">
+  <header class="users__header">
+    <h1 class="users__title">Utilisateurs</h1>
+    <p class="users__subtitle">Comptes rattachés à votre périmètre.</p>
   </header>
 
   @if (loading()) {
-    <!-- État de chargement : squelettes (pas de spinner plein écran). -->
-    <div class="users-skeleton" aria-busy="true" aria-live="polite" data-testid="users-loading">
+    <div class="users-toolbar">
+      <div class="mp-search">
+        <mat-icon class="mp-search__icon" aria-hidden="true">search</mat-icon>
+        <input class="mp-search__input" type="search" placeholder="Rechercher un compte" disabled />
+      </div>
+    </div>
+    <div class="mp-table" aria-busy="true" data-testid="users-loading">
+      <div class="mp-table__grid users-grid mp-table__head">
+        <div>Nom</div>
+        <div>E-mail</div>
+        <div>Rôle</div>
+        <div>Statut</div>
+      </div>
       @for (row of skeletonRows; track $index) {
-        <app-skeleton height="48px" />
+        <div class="mp-table__grid users-grid mp-table__row">
+          <span class="mp-skel mp-skel--70"></span>
+          <span class="mp-skel mp-skel--80"></span>
+          <span class="mp-skel mp-skel--chip"></span>
+          <span class="mp-skel mp-skel--chip"></span>
+        </div>
       }
     </div>
   } @else if (error(); as message) {
-    <!-- État d'erreur : état plein avec reprise. -->
     <app-error-state
       [message]="message"
       title="Impossible de charger les utilisateurs"
@@ -20,7 +35,6 @@
       data-testid="users-error"
     />
   } @else if (isEmpty()) {
-    <!-- État vide : aucun utilisateur. -->
     <app-empty-state
       icon="group"
       title="Aucun utilisateur"
@@ -28,88 +42,78 @@
       data-testid="users-empty"
     />
   } @else {
-    <!-- État de succès : recherche + tableau + pagination. -->
     <div class="users-toolbar">
-      <mat-form-field appearance="outline" class="users-search" subscriptSizing="dynamic">
-        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
-        <mat-label>Rechercher</mat-label>
+      <div class="mp-search">
+        <mat-icon class="mp-search__icon" aria-hidden="true">search</mat-icon>
         <input
-          matInput
-          #search
-          (input)="applyFilter(search.value)"
-          placeholder="Nom, e-mail, rôle…"
+          class="mp-search__input"
+          type="search"
+          [value]="search()"
+          (input)="onSearch($any($event.target).value)"
+          placeholder="Rechercher un compte"
+          aria-label="Rechercher"
           data-testid="users-search"
         />
-        @if (search.value) {
+      </div>
+      <div class="users-chips">
+        @for (c of roleChips(); track c.role) {
           <button
-            matIconButton
-            matSuffix
             type="button"
-            aria-label="Effacer la recherche"
-            (click)="search.value = ''; applyFilter('')"
+            class="mp-chip-filter mp-chip-filter--square"
+            [class.mp-chip-filter--on]="isRoleSelected(c.role)"
+            (click)="toggleRole(c.role)"
           >
-            <mat-icon>close</mat-icon>
+            {{ c.label }}
           </button>
         }
-      </mat-form-field>
+      </div>
     </div>
 
-    @if (filteredCount() === 0) {
-      <app-empty-state
-        icon="search_off"
-        title="Aucun résultat"
-        [description]="'Aucun utilisateur ne correspond à « ' + searchTerm() + ' ».'"
-        data-testid="users-no-results"
-      />
-    } @else {
-      <div class="users-table__wrapper">
-        <table mat-table [dataSource]="dataSource" class="users-table" data-testid="users-table">
-          <!-- Colonne Nom -->
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef scope="col">Nom</th>
-            <td mat-cell *matCellDef="let user">{{ displayName(user) }}</td>
-          </ng-container>
+    <div class="mp-table" data-testid="users-table">
+      <div class="mp-table__scroll">
+        <div class="mp-table__grid users-grid mp-table__head">
+          <div>Nom</div>
+          <div>E-mail</div>
+          <div>Rôle</div>
+          <div>Statut</div>
+        </div>
 
-          <!-- Colonne E-mail -->
-          <ng-container matColumnDef="email">
-            <th mat-header-cell *matHeaderCellDef scope="col">E-mail</th>
-            <td mat-cell *matCellDef="let user">{{ user.email ?? '—' }}</td>
-          </ng-container>
-
-          <!-- Colonne Rôle -->
-          <ng-container matColumnDef="role">
-            <th mat-header-cell *matHeaderCellDef scope="col">Rôle</th>
-            <td mat-cell *matCellDef="let user">
-              <app-role-badge [role]="user.role" />
-            </td>
-          </ng-container>
-
-          <!-- Colonne Statut : texte + pastille (jamais la couleur seule) -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef scope="col">Statut</th>
-            <td mat-cell *matCellDef="let user">
-              <span
-                class="users-status"
-                [class.users-status--active]="user.isActive"
-                [class.users-status--inactive]="!user.isActive"
-              >
-                <span class="users-status__dot" aria-hidden="true"></span>
-                {{ user.isActive ? 'Actif' : 'Inactif' }}
+        @for (r of pagedRows(); track r.user.id) {
+          <div class="mp-table__grid users-grid mp-table__row" data-testid="users-row">
+            <div class="users-cell__name">
+              <app-avatar [name]="r.name" [email]="r.user.email ?? ''" size="sm" />
+              <span class="users-cell__name-text" [class.rdv-cell--placeholder]="r.namePlaceholder" [title]="r.name">
+                {{ r.name }}
               </span>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="users-row"></tr>
-        </table>
+            </div>
+            <div class="users-cell__email" [class.rdv-cell--placeholder]="r.emailPlaceholder">
+              {{ r.email }}
+            </div>
+            <div><span class="mp-role-badge">{{ r.role }}</span></div>
+            <div><app-status-chip [model]="r.status" /></div>
+          </div>
+        }
       </div>
-    }
 
-    <mat-paginator
-      [pageSize]="10"
-      [pageSizeOptions]="[10, 25, 50]"
-      [hidden]="filteredCount() === 0"
-      aria-label="Pagination des utilisateurs"
-    />
+      @if (isEmptyFiltered()) {
+        <div class="mp-table__empty" data-testid="users-no-results">
+          <div class="mp-table__empty-title">Aucun résultat</div>
+          <div class="mp-table__empty-text">Aucun utilisateur ne correspond à ces filtres.</div>
+          <button type="button" class="mp-btn-outline" (click)="clearFilters()">Effacer les filtres</button>
+        </div>
+      } @else {
+        <div class="mp-table__foot">
+          <span class="mp-tnum">{{ rangeLabel() }}</span>
+          <div class="mp-pager">
+            <button type="button" aria-label="Page précédente" (click)="prevPage()" [disabled]="!canPrev()">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button type="button" aria-label="Page suivante" (click)="nextPage()" [disabled]="!canNext()">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
   }
-</section>
+</div>

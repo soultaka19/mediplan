@@ -2,6 +2,7 @@
 // - Thème (tokens `--mp-*` + Material 3 + pont system tokens) : voir _theme.scss.
 // - Tailwind v4 : isolé dans styles/tailwind.css (référencé dans angular.json).
 @use 'styles/theme';
+@use 'styles/redesign';
 
 html,
 body {
@@ -26,6 +27,168 @@ mat-icon {
     'wght' 400,
     'GRAD' 0,
     'opsz' 24;
+}
+
+// Animations partagées du redesign (MediPlan.dc.html) : réutilisées par le shell,
+// les écrans et les composants (spinners, skeletons, entrées de liste, pastilles).
+@keyframes mpSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes mpPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.72);
+  }
+}
+@keyframes mpShimmer {
+  0% {
+    background-position: -320px 0;
+  }
+  100% {
+    background-position: 320px 0;
+  }
+}
+@keyframes mpUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes mpIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+// Flash de succès : surlignage bref d'une ligne/carte (surface) après une action
+// réussie. Se termine sur la surface pour un retour propre sans clignotement.
+@keyframes mpFlash {
+  0% {
+    background: var(--mp-color-primary-container);
+  }
+  100% {
+    background: var(--mp-color-surface);
+  }
+}
+// Fondu d'entrée sans transform : utilisé sur le conteneur de contenu
+// (`.mp-main__inner`). IMPORTANT : ne jamais réintroduire de `transform` ici — un
+// transform résiduel (fill-mode) ferait de ce conteneur le bloc englobant des
+// `position: fixed` internes (panneaux latéraux), décalant panneau + backdrop.
+@keyframes mpFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+// Entrée d'un tiroir latéral droit : glissement horizontal depuis la droite.
+@keyframes mpPanelIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Spinner circulaire réutilisable : blanc par défaut (sur bouton primaire),
+// variante `--primary` (sur fond clair). Consomme l'animation mpSpin.
+.mp-spinner {
+  display: inline-block;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid rgb(255 255 255 / 40%);
+  border-top-color: #fff;
+  animation: mpSpin 0.7s linear infinite;
+
+  &--primary {
+    border-color: color-mix(in srgb, var(--mp-color-primary) 28%, transparent);
+    border-top-color: var(--mp-color-primary);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+// Affordance de clic : curseur « main » sur tout élément interactif (les <button>
+// natifs et les <div role="button"> n'affichent pas `pointer` par défaut), et
+// curseur « défaut » sur les éléments désactivés. Rétablit l'indication de clic
+// attendue (spec MediPlan.dc.html — `button{cursor:pointer}`).
+button:not(:disabled),
+a[href],
+[role='button']:not([aria-disabled='true']),
+[role='menuitem'],
+[role='menuitemcheckbox'],
+label[for],
+summary,
+select:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled='true'] {
+  cursor: default;
+}
+
+// Retour d'action : snackbars typés (succès vert / erreur rouge) pour un état de
+// réussite lisible d'un coup d'œil, au lieu du snackbar neutre par défaut. On
+// cible directement la surface MDC (les tokens `--mdc-snackbar-*` ne suffisent
+// pas selon la version de Material) avec `!important` pour battre la feuille MDC.
+.mp-snackbar-success {
+  --mdc-snackbar-container-color: var(--mp-color-success);
+  --mdc-snackbar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: #fff;
+
+  .mdc-snackbar__surface {
+    background-color: var(--mp-color-success) !important;
+  }
+
+  .mdc-snackbar__label,
+  .mat-mdc-snack-bar-label {
+    color: #fff !important;
+  }
+}
+
+.mp-snackbar-error {
+  --mdc-snackbar-container-color: var(--mp-color-error);
+  --mdc-snackbar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: #fff;
+
+  .mdc-snackbar__surface {
+    background-color: var(--mp-color-error) !important;
+  }
+
+  .mdc-snackbar__label,
+  .mat-mdc-snack-bar-label {
+    color: #fff !important;
+  }
 }
 
 // Focus clavier toujours visible (§6.2) — ne jamais supprimer sans alternative.

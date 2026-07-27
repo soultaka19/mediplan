@@ -1,147 +1,156 @@
-<section class="flow-page">
-  <header class="flow-page__header">
+<div class="flux">
+  <header class="flux__header">
     <div>
-      <h1 class="flow-page__title">Flux clinique du jour</h1>
-      <p class="flow-page__subtitle">Suivi des rendez-vous et statuts de consultation.</p>
+      <h1 class="flux__title">Flux clinique du jour</h1>
+      <p class="flux__subtitle">Suivi des rendez-vous et statuts de consultation.</p>
     </div>
-
-    <button matButton="outlined" type="button" (click)="load()" [disabled]="loading()">
-      <mat-icon aria-hidden="true">refresh</mat-icon>
-      Actualiser
-    </button>
+    <div class="flux__tools">
+      @if (!loading() && !error()) {
+        <span class="flux-sync">
+          <span class="flux-sync__dot" aria-hidden="true"></span>
+          Synchronisé {{ syncLabel() }}
+        </span>
+      }
+      <button type="button" class="flux-refresh" (click)="refresh()" [disabled]="refreshing()">
+        @if (refreshing()) {
+          <span class="mp-spinner mp-spinner--primary" aria-hidden="true"></span>
+        } @else {
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+        }
+        Actualiser
+      </button>
+    </div>
   </header>
 
+  @if (error(); as err) {
+    <div class="flux-error" role="alert">
+      <span class="flux-error__mark" aria-hidden="true">!</span>
+      <span class="flux-error__text">{{ err }}</span>
+      <button type="button" class="flux-error__retry" (click)="load()">Réessayer</button>
+    </div>
+  }
+
   @if (loading()) {
-    <div class="flow-skeleton" aria-busy="true" aria-live="polite" data-testid="flow-loading">
-      @for (row of skeletonRows; track $index) {
-        <app-skeleton height="52px" />
+    <div class="flux-list">
+      @for (s of skeletonRows; track $index) {
+        <div class="flux-skel"></div>
       }
     </div>
-  } @else if (error(); as message) {
-    <app-error-state
-      [message]="message"
-      title="Impossible de charger le flux du jour"
-      (retry)="load()"
-      data-testid="flow-error"
-    />
   } @else if (isEmpty()) {
-    <app-empty-state
-      icon="event_busy"
-      title="Aucun rendez-vous aujourd'hui"
-      description="La file clinique du jour est vide pour le moment."
-      data-testid="flow-empty"
-    />
-  } @else {
-    <div class="flow-toolbar">
-      <mat-form-field appearance="outline" class="flow-search" subscriptSizing="dynamic">
-        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
-        <mat-label>Rechercher</mat-label>
-        <input
-          matInput
-          #search
-          (input)="applyFilter(search.value)"
-          placeholder="Patient, médecin, statut…"
-          data-testid="flow-search"
-        />
-        @if (search.value) {
-          <button
-            matIconButton
-            matSuffix
-            type="button"
-            aria-label="Effacer la recherche"
-            (click)="search.value = ''; applyFilter('')"
-          >
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </mat-form-field>
-    </div>
-
-    @if (filteredCount() === 0) {
-      <app-empty-state
-        icon="search_off"
-        title="Aucun résultat"
-        [description]="'Aucun rendez-vous ne correspond à « ' + searchTerm() + ' ».'"
-        data-testid="flow-no-results"
-      />
-    } @else {
-      <div class="flow-table__wrapper">
-        <table mat-table [dataSource]="dataSource" class="flow-table" data-testid="flow-table">
-          <ng-container matColumnDef="time">
-            <th mat-header-cell *matHeaderCellDef scope="col">Heure</th>
-            <td mat-cell *matCellDef="let appointment">
-              {{ appointment.startAt | date: 'HH:mm' }} - {{ appointment.endAt | date: 'HH:mm' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="patient">
-            <th mat-header-cell *matHeaderCellDef scope="col">Patient</th>
-            <td mat-cell *matCellDef="let appointment">{{ patientLabel(appointment) }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="doctor">
-            <th mat-header-cell *matHeaderCellDef scope="col">Medecin</th>
-            <td mat-cell *matCellDef="let appointment">{{ doctorLabel(appointment) }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef scope="col">Statut</th>
-            <td mat-cell *matCellDef="let appointment">
-              <span class="flow-status" [attr.data-status]="appointment.status">
-                {{ statusLabel(appointment.status) }}
-              </span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
-            <td mat-cell *matCellDef="let appointment">
-              <div class="flow-actions">
-                @for (action of availableActions(appointment); track action.status) {
-                  <button
-                    matButton="outlined"
-                    type="button"
-                    class="flow-action"
-                    [attr.data-action]="action.status"
-                    [disabled]="updatingId() === appointment.id"
-                    (click)="updateStatus(appointment, action.status)"
-                    [attr.data-testid]="'flow-action-' + action.status"
-                  >
-                    <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
-                    {{ action.label }}
-                  </button>
-                }
-                @if (canCancel() && isCancellable(appointment.status)) {
-                  <button
-                    matButton="outlined"
-                    type="button"
-                    class="flow-action flow-action--cancel"
-                    [disabled]="updatingId() === appointment.id"
-                    (click)="cancel(appointment)"
-                    data-testid="flow-cancel"
-                  >
-                    <mat-icon aria-hidden="true">cancel</mat-icon>
-                    Annuler
-                  </button>
-                }
-                @if (!hasActions(appointment)) {
-                  <span class="flow-actions__empty">—</span>
-                }
-              </div>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns" data-testid="flow-row"></tr>
-        </table>
+    <div class="flux-empty">
+      <div class="flux-empty__icon" aria-hidden="true">
+        <mat-icon>event_busy</mat-icon>
       </div>
+      <div class="flux-empty__title">Aucun rendez-vous prévu aujourd’hui</div>
+      <div class="flux-empty__text">
+        La file clinique est vide. Les rendez-vous réservés pour aujourd’hui apparaîtront ici
+        automatiquement.
+      </div>
+    </div>
+  } @else {
+    <div class="flux-groups">
+      @if (activeRows().length) {
+        <section class="flux-group">
+          <div class="flux-group__head">
+            <h2 class="flux-group__title">Présents</h2>
+            <span class="flux-group__count flux-group__count--teal mp-tnum">{{ activeRows().length }}</span>
+            <span class="flux-group__rule"></span>
+          </div>
+          <div class="flux-list">
+            @for (r of activeRows(); track r.item.id) {
+              <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r, variant: 'active' }" />
+            }
+          </div>
+        </section>
+      }
+
+      @if (upcomingRows().length) {
+        <section class="flux-group">
+          <div class="flux-group__head">
+            <h2 class="flux-group__title">À venir</h2>
+            <span class="flux-group__count flux-group__count--blue mp-tnum">{{ upcomingRows().length }}</span>
+            <span class="flux-group__rule"></span>
+          </div>
+          <div class="flux-list">
+            @for (r of upcomingRows(); track r.item.id) {
+              <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r, variant: 'upcoming' }" />
+            }
+          </div>
+        </section>
+      }
+
+      @if (doneRows().length) {
+        <section class="flux-group">
+          <div class="flux-group__head">
+            <h2 class="flux-group__title">Clôturés</h2>
+            <span class="flux-group__count mp-tnum">{{ doneRows().length }}</span>
+            <span class="flux-group__rule"></span>
+          </div>
+          <div class="flux-list">
+            @for (r of doneRows(); track r.item.id) {
+              <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r, variant: 'done' }" />
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>
+
+<!-- Ligne de rendez-vous (factorisée entre les trois groupes) -->
+<ng-template #rowTpl let-r="r" let-variant="variant">
+  <div
+    class="flux-row"
+    [class.flux-row--active]="variant === 'active'"
+    [class.flux-row--done]="variant === 'done'"
+    [class.flux-row--flash]="r.item.id === flashId()"
+  >
+    <div class="flux-row__time mp-tnum">{{ r.time }}</div>
+    <div class="flux-row__body">
+      <div class="flux-row__patient">{{ r.patient }}</div>
+      <div class="flux-row__meta">{{ r.meta }}</div>
+    </div>
+    <app-status-chip [model]="r.chip" [size]="variant === 'active' ? 'md' : 'sm'" />
+
+    @if (r.nextStatus) {
+      <button
+        type="button"
+        class="flux-row__advance"
+        [class.flux-row__advance--teal]="variant === 'active'"
+        [class.flux-row__advance--outline]="variant === 'upcoming'"
+        (click)="advance(r)"
+        [disabled]="r.pending"
+      >
+        @if (r.pending) {
+          <span class="mp-spinner" aria-hidden="true"></span>
+        }
+        {{ r.nextLabel }}
+      </button>
     }
 
-    <mat-paginator
-      [pageSize]="10"
-      [pageSizeOptions]="[10, 25, 50]"
-      [hidden]="filteredCount() === 0"
-      aria-label="Pagination des rendez-vous"
-    />
-  }
-</section>
+    @if (r.menuActions.length || r.cancellable) {
+      <button
+        type="button"
+        class="flux-row__menu"
+        [matMenuTriggerFor]="rowMenu"
+        aria-label="Autres actions"
+      >
+        <mat-icon>more_horiz</mat-icon>
+      </button>
+      <mat-menu #rowMenu="matMenu">
+        @for (a of r.menuActions; track a.status) {
+          <button mat-menu-item type="button" (click)="updateStatus(r.item, a.status)">
+            <mat-icon>{{ a.icon }}</mat-icon>
+            <span>{{ a.label }}</span>
+          </button>
+        }
+        @if (r.cancellable) {
+          <button mat-menu-item type="button" (click)="cancel(r.item)">
+            <mat-icon>event_busy</mat-icon>
+            <span>Annuler le rendez-vous</span>
+          </button>
+        }
+      </mat-menu>
+    }
+  </div>
+</ng-template>

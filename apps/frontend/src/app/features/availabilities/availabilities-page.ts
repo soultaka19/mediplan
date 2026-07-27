@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  ElementRef,
+  HostListener,
   computed,
   inject,
   signal,
-  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -16,24 +15,26 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { forkJoin, of } from 'rxjs';
 import { catchError, finalize, map } from 'rxjs/operators';
 
 import { AuthFacade, PublicUser } from '@core/auth';
 import { authErrorMessage } from '@shared/http/http-error-message';
-import { Alert, EmptyState, ErrorState, NotificationService, Skeleton } from '@shared/ui';
+import {
+  EmptyState,
+  ErrorState,
+  NotificationService,
+  StatusChip,
+  StatusChipModel,
+} from '@shared/ui';
 import { UserService } from '@features/admin/users/user.service';
-import { Availability, AvailabilitySlot, AvailabilityType } from './availability.models';
+import { Availability, AvailabilityType } from './availability.models';
 import { AvailabilityService } from './availability.service';
 
 /** Minuit d'aujourd'hui : borne minimale du calendrier (pas de plage passée). */
@@ -48,32 +49,24 @@ function minutesOfDay(time: Date): number {
   return time.getHours() * 60 + time.getMinutes();
 }
 
-/**
- * Validateur croisé posé sur `endTime` : l'heure de fin doit suivre l'heure de
- * début. Lit `startTime` via le groupe parent ; ne se déclenche que si les deux
- * heures sont renseignées.
- */
+/** Validateur croisé posé sur `endTime` : l'heure de fin doit suivre le début. */
 function endAfterStart(control: AbstractControl): ValidationErrors | null {
   const start = control.parent?.get('startTime')?.value as Date | null | undefined;
   const end = control.value as Date | null;
-  if (!start || !end) {
-    return null;
-  }
+  if (!start || !end) return null;
   return minutesOfDay(end) > minutesOfDay(start) ? null : { endBeforeStart: true };
 }
 
-/** Index d'un jour (à minuit), pour comparer des dates sans tenir compte de l'heure. */
+/** Index d'un jour (à minuit), pour comparer des dates sans l'heure. */
 function dayIndex(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-/** Validateur croisé posé sur `endDate` : la date de fin ne précède pas le début. */
+/** Validateur croisé posé sur `endDate` : la fin ne précède pas le début. */
 function endDateNotBeforeStart(control: AbstractControl): ValidationErrors | null {
   const start = control.parent?.get('startDate')?.value as Date | null | undefined;
   const end = control.value as Date | null;
-  if (!start || !end) {
-    return null;
-  }
+  if (!start || !end) return null;
   return dayIndex(end) >= dayIndex(start) ? null : { endDateBeforeStart: true };
 }
 
@@ -89,39 +82,67 @@ function eachDay(start: Date, end: Date): Date[] {
   return days;
 }
 
-/** Garde-fou : plage maximale créée en une fois (évite les boucles accidentelles). */
+/** Garde-fou : plage maximale créée en une fois. */
 const MAX_RANGE_DAYS = 62;
 
-/** En-tête de groupe (médecin) inséré dans les lignes du tableau groupé. */
-interface DoctorGroupRow {
-  readonly group: true;
+/** Groupe de disponibilités par médecin (carte repliable). */
+interface DoctorGroup {
   readonly doctorId: string;
-  readonly doctorName: string;
-  readonly count: number;
+  readonly name: string;
+  readonly initials: string;
+  readonly summary: string;
+  readonly open: boolean;
+  readonly rows: readonly AvailabilityRowView[];
 }
 
-/** Ligne du tableau : soit un en-tête de médecin, soit une disponibilité. */
-type AvailabilityRow = DoctorGroupRow | Availability;
+/** Ligne de disponibilité prête à l'affichage. */
+interface AvailabilityRowView {
+  readonly item: Availability;
+  readonly chip: StatusChipModel;
+  readonly date: string;
+  readonly hours: string;
+  readonly slot: string;
+  readonly note: string;
+  readonly notePlaceholder: boolean;
+}
 
+/** Puce de type de plage (Disponible / Congé). */
+function typeChip(type: AvailabilityType): StatusChipModel {
+  return type === 'time_off'
+    ? { tone: 'absent', label: 'Congé' }
+    : { tone: 'done', label: 'Disponible' };
+}
+
+/** Initiales (2 lettres max) à partir d'un nom affiché. */
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+/**
+ * Disponibilités (redesign MediPlan.dc.html §dispo).
+ *
+ * Liste en cartes groupées par médecin (repliables, résumé d'heures), type en
+ * `StatusChip`. Le formulaire d'ajout (Material datepicker/timepicker, validateurs
+ * croisés, aperçu de créneaux, création multi-jours) est ouvert en panneau
+ * latéral. Logique métier inchangée.
+ */
 @Component({
   selector: 'app-availabilities-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
-    MatButtonModule,
-    MatCardModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatProgressBarModule,
     MatSelectModule,
-    MatTableModule,
     MatTimepickerModule,
-    Alert,
     EmptyState,
     ErrorState,
-    Skeleton,
+    StatusChip,
   ],
   templateUrl: './availabilities-page.html',
   styleUrl: './availabilities-page.scss',
@@ -142,19 +163,14 @@ export class AvailabilitiesPage {
   readonly loadError = signal<string | null>(null);
   readonly availabilities = signal<readonly Availability[]>([]);
   readonly doctors = signal<readonly PublicUser[]>([]);
-  readonly selectedSlots = signal<readonly AvailabilitySlot[]>([]);
-  readonly selectedAvailabilityId = signal<string | null>(null);
-  /** Terme de recherche sur la liste des disponibilités. */
-  readonly searchTerm = signal('');
-  /** Aperçu en direct des créneaux que la plage saisie va générer. */
   readonly slotPreview = signal<string | null>(null);
-  /** Repli des options secondaires (type, durée, note) pour un formulaire épuré. */
   readonly showAdvanced = signal(false);
 
-  /** Ancre de la liste, pour y défiler après un ajout réussi. */
-  private readonly listAnchor = viewChild<ElementRef<HTMLElement>>('listAnchor');
+  /** Panneau latéral « Ajouter une plage » ouvert. */
+  readonly panelOpen = signal(false);
+  /** Médecins repliés (par id). */
+  private readonly collapsed = signal<ReadonlySet<string>>(new Set());
 
-  /** Pas de réservation proposés (réglage de clinique, pas la durée réelle). */
   protected readonly slotDurationOptions = [15, 20, 30, 45, 60] as const;
 
   readonly currentUser = this.auth.currentUser;
@@ -163,74 +179,38 @@ export class AvailabilitiesPage {
     () => !this.loading() && this.loadError() === null && this.availabilities().length === 0,
   );
 
-  /** Disponibilités filtrées par la recherche (médecin, type, note, horaire). */
-  readonly filteredAvailabilities = computed<readonly Availability[]>(() => {
-    const term = this.searchTerm().trim().toLowerCase();
-    const all = this.availabilities();
-    if (!term) {
-      return all;
-    }
-    return all.filter((a) =>
-      [
-        this.doctorName(a.doctorId),
-        this.typeLabel(a.type),
-        a.note ?? '',
-        this.formatDate(a.startAt),
-        this.formatTime(a.startAt),
-        this.formatTime(a.endAt),
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(term),
-    );
-  });
-
-  /** Nombre de disponibilités après filtre (0 = aucun résultat). */
-  readonly filteredCount = computed(() => this.filteredAvailabilities().length);
-
-  /**
-   * Lignes du tableau, groupées par médecin (nom affiché une seule fois en
-   * en-tête). Pour un médecin qui consulte ses propres plages, aucun en-tête
-   * (une seule personne) : on renvoie directement ses disponibilités triées.
-   */
-  readonly groupedRows = computed<AvailabilityRow[]>(() => {
-    const filtered = [...this.filteredAvailabilities()].sort((a, b) =>
-      a.startAt.localeCompare(b.startAt),
-    );
-
-    if (this.isDoctor()) {
-      return filtered;
-    }
-
-    const byDoctor = new Map<string, Availability[]>();
-    for (const availability of filtered) {
-      const list = byDoctor.get(availability.doctorId) ?? [];
-      list.push(availability);
-      byDoctor.set(availability.doctorId, list);
-    }
-
-    const orderedDoctorIds = [...byDoctor.keys()].sort((x, y) =>
-      this.doctorName(x).localeCompare(this.doctorName(y), 'fr'),
-    );
-
-    const rows: AvailabilityRow[] = [];
-    for (const doctorId of orderedDoctorIds) {
-      const items = byDoctor.get(doctorId)!;
-      rows.push({ group: true, doctorId, doctorName: this.doctorName(doctorId), count: items.length });
-      rows.push(...items);
-    }
-    return rows;
-  });
-
-  /** Prédicat de ligne : vrai pour un en-tête de groupe (médecin). */
-  protected readonly isGroupRow = (_: number, row: AvailabilityRow): row is DoctorGroupRow =>
-    (row as DoctorGroupRow).group === true;
-
-  /** Colonnes de données (le médecin est porté par l'en-tête de groupe). */
-  protected readonly displayedColumns = ['type', 'period', 'duration', 'note', 'actions'] as const;
-  protected readonly skeletonRows = Array.from({ length: 4 });
-  /** Borne minimale du calendrier (aujourd'hui). */
+  protected readonly skeletonRows = Array.from({ length: 3 });
   protected readonly minDate = startOfToday();
+
+  /** Disponibilités groupées par médecin, prêtes pour les cartes repliables. */
+  readonly doctorGroups = computed<readonly DoctorGroup[]>(() => {
+    const sorted = [...this.availabilities()].sort((a, b) => a.startAt.localeCompare(b.startAt));
+    const byDoctor = new Map<string, Availability[]>();
+    for (const a of sorted) {
+      const list = byDoctor.get(a.doctorId) ?? [];
+      list.push(a);
+      byDoctor.set(a.doctorId, list);
+    }
+    const collapsed = this.collapsed();
+    return [...byDoctor.keys()]
+      .sort((x, y) => this.doctorName(x).localeCompare(this.doctorName(y), 'fr'))
+      .map((doctorId) => {
+        const items = byDoctor.get(doctorId)!;
+        const name = this.doctorName(doctorId);
+        const available = items.filter((i) => i.type === 'available').length;
+        const off = items.length - available;
+        const parts = [`${items.length} plage${items.length > 1 ? 's' : ''}`];
+        if (off > 0) parts.push(`${off} congé${off > 1 ? 's' : ''}`);
+        return {
+          doctorId,
+          name,
+          initials: initialsOf(name),
+          summary: parts.join(' · '),
+          open: !collapsed.has(doctorId),
+          rows: items.map((item) => this.toRow(item)),
+        };
+      });
+  });
 
   readonly form = this.fb.group({
     doctorId: this.fb.control(''),
@@ -250,8 +230,6 @@ export class AvailabilitiesPage {
   constructor() {
     this.load();
 
-    // Date de fin : par défaut = date de début (cas « journée unique » en un clic),
-    // et on revalide la règle « fin ≥ début » à chaque changement de début.
     this.form.controls.startDate.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((start) => {
@@ -262,12 +240,10 @@ export class AvailabilitiesPage {
         this.form.controls.endDate.updateValueAndValidity({ emitEvent: false });
       });
 
-    // Revalide l'heure de fin quand l'heure de début change (règle « fin > début »).
     this.form.controls.startTime.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.form.controls.endTime.updateValueAndValidity({ emitEvent: false }));
 
-    // Aperçu en direct des créneaux à partir de la plage + du pas choisi.
     this.form.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.slotPreview.set(this.computeSlotPreview()));
@@ -297,16 +273,41 @@ export class AvailabilitiesPage {
       });
   }
 
-  /** Met à jour le terme de recherche (le filtrage/regroupement est réactif). */
-  applyFilter(value: string): void {
-    this.searchTerm.set(value);
+  /** Ouvre le panneau d'ajout. */
+  openPanel(): void {
+    this.error.set(null);
+    this.panelOpen.set(true);
+  }
+
+  /** Ferme le panneau d'ajout. */
+  closePanel(): void {
+    this.panelOpen.set(false);
+  }
+
+  /** Échap ferme le panneau d'ajout (convention modale + accessibilité). */
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.panelOpen()) this.closePanel();
   }
 
   /**
-   * Décrit, en une ligne, ce que la plage saisie va produire : « ≈ N créneaux de
-   * D min ». Renvoie null si les données sont incomplètes ou incohérentes ; pour
-   * un congé, le rappelle explicitement (aucun créneau généré).
+   * Vrai si le formulaire peut être soumis : validité standard + médecin choisi
+   * (obligatoire quand l'utilisateur n'est pas lui-même médecin). Utilisé pour
+   * désactiver « Ajouter » tant que le formulaire est incomplet — même patron que
+   * la réservation, pour une soumission cohérente dans toute l'application.
    */
+  protected canSubmit(): boolean {
+    return this.form.valid && (this.isDoctor() || !!this.form.controls.doctorId.value);
+  }
+
+  /** Replie/déplie un groupe de médecin. */
+  toggleGroup(doctorId: string): void {
+    const next = new Set(this.collapsed());
+    if (next.has(doctorId)) next.delete(doctorId);
+    else next.add(doctorId);
+    this.collapsed.set(next);
+  }
+
   private computeSlotPreview(): string | null {
     const { type, startDate, endDate, startTime, endTime, slotDurationMin } =
       this.form.getRawValue();
@@ -320,20 +321,12 @@ export class AvailabilitiesPage {
       return days > 0 ? `Congé sur ${days} jour${days > 1 ? 's' : ''} — aucun créneau généré.` : null;
     }
 
-    if (!days || !startTime || !endTime || !slotDurationMin) {
-      return null;
-    }
+    if (!days || !startTime || !endTime || !slotDurationMin) return null;
     const span = minutesOfDay(endTime) - minutesOfDay(startTime);
-    if (span <= 0) {
-      return null;
-    }
+    if (span <= 0) return null;
     const perDay = Math.floor(span / slotDurationMin);
-    if (perDay <= 0) {
-      return `La plage horaire est plus courte qu'un créneau de ${slotDurationMin} min.`;
-    }
-    if (days === 1) {
-      return `≈ ${perDay} créneau${perDay > 1 ? 'x' : ''} de ${slotDurationMin} min réservables.`;
-    }
+    if (perDay <= 0) return `La plage horaire est plus courte qu'un créneau de ${slotDurationMin} min.`;
+    if (days === 1) return `≈ ${perDay} créneau${perDay > 1 ? 'x' : ''} de ${slotDurationMin} min réservables.`;
     return `≈ ${days} jours × ${perDay} = ${perDay * days} créneaux de ${slotDurationMin} min.`;
   }
 
@@ -358,22 +351,14 @@ export class AvailabilitiesPage {
       return;
     }
 
-    // Le backend n'empêche pas les chevauchements : on saute côté client les
-    // jours où le médecin a déjà une disponibilité qui recouvre ce créneau
-    // horaire, pour ne pas créer de doublons.
     const targetDoctorId = this.isDoctor() ? (this.currentUser()?.id ?? '') : value.doctorId;
     const startMin = minutesOfDay(value.startTime!);
     const endMin = minutesOfDay(value.endTime!);
     const alreadyCovered = (day: Date): boolean =>
       this.availabilities().some((existing) => {
-        if (existing.doctorId !== targetDoctorId) {
-          return false;
-        }
+        if (existing.doctorId !== targetDoctorId) return false;
         const existingStart = new Date(existing.startAt);
-        if (dayIndex(existingStart) !== dayIndex(day)) {
-          return false;
-        }
-        // Chevauchement horaire : [aStart, aEnd) ∩ [start, end) ≠ ∅.
+        if (dayIndex(existingStart) !== dayIndex(day)) return false;
         return minutesOfDay(existingStart) < endMin && startMin < minutesOfDay(new Date(existing.endAt));
       });
 
@@ -387,8 +372,6 @@ export class AvailabilitiesPage {
 
     this.saving.set(true);
 
-    // Une disponibilité par jour restant, avec le même horaire journalier. Chaque
-    // création est isolée : un échec ponctuel n'interrompt pas toute la plage.
     const requests = daysToCreate.map((day) =>
       this.availabilityService
         .createAvailability({
@@ -414,16 +397,13 @@ export class AvailabilitiesPage {
         if (created > 0) {
           const { title, message } = this.buildSuccessNotice(created, skipped, daysToCreate, value);
           this.resetForm();
+          this.closePanel();
           this.notifications
             .successDialog(title, message)
             .afterClosed()
             .subscribe(() => {
-              // Le retour de focus du dialogue peut « toucher » un champ vidé et
-              // afficher une erreur : on remet le formulaire à l'état intact,
-              // puis on défile vers la liste où figure la nouvelle plage.
               this.form.markAsUntouched();
               this.form.markAsPristine();
-              this.scrollToList();
             });
         } else {
           this.error.set('Aucune disponibilité créée : la plage est déjà définie pour ce médecin.');
@@ -432,17 +412,10 @@ export class AvailabilitiesPage {
       });
   }
 
-  /** Affiche/masque les options secondaires (type, durée, note). */
   protected toggleAdvanced(): void {
     this.showAdvanced.update((visible) => !visible);
   }
 
-  /** Défile en douceur jusqu'à la liste des disponibilités. */
-  private scrollToList(): void {
-    this.listAnchor()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  /** Compose le titre + message clair du popup de confirmation d'ajout. */
   private buildSuccessNotice(
     created: number,
     skipped: number,
@@ -472,9 +445,7 @@ export class AvailabilitiesPage {
     if (value.type === 'time_off') {
       lines.push(`${who} — congé ${dateText}.`);
     } else {
-      lines.push(
-        `${who} — ${dateText}, de ${timeFmt(value.startTime!)} à ${timeFmt(value.endTime!)}.`,
-      );
+      lines.push(`${who} — ${dateText}, de ${timeFmt(value.startTime!)} à ${timeFmt(value.endTime!)}.`);
       lines.push(`Pas de réservation : ${value.slotDurationMin} min par créneau.`);
     }
     if (skipped > 0) {
@@ -483,7 +454,6 @@ export class AvailabilitiesPage {
     return { title, message: lines.join('\n') };
   }
 
-  /** Réinitialise le formulaire en conservant le médecin sélectionné. */
   private resetForm(): void {
     this.form.reset({
       doctorId: this.form.controls.doctorId.value,
@@ -504,10 +474,6 @@ export class AvailabilitiesPage {
           'Disponibilité supprimée',
           'La plage et ses créneaux réservables ont été retirés.',
         );
-        if (this.selectedAvailabilityId() === availability.id) {
-          this.selectedAvailabilityId.set(null);
-          this.selectedSlots.set([]);
-        }
         this.load();
       },
       error: (err: unknown) => {
@@ -516,45 +482,40 @@ export class AvailabilitiesPage {
     });
   }
 
-  showSlots(availability: Availability): void {
-    this.selectedAvailabilityId.set(availability.id);
-    this.availabilityService.generateSlots(availability.id).subscribe({
-      next: (slots) => this.selectedSlots.set(slots),
-      error: (err: unknown) => this.notifications.error(authErrorMessage(err)),
-    });
-  }
-
   protected doctorName(doctorId: string): string {
-    const doctor = this.doctors().find((item) => item.id === doctorId);
-    if (!doctor) {
-      return 'Médecin';
+    const current = this.currentUser();
+    if (current && current.id === doctorId) {
+      const self = [current.firstName, current.lastName].filter(Boolean).join(' ').trim();
+      if (self) return self;
     }
+    const doctor = this.doctors().find((item) => item.id === doctorId);
+    if (!doctor) return 'Médecin';
     const fullName = [doctor.firstName, doctor.lastName].filter(Boolean).join(' ').trim();
     return fullName || doctor.email || 'Médecin';
   }
 
-  protected typeLabel(type: AvailabilityType): string {
-    return type === 'available' ? 'Disponible' : 'Congé';
-  }
-
-  protected formatDateTime(value: string): string {
-    return new Intl.DateTimeFormat('fr-CA', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value));
-  }
-
   /** Date seule, lisible (ex. « 22 juill. 2026 »). */
-  protected formatDate(value: string): string {
+  private formatDate(value: string): string {
     return new Intl.DateTimeFormat('fr-CA', { dateStyle: 'medium' }).format(new Date(value));
   }
 
   /** Heure seule (ex. « 08:30 »). */
-  protected formatTime(value: string): string {
+  private formatTime(value: string): string {
     return new Intl.DateTimeFormat('fr-CA', { timeStyle: 'short' }).format(new Date(value));
   }
 
-  /** Combine une date (jour) et une heure (h/min) en un instant unique. */
+  private toRow(item: Availability): AvailabilityRowView {
+    return {
+      item,
+      chip: typeChip(item.type),
+      date: this.formatDate(item.startAt),
+      hours: `${this.formatTime(item.startAt)} – ${this.formatTime(item.endAt)}`,
+      slot: `${item.slotDurationMin} min`,
+      note: item.note?.trim() ? item.note : '—',
+      notePlaceholder: !item.note?.trim(),
+    };
+  }
+
   private combine(date: Date, time: Date): Date {
     const combined = new Date(date);
     combined.setHours(time.getHours(), time.getMinutes(), 0, 0);

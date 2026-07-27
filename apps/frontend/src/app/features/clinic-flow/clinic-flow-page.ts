@@ -1,31 +1,13 @@
-import { DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
 
 import { AuthFacade } from '@core/auth';
 import { authErrorMessage } from '@shared/http/http-error-message';
-import {
-  ConfirmDialog,
-  ConfirmDialogData,
-  EmptyState,
-  ErrorState,
-  NotificationService,
-  Skeleton,
-} from '@shared/ui';
+import { ConfirmDialog, ConfirmDialogData, NotificationService, StatusChip } from '@shared/ui';
+import { appointmentStatusChip } from './appointment-status-chip';
 import {
   AppointmentFlowItem,
   AppointmentStatus,
@@ -37,43 +19,73 @@ import { CancelAppointmentDialog, CancelDialogData } from './cancel-appointment-
 /** Statuts depuis lesquels un rendez-vous peut encore être annulé. */
 const CANCELLABLE_STATUSES: readonly AppointmentStatus[] = ['booked', 'arrived'];
 
-/** Action de changement de statut proposée dans le menu « Actions ». */
-interface FlowAction {
+/** Statuts « terminaux » (irréversibles) : confirmation explicite avant application. */
+const CONFIRM_STATUSES: readonly AppointmentStatus[] = ['completed', 'absent'];
+
+/** Transition « avancer » principale (bouton d'action de la ligne). */
+const FORWARD: Partial<Record<AppointmentStatus, UpdateAppointmentStatusPayload['status']>> = {
+  booked: 'arrived',
+  arrived: 'in_consultation',
+  in_consultation: 'completed',
+};
+
+/** Libellés des transitions (bouton d'avancement + menu). */
+const STATUS_ACTION_LABEL: Record<UpdateAppointmentStatusPayload['status'], string> = {
+  arrived: 'Marquer arrivé',
+  in_consultation: 'Démarrer la consultation',
+  completed: 'Terminer',
+  absent: 'Marquer absent',
+};
+
+/** Statuts « en cours » (groupe actif, mis en avant). */
+const ACTIVE_STATUSES: readonly AppointmentStatus[] = ['arrived', 'in_consultation'];
+/** Statuts « clôturés » (atténués, sans disparaître). */
+const DONE_STATUSES: readonly AppointmentStatus[] = ['completed', 'absent', 'cancelled'];
+
+/** Action secondaire (menu ⋯). */
+interface FlowMenuAction {
   status: UpdateAppointmentStatusPayload['status'];
   label: string;
   icon: string;
 }
 
-/** Catalogue des transitions possibles (filtré par ligne selon le statut courant). */
-const FLOW_ACTIONS: readonly FlowAction[] = [
-  { status: 'arrived', label: 'Arrivé', icon: 'login' },
-  { status: 'in_consultation', label: 'En consultation', icon: 'stethoscope' },
-  { status: 'completed', label: 'Terminé', icon: 'task_alt' },
-  { status: 'absent', label: 'Absent', icon: 'person_off' },
-];
+/** Ligne prête à l'affichage (view model dérivé d'un `AppointmentFlowItem`). */
+export interface FlowRow {
+  readonly item: AppointmentFlowItem;
+  readonly time: string;
+  readonly patient: string;
+  readonly meta: string;
+  readonly chip: ReturnType<typeof appointmentStatusChip>;
+  readonly nextStatus: UpdateAppointmentStatusPayload['status'] | null;
+  readonly nextLabel: string;
+  readonly menuActions: readonly FlowMenuAction[];
+  readonly cancellable: boolean;
+  readonly pending: boolean;
+}
+
+/** Formate un horaire ISO en « 09 h 30 » (convention FR-CA de l'app). */
+function frTime(iso: string | undefined): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh} h ${mm}`;
+}
 
 /**
- * Statuts « terminaux » (irréversibles) : on demande une confirmation explicite
- * avant de les appliquer. Les étapes intermédiaires (Arrivé, En consultation)
- * s'appliquent directement pour ne pas alourdir le geste courant.
+ * Flux clinique du jour (redesign MediPlan.dc.html §flux).
+ *
+ * File du jour groupée par état : **En cours** (mis en avant), **À venir** et
+ * **Clôturés** (atténués, non-disparus). Un clic sur le bouton d'avancement =
+ * une transition (spinner par ligne) ; les statuts terminaux (Terminé/Absent)
+ * demandent confirmation. Les autres actions (annuler, marquer absent) sont dans
+ * le menu ⋯. Logique métier inchangée : transitions, annulation, notifications.
  */
-const CONFIRM_STATUSES: readonly AppointmentStatus[] = ['completed', 'absent'];
-
 @Component({
   selector: 'app-clinic-flow-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    DatePipe,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatPaginatorModule,
-    MatTableModule,
-    EmptyState,
-    ErrorState,
-    Skeleton,
-  ],
+  imports: [NgTemplateOutlet, MatIconModule, MatMenuModule, StatusChip],
   templateUrl: './clinic-flow-page.html',
   styleUrl: './clinic-flow-page.scss',
 })
@@ -84,17 +96,13 @@ export class ClinicFlowPage {
   private readonly auth = inject(AuthFacade);
 
   readonly loading = signal(true);
+  readonly refreshing = signal(false);
   readonly updatingId = signal<string | null>(null);
+  /** Ligne à surligner brièvement après une transition réussie (flash de succès). */
+  readonly flashId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly appointments = signal<readonly AppointmentFlowItem[]>([]);
-  /** Terme de recherche courant (pour le message « aucun résultat »). */
-  readonly searchTerm = signal('');
-  /** Nombre de lignes après filtre (0 = aucun résultat pour la recherche). */
-  readonly filteredCount = signal(0);
-
-  /** Source de données Material : pilote filtre + pagination sur la table. */
-  readonly dataSource = new MatTableDataSource<AppointmentFlowItem>([]);
-  private readonly paginator = viewChild(MatPaginator);
+  private readonly lastSync = signal<Date | null>(null);
 
   /** L'annulation est une action de réception (clinic_admin/super_admin). */
   readonly canCancel = computed(() => {
@@ -102,71 +110,79 @@ export class ClinicFlowPage {
     return role === 'clinic_admin' || role === 'super_admin';
   });
 
-  readonly isEmpty = computed(
-    () => !this.loading() && this.error() === null && this.appointments().length === 0,
-  );
-
-  protected readonly displayedColumns = ['time', 'patient', 'doctor', 'status', 'actions'] as const;
+  /** Squelettes de chargement initial. */
   protected readonly skeletonRows = Array.from({ length: 5 });
 
+  private readonly rows = computed<readonly FlowRow[]>(() => {
+    const pending = this.updatingId();
+    return this.appointments()
+      .map((item) => this.toRow(item, item.id === pending))
+      .sort((a, b) => (a.item.startAt ?? '').localeCompare(b.item.startAt ?? ''));
+  });
+
+  readonly activeRows = computed(() =>
+    this.rows().filter((r) => ACTIVE_STATUSES.includes(r.item.status)),
+  );
+  readonly upcomingRows = computed(() => this.rows().filter((r) => r.item.status === 'booked'));
+  readonly doneRows = computed(() => this.rows().filter((r) => DONE_STATUSES.includes(r.item.status)));
+
+  readonly hasAny = computed(() => this.rows().length > 0);
+  readonly isEmpty = computed(() => !this.loading() && this.error() === null && !this.hasAny());
+
+  /** Libellé de synchronisation (« à l'instant » / « à 10 h 41 »). */
+  readonly syncLabel = computed(() => {
+    const at = this.lastSync();
+    if (!at) return '';
+    return `à ${frTime(at.toISOString())}`;
+  });
+
   constructor() {
-    // Filtre sur patient + médecin + libellé de statut (recherche « humaine »).
-    this.dataSource.filterPredicate = (item, filter) => {
-      const haystack = [
-        this.patientLabel(item),
-        this.doctorLabel(item),
-        this.statusLabel(item.status),
-      ]
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(filter);
-    };
-
-    // Branche la pagination dès que le composant paginator apparaît (état succès).
-    effect(() => {
-      this.dataSource.paginator = this.paginator() ?? null;
-    });
-
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
     this.error.set(null);
+    this.fetch();
+  }
 
+  /** Ré-synchronise sans vider l'écran (spinner discret dans l'en-tête). */
+  refresh(): void {
+    if (this.refreshing()) return;
+    this.refreshing.set(true);
+    this.error.set(null);
+    this.fetch();
+  }
+
+  private fetch(): void {
     this.flowService.listToday().subscribe({
       next: (appointments) => {
         this.appointments.set(appointments);
-        this.dataSource.data = [...appointments];
-        this.applyFilter(this.searchTerm());
+        this.lastSync.set(new Date());
         this.loading.set(false);
+        this.refreshing.set(false);
       },
       error: (err: unknown) => {
         this.error.set(authErrorMessage(err));
         this.loading.set(false);
+        this.refreshing.set(false);
       },
     });
   }
 
-  /** Applique le filtre de recherche et met à jour le compteur de résultats. */
-  applyFilter(value: string): void {
-    this.searchTerm.set(value);
-    this.dataSource.filter = value.trim().toLowerCase();
-    this.filteredCount.set(this.dataSource.filteredData.length);
-    this.dataSource.paginator?.firstPage();
+  /** Avance le rendez-vous d'une étape (bouton principal de la ligne). */
+  advance(row: FlowRow): void {
+    if (row.nextStatus) {
+      this.updateStatus(row.item, row.nextStatus);
+    }
   }
 
-  /** Actions de statut valides pour ce rendez-vous (menu contextuel). */
-  protected availableActions(appointment: AppointmentFlowItem): FlowAction[] {
-    return FLOW_ACTIONS.filter((action) => this.canSetStatus(appointment.status, action.status));
-  }
-
-  /** Vrai s'il existe au moins une action (statut ou annulation) pour la ligne. */
-  protected hasActions(appointment: AppointmentFlowItem): boolean {
-    return (
-      this.availableActions(appointment).length > 0 ||
-      (this.canCancel() && this.isCancellable(appointment.status))
-    );
+  /** Surligne brièvement une ligne après une transition réussie (retour de succès). */
+  private flashSuccess(id: string): void {
+    this.flashId.set(id);
+    setTimeout(() => {
+      if (this.flashId() === id) this.flashId.set(null);
+    }, 900);
   }
 
   updateStatus(
@@ -184,7 +200,7 @@ export class ClinicFlowPage {
       return;
     }
 
-    const label = FLOW_ACTIONS.find((action) => action.status === status)?.label ?? '';
+    const label = status === 'completed' ? 'Terminé' : 'Absent';
     this.dialog
       .open(ConfirmDialog, {
         data: {
@@ -213,21 +229,15 @@ export class ClinicFlowPage {
         this.appointments.update((items) =>
           items.map((item) => (item.id === updated.id ? updated : item)),
         );
-        this.dataSource.data = [...this.appointments()];
-        this.applyFilter(this.searchTerm());
         this.updatingId.set(null);
-        this.notifications.success('Statut du rendez-vous mis a jour.');
+        this.flashSuccess(updated.id);
+        this.notifications.success('Statut du rendez-vous mis à jour.');
       },
       error: (err: unknown) => {
         this.updatingId.set(null);
         this.notifications.error(authErrorMessage(err));
       },
     });
-  }
-
-  /** Vrai si le rendez-vous est encore annulable (aligné sur le backend). */
-  protected isCancellable(status: AppointmentStatus): boolean {
-    return CANCELLABLE_STATUSES.includes(status);
   }
 
   /** Ouvre le dialogue de motif puis annule le rendez-vous (libère le créneau). */
@@ -237,9 +247,7 @@ export class ClinicFlowPage {
       .open(CancelAppointmentDialog, { data })
       .afterClosed()
       .subscribe((reason?: string) => {
-        if (!reason) {
-          return;
-        }
+        if (!reason) return;
         this.updatingId.set(appointment.id);
         this.flowService.cancel(appointment.id, reason).subscribe({
           next: () => {
@@ -258,23 +266,42 @@ export class ClinicFlowPage {
       });
   }
 
-  protected statusLabel(status: AppointmentStatus): string {
-    const labels: Record<AppointmentStatus, string> = {
-      booked: 'Reserve',
-      cancelled: 'Annule',
-      arrived: 'Arrive',
-      in_consultation: 'En consultation',
-      completed: 'Termine',
-      absent: 'Absent',
+  /** Construit le view model d'une ligne. */
+  private toRow(item: AppointmentFlowItem, pending: boolean): FlowRow {
+    const nextStatus = FORWARD[item.status] ?? null;
+    const menuActions = this.menuActions(item, nextStatus);
+    const doctor = this.doctorLabel(item);
+    const reason = item.reason?.trim() ? item.reason : 'Consultation';
+    return {
+      item,
+      time: frTime(item.startAt),
+      patient: this.patientLabel(item),
+      meta: `${doctor} · ${reason}`,
+      chip: appointmentStatusChip(item.status),
+      nextStatus,
+      nextLabel: nextStatus ? STATUS_ACTION_LABEL[nextStatus] : '',
+      menuActions,
+      cancellable: this.canCancel() && CANCELLABLE_STATUSES.includes(item.status),
+      pending,
     };
-    return labels[status];
   }
 
-  protected canSetStatus(current: AppointmentStatus, next: AppointmentStatus): boolean {
-    if (current === next) {
-      return false;
+  /** Actions secondaires (menu ⋯) : transitions valides hors avancement principal. */
+  private menuActions(
+    item: AppointmentFlowItem,
+    primary: UpdateAppointmentStatusPayload['status'] | null,
+  ): FlowMenuAction[] {
+    const actions: FlowMenuAction[] = [];
+    if (item.status !== 'completed' && item.status !== 'cancelled' && item.status !== 'absent') {
+      if (primary !== 'absent' && this.canSetStatus(item.status, 'absent')) {
+        actions.push({ status: 'absent', label: 'Marquer absent', icon: 'person_off' });
+      }
     }
+    return actions;
+  }
 
+  private canSetStatus(current: AppointmentStatus, next: AppointmentStatus): boolean {
+    if (current === next) return false;
     const transitions: Record<AppointmentStatus, readonly AppointmentStatus[]> = {
       booked: ['arrived', 'absent'],
       arrived: ['in_consultation', 'absent'],
@@ -283,15 +310,14 @@ export class ClinicFlowPage {
       absent: [],
       cancelled: [],
     };
-
     return transitions[current].includes(next);
   }
 
-  protected patientLabel(appointment: AppointmentFlowItem): string {
+  private patientLabel(appointment: AppointmentFlowItem): string {
     return appointment.patientName || `Patient ${appointment.patientId.slice(0, 8)}`;
   }
 
-  protected doctorLabel(appointment: AppointmentFlowItem): string {
-    return appointment.doctorName || `Medecin ${appointment.doctorId.slice(0, 8)}`;
+  private doctorLabel(appointment: AppointmentFlowItem): string {
+    return appointment.doctorName || `Médecin ${appointment.doctorId.slice(0, 8)}`;
   }
 }

@@ -1,0 +1,11 @@
+<span
+  class="mp-chip"
+  [class.mp-chip--md]="size() === 'md'"
+  [class.mp-chip--pulse]="isPulse()"
+  [class.mp-chip--strike]="isStrike()"
+  [style.background]="bg()"
+  [style.color]="fg()"
+>
+  <span class="mp-chip__dot" aria-hidden="true"></span>
+  <span>{{ labelValue() }}</span>
+</span>

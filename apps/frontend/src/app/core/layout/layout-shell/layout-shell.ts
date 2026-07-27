@@ -1,58 +1,50 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 
 import { AuthFacade } from '@core/auth';
 import { ThemeService } from '@core/theme';
 import { BookAppointmentDialog } from '@features/appointments/book-appointment-dialog';
-import { Avatar } from '@shared/ui';
+import { Avatar, roleLabel } from '@shared/ui';
 import { resolveDisplayName } from '@shared/user/display-name';
 import { NAV_ITEMS, visibleNavItems } from '../nav-items';
 
 /** Rôles autorisés à réserver un rendez-vous depuis la topbar (comme l'onglet dédié). */
 const BOOKING_ROLES = ['clinic_admin', 'super_admin'] as const;
 
-/** Largeur max au-delà de laquelle le sidenav est en mode `side` (pivot md). */
+/** Largeur max au-delà de laquelle le rail est en mode desktop (pivot md). */
 const MOBILE_QUERY = '(max-width: 959.98px)';
 
+/** Clé de persistance de l'état réduit/étendu du rail (préférence utilisateur). */
+const RAIL_STORAGE_KEY = 'mp-rail-collapsed';
+
 /**
- * Shell applicatif : header (toolbar) + sidenav responsive + zone de contenu.
+ * Shell applicatif : topbar + rail de navigation rétractable + zone de contenu
+ * (redesign MediPlan.dc.html §shell).
  *
- * Enveloppe les écrans protégés (cf. design-system §3 et §7.2). Gère :
- * - le mode responsive via `BreakpointObserver` (signal `isMobile`) : `over`
- *   (overlay + backdrop) sous 960px, `side` (pousse le contenu) au-dessus ;
- * - l'état ouvert/fermé du sidenav (repli complet sur desktop, décision client) ;
- * - la fermeture auto à la navigation en mode `over` ;
- * - le menu utilisateur (nom/email + déconnexion) lisant `AuthFacade`.
+ * - Desktop : rail en flux, largeur animée 256px ↔ 72px (icônes seules) ;
+ *   préférence persistée. Mobile : rail en overlay + backdrop.
+ * - CTA « Nouveau rendez-vous » (admins) avec raccourci clavier global « N ».
+ * - Menu utilisateur custom (nom + rôle, bascule de thème, déconnexion).
  *
- * Aucune logique métier ici : l'auth passe par la façade.
+ * Aucune logique métier ici : auth via la façade, thème via `ThemeService`.
  */
 @Component({
   selector: 'app-layout-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatListModule,
-    MatIconModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatDividerModule,
-    Avatar,
-  ],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatIconModule, MatTooltipModule, Avatar],
   templateUrl: './layout-shell.html',
   styleUrl: './layout-shell.scss',
 })
@@ -77,11 +69,7 @@ export class LayoutShell {
     this.isDarkTheme() ? 'Activer le thème clair' : 'Activer le thème sombre',
   );
 
-  /**
-   * Items de navigation visibles selon le rôle courant (réactif au changement
-   * d'utilisateur). Les items réservés (ex. « Utilisateurs ») n'apparaissent que
-   * pour les rôles autorisés.
-   */
+  /** Items de navigation visibles selon le rôle courant (réactif au rôle). */
   protected readonly navItems = computed(() =>
     visibleNavItems(NAV_ITEMS, this.user()?.role ?? null),
   );
@@ -92,21 +80,44 @@ export class LayoutShell {
     { initialValue: this.breakpointObserver.isMatched(MOBILE_QUERY) },
   );
 
-  /** Mode du sidenav dérivé du responsive. */
-  readonly sidenavMode = computed<'over' | 'side'>(() => (this.isMobile() ? 'over' : 'side'));
+  /** Rail réduit (desktop) : préférence persistée. */
+  private readonly railCollapsedState = signal(this.readRailPreference());
+  readonly railCollapsed = this.railCollapsedState.asReadonly();
 
-  /** État ouvert/fermé du sidenav. Ouvert par défaut sur desktop, fermé mobile. */
-  private readonly openedState = signal(!this.breakpointObserver.isMatched(MOBILE_QUERY));
-  readonly opened = this.openedState.asReadonly();
+  /** Overlay de navigation ouvert (mobile uniquement). */
+  private readonly mobileNavState = signal(false);
+  readonly mobileNavOpen = this.mobileNavState.asReadonly();
 
-  /** Libellé accessible dynamique du burger selon l'état. */
-  readonly toggleLabel = computed(() => (this.opened() ? 'Fermer le menu' : 'Ouvrir le menu'));
+  /** Menu utilisateur (dropdown) ouvert. */
+  private readonly userMenuState = signal(false);
+  readonly userMenuOpen = this.userMenuState.asReadonly();
+
+  /** Vrai si les libellés de nav sont visibles (masqués quand rail réduit desktop). */
+  readonly showLabels = computed(() => this.isMobile() || !this.railCollapsed());
+
+  /** Libellé accessible du bouton de repli du rail. */
+  readonly railToggleLabel = computed(() =>
+    this.railCollapsed() ? 'Étendre le menu' : 'Réduire le menu',
+  );
+
+  /**
+   * Libellé accessible du burger selon le contexte. Sur desktop, il est distinct
+   * de celui du chevron du rail (`railToggleLabel`) pour éviter deux contrôles au
+   * nom accessible identique (les deux replient pourtant le rail).
+   */
+  readonly burgerLabel = computed(() => {
+    if (this.isMobile()) return this.mobileNavOpen() ? 'Fermer le menu' : 'Ouvrir le menu';
+    return 'Afficher ou masquer le menu latéral';
+  });
 
   /** Nom affichable : prénom/nom si présents, sinon la partie locale de l'e-mail. */
   readonly displayName = computed(() => resolveDisplayName(this.user()));
 
+  /** Libellé français du rôle courant. */
+  readonly userRoleLabel = computed(() => roleLabel(this.user()?.role));
+
   /**
-   * Vrai si le rôle courant peut réserver un rendez-vous (raccourci topbar).
+   * Vrai si le rôle courant peut réserver un rendez-vous (raccourci topbar + « N »).
    * Aligné sur le `roleGuard` de la route `/appointments`.
    */
   readonly canBookAppointment = computed(() => {
@@ -115,22 +126,47 @@ export class LayoutShell {
   });
 
   constructor() {
-    // En mode overlay, refermer le sidenav à chaque navigation (item cliqué).
+    // En mode overlay, refermer la nav mobile à chaque navigation (item cliqué).
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe(() => {
-        if (this.isMobile()) {
-          this.openedState.set(false);
-        }
-      });
+      .subscribe(() => this.mobileNavState.set(false));
   }
 
-  /** Bascule l'ouverture du sidenav (burger). */
-  toggleSidenav(): void {
-    this.openedState.update((value) => !value);
+  /** Burger : bascule le rail (desktop) ou l'overlay (mobile). */
+  onBurger(): void {
+    if (this.isMobile()) {
+      this.mobileNavState.update((open) => !open);
+    } else {
+      this.toggleRail();
+    }
+  }
+
+  /** Bascule l'état réduit/étendu du rail et persiste la préférence. */
+  toggleRail(): void {
+    this.railCollapsedState.update((collapsed) => {
+      const next = !collapsed;
+      this.writeRailPreference(next);
+      return next;
+    });
+  }
+
+  /** Ferme l'overlay de navigation mobile (clic backdrop / Échap). */
+  closeMobileNav(): void {
+    this.mobileNavState.set(false);
+  }
+
+  /** Bascule le menu utilisateur (stoppe la propagation pour ne pas se refermer). */
+  toggleUserMenu(event: Event): void {
+    event.stopPropagation();
+    this.userMenuState.update((open) => !open);
+  }
+
+  /** Ferme le menu utilisateur (clic extérieur / navigation). */
+  closeUserMenu(): void {
+    this.userMenuState.set(false);
   }
 
   /** Bascule le thème clair/sombre. */
@@ -143,6 +179,7 @@ export class LayoutShell {
    * vers l'historique des rendez-vous pour que l'utilisateur voie l'ajout.
    */
   openBooking(): void {
+    this.closeUserMenu();
     this.dialog
       .open(BookAppointmentDialog, { autoFocus: 'dialog', restoreFocus: true })
       .afterClosed()
@@ -153,14 +190,65 @@ export class LayoutShell {
       });
   }
 
-  /** Synchronise l'état quand l'utilisateur ferme via backdrop/Échap. */
-  onOpenedChange(opened: boolean): void {
-    this.openedState.set(opened);
-  }
-
   /** Déconnecte l'utilisateur et le renvoie vers l'écran de connexion. */
   logout(): void {
+    this.closeUserMenu();
     this.auth.logout();
     void this.router.navigate(['/login']);
+  }
+
+  /** Ferme le menu utilisateur sur tout clic hors de son conteneur. */
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.userMenuOpen()) this.closeUserMenu();
+  }
+
+  /**
+   * Raccourcis clavier globaux : « N » ouvre la réservation (admins) hors champ
+   * de saisie ; « Échap » ferme les menus ouverts.
+   */
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.closeUserMenu();
+      this.closeMobileNav();
+      return;
+    }
+    if ((event.key === 'n' || event.key === 'N') && !this.isTypingContext(event)) {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (!this.canBookAppointment()) return;
+      event.preventDefault();
+      this.openBooking();
+    }
+  }
+
+  /** Vrai si le focus est dans un champ de saisie (ne pas capter « N »). */
+  private isTypingContext(event: KeyboardEvent): boolean {
+    const target = event.target as HTMLElement | null;
+    if (!target) return false;
+    const tag = target.tagName;
+    return (
+      tag === 'INPUT' ||
+      tag === 'TEXTAREA' ||
+      tag === 'SELECT' ||
+      target.isContentEditable ||
+      target.closest('[role="dialog"]') !== null
+    );
+  }
+
+  private readRailPreference(): boolean {
+    try {
+      return localStorage.getItem(RAIL_STORAGE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private writeRailPreference(collapsed: boolean): void {
+    try {
+      localStorage.setItem(RAIL_STORAGE_KEY, collapsed ? '1' : '0');
+    } catch {
+      // Stockage indisponible (mode privé) : préférence non persistée, sans impact.
+    }
   }
 }

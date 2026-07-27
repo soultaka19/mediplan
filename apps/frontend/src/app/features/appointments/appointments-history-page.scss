@@ -2,142 +2,88 @@
   display: block;
 }
 
-.history-page {
-  display: grid;
-  gap: var(--mp-space-5);
-}
-
-.history-page__header {
+.rdv__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--mp-space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--mp-space-4);
 }
 
-.history-page__title {
+.rdv__title {
   margin: 0;
   font-family: var(--mp-font-display-family);
-  font-size: var(--mp-font-title-size);
-  line-height: var(--mp-font-title-line);
-  font-weight: var(--mp-font-title-weight);
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
   color: var(--mp-color-text);
 }
 
-.history-page__subtitle {
-  margin: var(--mp-space-2) 0 0;
+.rdv__subtitle {
+  margin: 5px 0 0;
+  font-size: 14px;
   color: var(--mp-color-text-secondary);
 }
 
-.history-skeleton {
-  display: grid;
-  gap: var(--mp-space-3);
-}
-
-.history-toolbar {
+.rdv-toolbar {
   display: flex;
-  justify-content: flex-start;
-}
-
-.history-search {
-  width: min(460px, 100%);
-}
-
-.history-search mat-icon[matPrefix] {
-  margin-inline: var(--mp-space-2) var(--mp-space-1);
-  color: var(--mp-color-text-secondary);
-}
-
-.history-table__wrapper {
-  overflow-x: auto;
-  border: 1px solid var(--mp-color-border);
-  border-radius: var(--mp-radius-md);
-  background: var(--mp-color-surface);
-}
-
-.history-table {
-  width: 100%;
-  min-width: 820px;
-  background: transparent;
-}
-
-.history-table th.mat-mdc-header-cell {
-  background: var(--mp-color-surface-variant);
-  color: var(--mp-color-text);
-  font-weight: 600;
-}
-
-.history-table th.mat-mdc-header-cell,
-.history-table td.mat-mdc-cell {
-  color: var(--mp-color-text);
-  border-bottom-color: var(--mp-color-border);
-  padding-block: var(--mp-space-3);
-}
-
-.history-when {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.history-when__date {
-  font-weight: 600;
-}
-
-.history-when__time {
-  color: var(--mp-color-text-secondary);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.history-reason {
-  max-width: 26ch;
-  color: var(--mp-color-text-secondary);
-}
-
-// Pastille de statut : texte + fond tonal (jamais la couleur seule).
-.history-status {
-  display: inline-flex;
   align-items: center;
-  min-height: 26px;
-  padding: 0 var(--mp-space-3);
-  border: 1px solid var(--mp-color-border);
-  border-radius: var(--mp-radius-full);
+  gap: var(--mp-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--mp-space-3);
+}
+
+.rdv-chips {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.rdv-active-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3);
+  margin-bottom: var(--mp-space-3);
   font-size: 13px;
+  color: var(--mp-color-text-secondary);
+}
+
+// Colonnes de la table Rendez-vous.
+.rdv-grid {
+  min-width: 860px;
+  grid-template-columns: 158px 1.1fr 1fr 148px 1.3fr;
+}
+
+.rdv-cell__date {
+  font-size: 13.5px;
   font-weight: 600;
+}
+
+.rdv-cell__time {
+  font-size: 12.5px;
+  color: var(--mp-color-text-secondary);
+  margin-top: 1px;
+}
+
+.rdv-cell__patient {
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.history-status[data-status='booked'] {
-  background: color-mix(in srgb, var(--mp-color-info) 12%, var(--mp-color-surface));
+.rdv-cell__doctor {
+  font-size: 14px;
+  color: var(--mp-color-text-secondary);
 }
 
-.history-status[data-status='arrived'] {
-  background: color-mix(in srgb, var(--mp-color-info) 12%, var(--mp-color-surface));
-}
-
-.history-status[data-status='in_consultation'] {
-  background: var(--mp-color-primary-container);
-}
-
-.history-status[data-status='completed'] {
-  background: color-mix(in srgb, var(--mp-color-success) 14%, var(--mp-color-surface));
-}
-
-.history-status[data-status='absent'] {
-  background: color-mix(in srgb, var(--mp-color-warning) 14%, var(--mp-color-surface));
-}
-
-.history-status[data-status='cancelled'] {
-  background: color-mix(in srgb, var(--mp-color-error) 12%, var(--mp-color-surface));
-  color: var(--mp-color-error);
-}
-
-mat-paginator {
-  background: transparent;
-}
-
-@media (max-width: 720px) {
-  .history-page__header {
-    flex-direction: column;
-  }
+.rdv-cell__motif {
+  font-size: 13.5px;
+  color: var(--mp-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

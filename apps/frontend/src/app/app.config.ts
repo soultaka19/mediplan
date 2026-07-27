@@ -8,6 +8,7 @@ import {
   provideZoneChangeDetection,
 } from '@angular/core';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
+import { MatDatepickerIntl } from '@angular/material/datepicker';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 
@@ -17,6 +18,23 @@ import { routes } from './app.routes';
 // Données de locale fr-CA : formats de date/heure, séparateurs, etc. Utilisées
 // par le pipe `date`, le calendrier (MatDatepicker) et le sélecteur d'heure.
 registerLocaleData(localeFrCa);
+
+/** Libellés accessibles français du calendrier (sinon anglais par défaut). */
+function frenchDatepickerIntl(): MatDatepickerIntl {
+  const intl = new MatDatepickerIntl();
+  intl.calendarLabel = 'Calendrier';
+  intl.openCalendarLabel = 'Ouvrir le calendrier';
+  intl.closeCalendarLabel = 'Fermer le calendrier';
+  intl.prevMonthLabel = 'Mois précédent';
+  intl.nextMonthLabel = 'Mois suivant';
+  intl.prevYearLabel = 'Année précédente';
+  intl.nextYearLabel = 'Année suivante';
+  intl.prevMultiYearLabel = 'Vingt années précédentes';
+  intl.nextMultiYearLabel = 'Vingt années suivantes';
+  intl.switchToMonthViewLabel = 'Choisir une date';
+  intl.switchToMultiYearViewLabel = "Choisir le mois et l'année";
+  return intl;
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,5 +49,8 @@ export const appConfig: ApplicationConfig = {
     provideNativeDateAdapter(),
     { provide: LOCALE_ID, useValue: 'fr-CA' },
     { provide: MAT_DATE_LOCALE, useValue: 'fr-CA' },
+    // Traductions françaises des libellés accessibles du calendrier (le sélecteur
+    // d'heure se traduit via `aria-label` sur chaque `mat-timepicker-toggle`).
+    { provide: MatDatepickerIntl, useFactory: frenchDatepickerIntl },
   ],
 };

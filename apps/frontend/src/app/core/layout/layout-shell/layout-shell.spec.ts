@@ -79,8 +79,9 @@ describe('LayoutShell', () => {
     byTestId<HTMLButtonElement>(root, 'shell-user-menu-trigger').click();
     fixture.detectChanges();
 
-    expect(byTestId(overlay(), 'shell-user-name').textContent).toContain('Ada Lovelace');
-    expect(byTestId(overlay(), 'shell-user-email').textContent).toContain('patient@example.com');
+    // Le menu utilisateur est un dropdown inline (plus un overlay CDK).
+    expect(byTestId(root, 'shell-user-name').textContent).toContain('Ada Lovelace');
+    expect(byTestId(root, 'shell-user-email').textContent).toContain('patient@example.com');
   });
 
   it('clic « Se déconnecter » appelle logout() puis navigue vers /login', () => {
@@ -92,7 +93,7 @@ describe('LayoutShell', () => {
     byTestId<HTMLButtonElement>(root, 'shell-user-menu-trigger').click();
     fixture.detectChanges();
 
-    byTestId<HTMLButtonElement>(overlay(), 'shell-logout').click();
+    byTestId<HTMLButtonElement>(root, 'shell-logout').click();
 
     expect(facade.logout).toHaveBeenCalled();
     expect(navigateSpy).toHaveBeenCalledWith(['/login']);
@@ -139,14 +140,14 @@ describe('LayoutShell', () => {
     expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
-  it('le burger bascule l’ouverture du sidenav', () => {
+  it('le repli du rail bascule l’état réduit/étendu', () => {
     const fixture = setup();
     const component = fixture.componentInstance;
-    const initial = component.opened();
+    const initial = component.railCollapsed();
 
-    component.toggleSidenav();
+    component.toggleRail();
 
-    expect(component.opened()).toBe(!initial);
+    expect(component.railCollapsed()).toBe(!initial);
   });
 
   it('le bouton de thème bascule clair/sombre et reflète aria-pressed', () => {

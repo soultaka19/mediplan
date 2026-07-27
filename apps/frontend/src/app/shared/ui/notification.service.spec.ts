@@ -27,7 +27,9 @@ describe('NotificationService', () => {
 
     expect(snackBar.open).toHaveBeenCalledTimes(1);
     const [message, action, config] = snackBar.open.mock.calls[0];
-    expect(message).toBe('Profil mis à jour');
+    // Le message est préfixé d'un « ✓ » de succès (indicateur d'état).
+    expect(message).toContain('Profil mis à jour');
+    expect(message).toContain('✓');
     expect(action).toBeUndefined();
     expect(config).toMatchObject({ duration: 3000, politeness: 'polite' });
   });

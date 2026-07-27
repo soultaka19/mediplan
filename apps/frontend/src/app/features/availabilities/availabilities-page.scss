@@ -2,266 +2,252 @@
   display: block;
 }
 
-.availabilities-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--mp-space-5);
-}
-
-.availabilities-page__header {
+.dispo__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--mp-space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--mp-space-4);
 }
 
-.availabilities-page__title {
+.dispo__title {
   margin: 0;
   font-family: var(--mp-font-display-family);
-  font-size: var(--mp-font-display-size);
-  line-height: var(--mp-font-display-line);
-  font-weight: var(--mp-font-display-weight);
-  letter-spacing: var(--mp-font-display-spacing);
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
   color: var(--mp-color-text);
 }
 
-.availabilities-page__subtitle {
-  margin: var(--mp-space-1) 0 0;
+.dispo__subtitle {
+  margin: 5px 0 0;
+  font-size: 14px;
   color: var(--mp-color-text-secondary);
 }
 
-.availability-form-card,
-.slots-card {
-  border-color: var(--mp-color-border);
-  background: var(--mp-color-surface);
-}
-
-.availability-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: var(--mp-space-3) var(--mp-space-4);
-  align-items: start;
-}
-
-.availability-form mat-form-field {
-  min-width: 0;
-}
-
-// La note occupe toute la largeur : champ libre, séparé des contrôles datés.
-.availability-form__note {
-  grid-column: 1 / -1;
-}
-
-.availability-form__submit {
-  grid-column: 1 / -1;
-  justify-self: start;
-  min-height: 48px;
-  padding-inline: var(--mp-space-5);
-  white-space: nowrap;
-}
-
-// Bouton de repli des options secondaires (formulaire épuré par défaut).
-.availability-form__advanced-toggle {
-  grid-column: 1 / -1;
-  justify-self: start;
-}
-
-// Sous-grille des options avancées (type, durée, note).
-.availability-form__advanced {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: var(--mp-space-3) var(--mp-space-4);
-  align-items: start;
-  padding-top: var(--mp-space-1);
-}
-
-// Ancre de défilement : marge haute pour ne pas coller sous la barre.
-.availability-list {
-  scroll-margin-top: var(--mp-space-4);
-}
-
-// Aperçu en direct des créneaux générés : bandeau tonal discret, pleine largeur.
-.availability-form__preview {
-  grid-column: 1 / -1;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--mp-space-2);
-  justify-self: start;
-  margin: 0;
-  padding: var(--mp-space-2) var(--mp-space-3);
-  border-radius: var(--mp-radius-md);
-  background: var(--mp-color-primary-container);
-  color: var(--mp-color-text);
-  font-weight: 500;
-}
-
-.availability-form__preview mat-icon {
-  color: var(--mp-color-primary);
-}
-
-.availability-skeleton {
+// --- Cartes groupées par médecin --------------------------------------------
+.dispo-list {
   display: flex;
   flex-direction: column;
-  gap: var(--mp-space-2);
+  gap: var(--mp-space-3);
 }
 
-// Barre d'outils (recherche) + pagination de la liste.
-.availability-toolbar {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.availability-search {
-  width: min(420px, 100%);
-}
-
-.availability-search mat-icon[matPrefix] {
-  margin-inline: var(--mp-space-2) var(--mp-space-1);
-  color: var(--mp-color-text-secondary);
-}
-
-mat-paginator {
-  background: transparent;
-  margin-top: var(--mp-space-2);
-}
-
-.availability-table__wrapper {
-  overflow-x: auto;
-  border: 1px solid var(--mp-color-border);
-  border-radius: var(--mp-radius-md);
+.dispo-group {
   background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-lg);
+  overflow: hidden;
 }
 
-.availability-table {
+.dispo-group__head {
   width: 100%;
-  background: transparent;
-}
-
-.availability-table th.mat-mdc-header-cell {
-  background: var(--mp-color-surface-variant);
-  color: var(--mp-color-text);
-  font-weight: 600;
-}
-
-.availability-table th.mat-mdc-header-cell,
-.availability-table td.mat-mdc-cell {
-  color: var(--mp-color-text);
-  border-bottom-color: var(--mp-color-border);
-  padding-block: var(--mp-space-3);
-}
-
-// En-tête de groupe médecin : ligne pleine largeur, surface tonale, nom une fois.
-.availability-group {
-  padding: 0;
-  background: var(--mp-color-surface-variant);
-  border-top: 2px solid var(--mp-color-border);
-}
-
-.availability-group__inner {
   display: flex;
   align-items: center;
-  gap: var(--mp-space-2);
-  padding: var(--mp-space-2) var(--mp-space-3);
+  gap: var(--mp-space-3);
+  padding: 14px 18px;
+  background: var(--mp-color-background);
+  border: 0;
+  border-bottom: 1px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms var(--mp-ease-standard);
+
+  &:hover {
+    background: var(--mp-color-hover);
+  }
+
+  &[aria-expanded='true'] {
+    border-bottom-color: var(--mp-color-border);
+  }
 }
 
-.availability-group__inner mat-icon {
-  width: 20px;
-  height: 20px;
-  font-size: 20px;
-  line-height: 20px;
+.dispo-group__caret {
+  flex: none;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--mp-color-text-secondary);
+  transition: transform 120ms var(--mp-ease-standard);
+
+  &--open {
+    transform: rotate(90deg);
+  }
+}
+
+.dispo-group__avatar {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--mp-color-primary-container);
   color: var(--mp-color-primary);
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.availability-group__name {
-  font-weight: 700;
+.dispo-group__name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--mp-color-text);
 }
 
-.availability-group__count {
-  margin-left: auto;
-  font-weight: 500;
+.dispo-group__summary {
   font-size: 13px;
   color: var(--mp-color-text-secondary);
 }
 
-.availability-period {
+// --- Table interne (grille) --------------------------------------------------
+.dispo-grid {
+  min-width: 640px;
+  grid-template-columns: 132px 200px 96px 1fr 88px;
+}
+
+.dispo-subhead {
+  padding-top: 11px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--mp-color-border);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--mp-color-text-secondary);
+}
+
+.dispo-actions-col {
+  text-align: right;
+}
+
+.dispo-row {
+  min-height: 60px;
+  border-bottom: 1px solid var(--mp-color-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.dispo-cell__date {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.dispo-cell__hours {
+  font-size: 12.5px;
+  color: var(--mp-color-text-secondary);
+  margin-top: 1px;
+}
+
+.dispo-cell__slot {
+  font-size: 13.5px;
+  color: var(--mp-color-text-secondary);
+}
+
+.dispo-cell__note {
+  font-size: 13.5px;
+  color: var(--mp-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dispo-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.dispo-icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--mp-radius-md);
+  color: var(--mp-color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: var(--mp-color-hover);
+  }
+
+  &--danger:hover {
+    background: var(--mp-status-cancelled-bg);
+    color: var(--mp-color-error);
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// --- Formulaire (panneau latéral) --------------------------------------------
+.dispo-form mat-form-field {
+  width: 100%;
+}
+
+.dispo-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--mp-space-3);
+}
+
+.dispo-form__preview {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-accent-soft);
+  color: var(--mp-color-accent-ink);
+  font-size: 13px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.dispo-form__adv-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--mp-color-primary);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    transition: transform 120ms var(--mp-ease-standard);
+  }
+}
+
+.dispo-form__advanced {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-
-.availability-period__date {
-  font-weight: 600;
-  color: var(--mp-color-text);
-}
-
-.availability-period__time {
-  color: var(--mp-color-text-secondary);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.availability-type {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 var(--mp-space-3);
-  border-radius: var(--mp-radius-full);
-  color: var(--mp-color-success);
-  background: color-mix(in srgb, var(--mp-color-success) 12%, transparent);
-  font-weight: 600;
-}
-
-.availability-type--off {
-  color: var(--mp-color-warning);
-  background: color-mix(in srgb, var(--mp-color-warning) 14%, transparent);
-}
-
-.availability-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--mp-space-1);
-}
-
-.slots-card__title {
-  margin: 0 0 var(--mp-space-3);
-  color: var(--mp-color-text);
-  font-size: 1rem;
-}
-
-.slots-card__empty {
-  margin: 0;
-  color: var(--mp-color-text-secondary);
-}
-
-.slots-list {
-  display: flex;
-  flex-wrap: wrap;
   gap: var(--mp-space-2);
-}
-
-.slot-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  padding: 0 var(--mp-space-3);
+  padding: 14px;
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-color-background);
   border: 1px solid var(--mp-color-border);
-  border-radius: var(--mp-radius-full);
-  color: var(--mp-color-text);
-  background: var(--mp-color-surface-variant);
 }
 
-@media (max-width: 900px) {
-  .availabilities-page__header {
-    flex-direction: column;
-  }
-
-  .availability-form {
-    grid-template-columns: 1fr;
-  }
-
-  .availability-form__note {
-    grid-column: auto;
-  }
+.dispo-form__submit {
+  flex: 1;
+  justify-content: center;
 }

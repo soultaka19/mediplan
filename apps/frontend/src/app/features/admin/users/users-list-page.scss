@@ -2,109 +2,64 @@
   display: block;
 }
 
-// --- En-tête de page ---------------------------------------------------------
-.users-page__header {
-  margin-bottom: var(--mp-space-5);
+.users__header {
+  margin-bottom: var(--mp-space-4);
 }
 
-.users-page__title {
+.users__title {
   margin: 0;
   font-family: var(--mp-font-display-family);
-  font-size: var(--mp-font-display-size);
-  line-height: var(--mp-font-display-line);
-  font-weight: var(--mp-font-display-weight);
-  letter-spacing: var(--mp-font-display-spacing);
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
   color: var(--mp-color-text);
 }
 
-.users-page__subtitle {
-  margin: var(--mp-space-1) 0 0;
+.users__subtitle {
+  margin: 5px 0 0;
+  font-size: 14px;
   color: var(--mp-color-text-secondary);
 }
 
-// --- Squelettes de chargement ------------------------------------------------
-.users-skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: var(--mp-space-2);
-}
-
-// --- Barre d'outils (recherche) ----------------------------------------------
 .users-toolbar {
   display: flex;
-  justify-content: flex-start;
+  align-items: center;
+  gap: var(--mp-space-3);
+  flex-wrap: wrap;
   margin-bottom: var(--mp-space-3);
 }
 
-.users-search {
-  width: min(420px, 100%);
+.users-chips {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
 }
 
-.users-search mat-icon[matPrefix] {
-  margin-inline: var(--mp-space-2) var(--mp-space-1);
-  color: var(--mp-color-text-secondary);
+// Colonnes de la table Utilisateurs.
+.users-grid {
+  min-width: 720px;
+  grid-template-columns: 1.2fr 1.3fr 200px 130px;
 }
 
-// --- Pagination --------------------------------------------------------------
-mat-paginator {
-  background: transparent;
-  margin-top: var(--mp-space-2);
-}
-
-// --- Tableau -----------------------------------------------------------------
-// Conteneur : surface tonale + bord + rayon, débordement horizontal géré sur
-// les petits écrans (cf. design-system §3.2 surfaces tonales).
-.users-table__wrapper {
-  overflow-x: auto;
-  border: 1px solid var(--mp-color-border);
-  border-radius: var(--mp-radius-md);
-  background: var(--mp-color-surface);
-}
-
-.users-table {
-  width: 100%;
-  background: transparent;
-}
-
-// En-tête sur surface-variant pour le détacher des lignes.
-.users-table th.mat-mdc-header-cell {
-  background: var(--mp-color-surface-variant);
-  color: var(--mp-color-text);
-  font-weight: 600;
-}
-
-.users-table th.mat-mdc-header-cell,
-.users-table td.mat-mdc-cell {
-  color: var(--mp-color-text);
-  border-bottom-color: var(--mp-color-border);
-  padding-block: var(--mp-space-3);
-}
-
-// Lignes alternées sobres via token (zébrage léger, lisible en clair et sombre).
-.users-table tr.mat-mdc-row:nth-child(even) td.mat-mdc-cell {
-  background: var(--mp-color-surface-variant);
-}
-
-// --- Statut (texte + pastille, jamais la couleur seule) ----------------------
-.users-status {
-  display: inline-flex;
+.users-cell__name {
+  display: flex;
   align-items: center;
   gap: var(--mp-space-2);
+  min-width: 0;
+}
+
+.users-cell__name-text {
+  font-size: 14px;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.users-status__dot {
-  flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--mp-radius-full);
-  background: currentColor;
-}
-
-.users-status--active {
-  color: var(--mp-color-success);
-}
-
-.users-status--inactive {
+.users-cell__email {
+  font-size: 13.5px;
   color: var(--mp-color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

@@ -1,87 +1,151 @@
 @if (user(); as currentUser) {
-  <!-- Zone d'accueil : avatar + salutation (seul <h1>) + badge de rôle (frère) -->
-  <header class="dashboard-hero">
+  <!-- Zone d'accueil : avatar + salutation (seul <h1>) + badge de rôle -->
+  <header class="dash-hero">
     <app-avatar [name]="displayName()" [email]="currentUser.email ?? ''" size="md" />
-    <div class="dashboard-hero__text">
-      <div class="dashboard-hero__heading">
-        <h1 class="dashboard-hero__title" data-testid="dashboard-welcome">{{ greeting() }}</h1>
+    <div class="dash-hero__text">
+      <div class="dash-hero__heading">
+        <h1 class="dash-hero__title" data-testid="dashboard-welcome">{{ greeting() }}</h1>
         <app-role-badge [role]="currentUser.role" />
       </div>
-      <p class="dashboard-hero__subtitle">{{ subtitle() }}</p>
+      <p class="dash-hero__subtitle">{{ subtitle() }}</p>
     </div>
   </header>
 
-  <!-- KPI par rôle : « RDV du jour » réel, les autres en placeholder « bientôt » -->
-  <section class="dashboard-stats" aria-label="Statistiques">
-    @for (stat of stats(); track stat.label) {
-      <app-stat-card
-        [icon]="stat.icon"
-        [label]="stat.label"
-        [value]="stat.value ?? '—'"
-        [hint]="stat.hint ?? ''"
-      />
+  <!-- KPI par rôle : « RDV du jour » réel + cliquable, les autres « bientôt » -->
+  <section class="dash-kpis" aria-label="Statistiques">
+    @if (isLoading()) {
+      @for (s of [0, 1, 2]; track s) {
+        <div class="dash-kpi dash-kpi--skeleton">
+          <span class="dash-skel dash-skel--icon"></span>
+          <span class="dash-skel dash-skel--value"></span>
+          <span class="dash-skel dash-skel--label"></span>
+        </div>
+      }
+    } @else {
+      @for (stat of stats(); track stat.label) {
+        @if (stat.route) {
+          <a
+            class="dash-kpi dash-kpi--link"
+            [class.dash-kpi--teal]="stat.accent === 'teal'"
+            [routerLink]="stat.route"
+            data-testid="dashboard-kpi-link"
+          >
+            <ng-container
+              [ngTemplateOutlet]="kpiBody"
+              [ngTemplateOutletContext]="{ stat }"
+            />
+          </a>
+        } @else {
+          <div class="dash-kpi" [class.dash-kpi--teal]="stat.accent === 'teal'">
+            <ng-container
+              [ngTemplateOutlet]="kpiBody"
+              [ngTemplateOutletContext]="{ stat }"
+            />
+          </div>
+        }
+      }
     }
   </section>
 
-  <!-- Prochain rendez-vous : état vide (la prise de RDV arrive plus tard) -->
-  <section class="dashboard-next" aria-labelledby="dashboard-next-title">
-    <h2 id="dashboard-next-title" class="dashboard-section-title">Prochain rendez-vous</h2>
-    <mat-card class="dashboard-next__card" appearance="outlined">
-      <app-empty-state
-        icon="event_busy"
-        title="Aucun rendez-vous à venir"
-        description="La prise de rendez-vous arrive bientôt."
-        [headingLevel]="3"
-        [dense]="true"
-      />
-    </mat-card>
+  <ng-template #kpiBody let-stat="stat">
+    <div class="dash-kpi__top">
+      <span class="dash-kpi__icon" aria-hidden="true">
+        <mat-icon>{{ stat.icon }}</mat-icon>
+      </span>
+      @if (stat.route) {
+        <span class="dash-kpi__cta">
+          {{ stat.routeLabel }}
+          <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        </span>
+      }
+    </div>
+    <div class="dash-kpi__value mp-tnum" [class.dash-kpi__value--muted]="stat.soon">
+      {{ stat.value ?? '—' }}
+    </div>
+    <div class="dash-kpi__label">
+      <span>{{ stat.label }}</span>
+      @if (stat.soon) {
+        <span class="dash-soon">bientôt</span>
+      }
+    </div>
+  </ng-template>
+
+  <!-- Prochain rendez-vous : dérivé de la file du jour, sinon état vide -->
+  <section class="dash-section" aria-labelledby="dash-next-title">
+    <h2 id="dash-next-title" class="dash-section__title">Prochain rendez-vous</h2>
+    @if (nextAppointment(); as next) {
+      <a class="dash-next" routerLink="/clinic-flow/today">
+        <div class="dash-next__time">
+          <div class="dash-next__day">Aujourd’hui</div>
+          <div class="dash-next__hour mp-tnum">{{ next.time }}</div>
+        </div>
+        <div class="dash-next__body">
+          <div class="dash-next__head">
+            <span class="dash-next__patient">{{ next.patient }}</span>
+            <app-status-chip [model]="next.chip" />
+          </div>
+          <div class="dash-next__meta">{{ next.meta }}</div>
+        </div>
+        <span class="dash-next__link">
+          Ouvrir le flux
+          <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        </span>
+      </a>
+    } @else if (!isLoading()) {
+      <div class="dash-card">
+        <app-empty-state
+          icon="event_available"
+          title="Aucun rendez-vous à venir aujourd’hui"
+          description="Les rendez-vous réservés pour aujourd’hui apparaîtront ici."
+          [headingLevel]="3"
+          [dense]="true"
+        />
+      </div>
+    } @else {
+      <div class="dash-card dash-next--skeleton"><span class="dash-skel dash-skel--wide"></span></div>
+    }
   </section>
 
   <!-- Accès rapides : lien actif si l'écran existe (route), sinon « bientôt ». -->
-  <section class="dashboard-quick" aria-labelledby="dashboard-quick-title">
-    <h2 id="dashboard-quick-title" class="dashboard-section-title">Accès rapides</h2>
-    <div class="dashboard-quick__grid">
+  <section class="dash-section" aria-labelledby="dash-quick-title">
+    <h2 id="dash-quick-title" class="dash-section__title">Accès rapides</h2>
+    <div class="dash-quick">
       @for (action of quickActions(); track action.label) {
         @if (action.route) {
           <a
             [routerLink]="action.route"
-            class="dashboard-quick__item dashboard-quick__item--active"
+            class="dash-quick__item"
             data-testid="dashboard-quick-action-link"
           >
-            <mat-icon class="dashboard-quick__icon" aria-hidden="true">{{ action.icon }}</mat-icon>
-            <span class="dashboard-quick__label">{{ action.label }}</span>
-            <mat-icon class="dashboard-quick__chevron" aria-hidden="true">chevron_right</mat-icon>
+            <mat-icon class="dash-quick__icon" aria-hidden="true">{{ action.icon }}</mat-icon>
+            <span class="dash-quick__label">{{ action.label }}</span>
+            <mat-icon class="dash-quick__chevron" aria-hidden="true">chevron_right</mat-icon>
           </a>
         } @else {
-          <button
-            type="button"
-            class="dashboard-quick__item"
-            disabled
+          <div
+            class="dash-quick__item dash-quick__item--soon"
             aria-disabled="true"
             data-testid="dashboard-quick-action"
           >
-            <mat-icon class="dashboard-quick__icon" aria-hidden="true">{{ action.icon }}</mat-icon>
-            <span class="dashboard-quick__label">{{ action.label }}</span>
-            <span class="dashboard-quick__soon">bientôt</span>
-          </button>
+            <mat-icon class="dash-quick__icon" aria-hidden="true">{{ action.icon }}</mat-icon>
+            <span class="dash-quick__label">{{ action.label }}</span>
+            <span class="dash-soon">bientôt</span>
+          </div>
         }
       }
     </div>
   </section>
 
-  <!-- Carte identité secondaire/condensée (email + rôle) -->
-  <section class="dashboard-account" aria-labelledby="dashboard-account-title">
-    <h2 id="dashboard-account-title" class="dashboard-section-title">Mon compte</h2>
-    <mat-card class="dashboard-account__card" appearance="outlined">
-      <mat-card-content>
-        <dl class="dashboard-account__list">
-          <dt>Adresse e-mail</dt>
-          <dd data-testid="dashboard-email">{{ currentUser.email }}</dd>
-
-          <dt>Rôle</dt>
-          <dd data-testid="dashboard-role">{{ roleLabel() }}</dd>
-        </dl>
-      </mat-card-content>
-    </mat-card>
+  <!-- Carte identité secondaire (email + rôle) -->
+  <section class="dash-section" aria-labelledby="dash-account-title">
+    <h2 id="dash-account-title" class="dash-section__title">Mon compte</h2>
+    <div class="dash-card dash-account">
+      <dl class="dash-account__list">
+        <dt>Adresse e-mail</dt>
+        <dd data-testid="dashboard-email">{{ currentUser.email }}</dd>
+        <dt>Rôle</dt>
+        <dd data-testid="dashboard-role">{{ roleLabel() }}</dd>
+      </dl>
+    </div>
   </section>
 }

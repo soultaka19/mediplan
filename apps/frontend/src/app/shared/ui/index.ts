@@ -9,5 +9,7 @@ export * from './avatar/avatar';
 export * from './role-badge/role-badge';
 export * from './stat-card/stat-card';
 export * from './skeleton/skeleton';
+export * from './status-chip/status-chip';
+export type { StatusTone, StatusChipModel } from './status-chip/status-tones';
 export * from './role-labels';
 export * from './notification.service';

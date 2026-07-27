@@ -2,219 +2,488 @@
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  background: var(--mp-color-background);
 }
 
-// --- Toolbar -----------------------------------------------------------------
-.mp-toolbar {
-  position: relative;
-  z-index: 2;
-  // Barre plus haute et plus aérée que la hauteur Material par défaut (64px) :
-  // respiration verticale pour le wordmark, l'avatar et le CTA (§3.4).
-  min-height: 72px;
-  padding-inline: var(--mp-space-4);
-  gap: var(--mp-space-2);
-  background: var(--mp-color-surface);
-  color: var(--mp-color-text);
-  box-shadow: var(--mp-elevation-1);
-}
-
-// Raccourci « Nouveau rendez-vous » : bouton d'action principal de la topbar.
-.mp-toolbar__cta {
-  display: inline-flex;
+// --- Topbar ------------------------------------------------------------------
+.mp-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  flex: none;
+  height: 64px;
+  display: flex;
   align-items: center;
-  gap: var(--mp-space-1);
-  // Léger retrait du groupe thème/utilisateur à droite.
-  margin-inline-end: var(--mp-space-1);
+  gap: var(--mp-space-3);
+  padding: 0 var(--mp-space-5) 0 var(--mp-space-3);
+  background: var(--mp-color-surface);
+  border-bottom: 1px solid var(--mp-color-border);
 }
 
-// Sous le pivot mobile, on garde l'icône seule (le libellé disparaît) pour ne
-// pas encombrer la barre ; l'action reste accessible via aria-label.
-@media (max-width: 719.98px) {
-  .mp-toolbar__cta-label {
-    display: none;
+.mp-topbar__spacer {
+  flex: 1;
+}
+
+.mp-topbar__icon-btn {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--mp-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mp-color-text-secondary);
+  transition: background 120ms var(--mp-ease-standard);
+
+  &:hover {
+    background: var(--mp-color-hover);
+  }
+
+  &--outlined {
+    border: 1px solid var(--mp-color-border);
+    background: var(--mp-color-surface);
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
 
-// Wordmark verrouillé : pictogramme + « MediPlan », espacement et poids fixes
-// (cf. roadmap UX §3.4). Pas d'asset SVG (KISS) — `mat-icon` Material Symbols.
-.mp-toolbar__brand {
+// Wordmark : pastille dégradée bleu → teal + « MediPlan ».
+.mp-topbar__brand {
   display: inline-flex;
   align-items: center;
   gap: var(--mp-space-2);
+  flex: none;
 }
 
-// Signature visuelle : pastille dégradée bleu → teal. Le glyphe est réduit à
-// 18px pour respirer dans la pastille de 30px (taille Material par défaut : 24px).
-.mp-toolbar__logo {
+.mp-topbar__logo {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
-  font-size: 18px;
+  border-radius: var(--mp-radius-md);
+  background: linear-gradient(150deg, var(--mp-color-accent), var(--mp-color-primary));
   color: #fff;
-  background: linear-gradient(135deg, var(--mp-color-primary), var(--mp-color-accent));
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
 }
 
-// Sur fond navy, la pastille se fond dans la barre : un liseré la détache.
-// `:host-context` est obligatoire ici : en encapsulation Emulated, un sélecteur
-// écrit `html[data-theme='dark'] .mp-toolbar__logo` se compile en
-// `html[data-theme='dark'][_ngcontent-x] .mp-toolbar__logo[_ngcontent-x]` —
-// l'attribut de scope atterrit sur <html>, qui ne le porte jamais, et la règle
-// ne matche donc aucun élément.
-:host-context(html[data-theme='dark']) .mp-toolbar__logo {
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 14%);
-}
-
-.mp-toolbar__name {
+.mp-topbar__name {
   font-family: var(--mp-font-display-family);
-  font-size: 20px;
+  font-size: 17.5px;
   font-weight: 700;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.35px;
   color: var(--mp-color-text);
 }
 
-// Menu utilisateur : avatar → nom → caret, dans cet ordre, avec un espacement
-// aéré (≥ --mp-space-2) pour décoller l'avatar du nom et le caret du nom.
-.mp-toolbar__user {
+// CTA principal « Nouveau rendez-vous ».
+.mp-topbar__cta {
+  flex: none;
+  height: 44px;
+  padding: 0 18px 0 15px;
+  border: 0;
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-primary);
+  color: var(--mp-color-on-primary);
+  font-size: 14.5px;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: var(--mp-space-2);
-}
+  box-shadow: 0 2px 8px rgb(30 95 168 / 28%);
+  transition:
+    background 120ms var(--mp-ease-standard),
+    transform 120ms var(--mp-ease-standard);
 
-.mp-toolbar__user-name {
-  // Petit retrait pour ne pas coller l'avatar au nom (lisibilité).
-  margin-inline-start: var(--mp-space-1);
-}
+  &:hover {
+    background: var(--mp-color-primary-hover);
+    transform: translateY(-1px);
+  }
 
-// Le nom est masqué sur petit écran (gardé accessible via aria-label du bouton).
-@media (max-width: 599.98px) {
-  .mp-toolbar__user-name {
-    display: none;
+  &:active {
+    transform: translateY(0);
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
   }
 }
 
-// --- Conteneur shell ---------------------------------------------------------
-.mp-shell {
-  flex: 1 1 auto;
-  background: var(--mp-color-background);
+// Puce clavier.
+.mp-kbd {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--mp-color-surface-variant);
+  border: 1px solid var(--mp-color-border);
+  font-family: var(--mp-font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--mp-color-text-secondary);
+
+  &--on-primary {
+    background: rgb(255 255 255 / 18%);
+    border: 0;
+    color: #fff;
+  }
 }
 
-.mp-sidenav {
+// --- Menu utilisateur --------------------------------------------------------
+.mp-usermenu {
+  position: relative;
+  flex: none;
+}
+
+.mp-usermenu__trigger {
+  height: 44px;
+  padding: 0 10px 0 5px;
+  border: 1px solid var(--mp-color-border);
+  background: var(--mp-color-surface);
+  border-radius: var(--mp-radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  color: var(--mp-color-text);
+  transition: background 120ms var(--mp-ease-standard);
+
+  &:hover {
+    background: var(--mp-color-background);
+  }
+}
+
+.mp-usermenu__name {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.mp-usermenu__caret {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--mp-color-text-disabled);
+}
+
+.mp-usermenu__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 264px;
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-lg);
+  box-shadow: var(--mp-elevation-3);
+  padding: var(--mp-space-2);
+  z-index: 50;
+  animation: mpIn 0.14s var(--mp-ease-standard);
+}
+
+.mp-usermenu__header {
+  padding: var(--mp-space-3);
+  border-bottom: 1px solid var(--mp-color-border);
+  margin-bottom: var(--mp-space-1);
+}
+
+.mp-usermenu__header-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mp-color-text);
+}
+
+.mp-usermenu__header-role {
+  font-size: 12.5px;
+  color: var(--mp-color-text-secondary);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-usermenu__item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  border-radius: var(--mp-radius-md);
+  padding: var(--mp-space-2) var(--mp-space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-2);
+  font-size: 13.5px;
+  color: var(--mp-color-text);
+  text-align: left;
+
+  &:hover {
+    background: var(--mp-color-background);
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &--danger {
+    justify-content: flex-start;
+    color: var(--mp-color-error);
+
+    &:hover {
+      background: var(--mp-status-cancelled-bg);
+    }
+  }
+}
+
+// Interrupteur de thème (dans le menu).
+.mp-switch {
+  flex: none;
+  width: 34px;
+  height: 20px;
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-input-border);
+  position: relative;
+  transition: background 140ms var(--mp-ease-standard);
+
+  &--on {
+    background: var(--mp-color-primary);
+  }
+}
+
+.mp-switch__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+  transition: transform 140ms var(--mp-ease-standard);
+
+  .mp-switch--on & {
+    transform: translateX(14px);
+  }
+}
+
+// --- Corps : rail + contenu --------------------------------------------------
+.mp-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+// --- Rail de navigation ------------------------------------------------------
+.mp-rail {
+  flex: none;
   width: 256px;
   background: var(--mp-color-surface);
   border-right: 1px solid var(--mp-color-border);
-}
-
-// --- Navigation --------------------------------------------------------------
-// Espacement propre : marge autour de la liste, intervalle vertical entre
-// items, et coins arrondis pour que l'item actif/au survol forme une « pilule ».
-.mp-sidenav nav {
-  padding: var(--mp-space-2);
-}
-
-.mp-sidenav mat-nav-list {
+  padding: var(--mp-space-4) var(--mp-space-3);
   display: flex;
   flex-direction: column;
   gap: var(--mp-space-1);
-  padding: 0;
-}
+  overflow: hidden;
+  transition: width 180ms var(--mp-ease-standard);
 
-.mp-sidenav mat-nav-list [mat-list-item] {
-  border-radius: var(--mp-radius-md);
-  // Transition douce du fond et du filet d'accent (hover → actif) (S3 / §3.5).
-  transition:
-    background-color 140ms var(--mp-ease-standard, ease),
-    box-shadow 140ms var(--mp-ease-standard, ease);
+  &--collapsed {
+    width: 72px;
+  }
 
-  // Affordance au survol des items actionnables (pas les désactivés).
-  &:not(.mp-nav--disabled):hover {
-    background: var(--mp-color-surface-variant);
+  &--overlay {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    width: 272px;
+    z-index: 46;
+    box-shadow: 14px 0 34px rgb(26 34 51 / 14%);
+    animation: mpIn 0.16s var(--mp-ease-standard);
   }
 }
 
-.mp-nav--active {
-  --mat-list-active-indicator-color: var(--mp-color-primary-container);
+.mp-rail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+}
 
-  background: var(--mp-color-primary-container);
-  // Filet d'accent teal décoratif (jamais de texte sur teal → AA préservé) (S3).
-  // box-shadow inset gauche : ne décale pas le contenu (vs border-left).
-  box-shadow: inset 3px 0 0 0 var(--mp-color-accent);
+.mp-rail__spacer {
+  flex: 1;
+}
 
-  .mat-mdc-list-item-icon,
-  span[matListItemTitle] {
+.mp-rail__collapse {
+  height: 42px;
+  margin-bottom: var(--mp-space-2);
+  border: 1px solid var(--mp-color-border);
+  background: var(--mp-color-surface);
+  border-radius: var(--mp-radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  padding: 0 12px;
+  color: var(--mp-color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 120ms var(--mp-ease-standard);
+
+  .mp-rail--collapsed & {
+    justify-content: center;
+    padding: 0;
+  }
+
+  &:hover {
+    background: var(--mp-color-hover);
+  }
+}
+
+.mp-rail__collapse-caret {
+  flex: none;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  transition: transform 180ms var(--mp-ease-standard);
+
+  &--flipped {
+    transform: rotate(180deg);
+  }
+}
+
+// --- Item de navigation ------------------------------------------------------
+.mp-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3);
+  height: 46px;
+  padding: 0 var(--mp-space-3);
+  border-radius: var(--mp-radius-md);
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--mp-color-text-secondary);
+  text-decoration: none;
+  transition:
+    background 120ms var(--mp-ease-standard),
+    color 120ms var(--mp-ease-standard);
+
+  .mp-rail--collapsed & {
+    justify-content: center;
+    padding: 0;
+  }
+
+  &:not(.mp-nav-item--disabled):hover {
+    background: var(--mp-color-hover);
+    color: var(--mp-color-text);
+    text-decoration: none;
+  }
+
+  &--active {
+    background: var(--mp-color-primary-container);
     color: var(--mp-color-primary);
     font-weight: 600;
+
+    .mp-nav-item__icon {
+      color: var(--mp-color-primary);
+    }
+
+    .mp-nav-item__liseret {
+      background: var(--mp-color-accent);
+    }
+  }
+
+  &--disabled {
+    cursor: default;
+    color: var(--mp-color-text-disabled);
   }
 }
 
-// Respect de prefers-reduced-motion : pas de transition sur le changement d'état.
-@media (prefers-reduced-motion: reduce) {
-  .mp-sidenav mat-nav-list [mat-list-item] {
-    transition: none;
-  }
+.mp-nav-item__liseret {
+  position: absolute;
+  left: 0;
+  top: 11px;
+  bottom: 11px;
+  width: 3px;
+  border-radius: 2px;
+  background: transparent;
+  transition: background 180ms var(--mp-ease-standard);
 }
 
-.mp-nav__soon {
-  font-size: 12px;
+.mp-nav-item__icon {
+  flex: none;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  color: inherit;
+}
+
+.mp-nav-item__label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.mp-nav-item__soon {
+  font-size: 11px;
   font-style: italic;
   color: var(--mp-color-text-disabled);
 }
 
-// --- Zone de contenu ---------------------------------------------------------
-.mp-content {
-  background: var(--mp-color-background);
+// Backdrop de l'overlay mobile.
+.mp-nav-backdrop {
+  position: fixed;
+  inset: 64px 0 0;
+  background: rgb(26 34 51 / 42%);
+  z-index: 45;
 }
 
-.mp-content__inner {
-  display: block;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--mp-space-5);
+// --- Zone de contenu ---------------------------------------------------------
+.mp-main {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  background: var(--mp-color-background);
 
-  // Entrée de page discrète : fade + légère translation verticale au montage
-  // (§3.5). Durée --mp-motion-slow, courbe standard, aucun bounce.
-  animation: mp-page-enter var(--mp-motion-slow) var(--mp-ease-standard) both;
-
-  // Le contenu reçoit le focus via le skip link sans anneau parasite.
   &:focus {
     outline: none;
   }
 }
 
-@keyframes mp-page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+.mp-main__inner {
+  display: block;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: var(--mp-space-5);
+  // Fondu d'entrée SANS transform : un transform résiduel (fill-mode `both`)
+  // établirait un bloc englobant qui casserait le `position: fixed` des panneaux
+  // latéraux (backdrop + tiroir décalés de 64px). Voir keyframes `mpFade`.
+  animation: mpFade var(--mp-motion-slow) var(--mp-ease-standard) both;
+}
+
+@media (max-width: 599.98px) {
+  .mp-main__inner {
+    padding: var(--mp-space-4);
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  // Éviter tout débordement horizontal de la topbar sur petit écran : logo seul
+  // (le wordmark « MediPlan » est masqué) et gouttières resserrées.
+  .mp-topbar {
+    gap: var(--mp-space-2);
+    padding: 0 var(--mp-space-3);
   }
-}
 
-// prefers-reduced-motion : pas d'animation d'entrée (contenu posé directement).
-@media (prefers-reduced-motion: reduce) {
-  .mp-content__inner {
-    animation: none;
+  .mp-topbar__name {
+    display: none;
   }
-}
-
-// --- Menu utilisateur --------------------------------------------------------
-.mp-user-menu__header {
-  // En-tête non interactif : annule l'apparence « cliquable » de mat-menu-item.
-  cursor: default;
-  opacity: 1 !important;
-}
-
-.mp-user-menu__name {
-  font-weight: 600;
-  color: var(--mp-color-text);
-}
-
-.mp-user-menu__email {
-  font-size: 12px;
-  color: var(--mp-color-text-secondary);
 }

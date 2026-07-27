@@ -1,8 +1,10 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 
 import { AuthFacade, PublicUser, UserRole } from '@core/auth';
+import { AppointmentFlowService } from '@features/clinic-flow/appointment-flow.service';
 import { DashboardPage } from './dashboard-page';
 
 function makeUser(overrides: Partial<PublicUser> = {}): PublicUser {
@@ -45,11 +47,19 @@ function allByTestId<T extends HTMLElement>(root: HTMLElement, id: string): T[] 
 }
 
 describe('DashboardPage', () => {
+  // Faux service de flux : file du jour vide et synchrone (aucun HttpClient,
+  // `isLoading` déterministe pour l'assertion des KPI/labels).
+  const fakeFlow = { listToday: () => of([]) };
+
   function setup(user: PublicUser | null) {
     const facade = createFakeFacade(user);
     TestBed.configureTestingModule({
       imports: [DashboardPage],
-      providers: [provideRouter([]), { provide: AuthFacade, useValue: facade }],
+      providers: [
+        provideRouter([]),
+        { provide: AuthFacade, useValue: facade },
+        { provide: AppointmentFlowService, useValue: fakeFlow },
+      ],
     });
     const fixture = TestBed.createComponent(DashboardPage);
     fixture.detectChanges();
@@ -133,20 +143,22 @@ describe('DashboardPage', () => {
     },
   );
 
-  it('n’invente aucune donnée : les KPI restent en placeholder « — »', () => {
+  it('n’invente aucune donnée : les KPI patient restent en placeholder « — »', () => {
     const { fixture } = setup(makeUser());
     const root = fixture.nativeElement as HTMLElement;
-    const numbers = Array.from(root.querySelectorAll('.mp-stat__number'));
+    const numbers = Array.from(root.querySelectorAll('.dash-kpi__value'));
 
     expect(numbers.length).toBeGreaterThan(0);
     expect(numbers.every((n) => n.textContent?.trim() === '—')).toBe(true);
   });
 
-  it('rend les accès rapides désactivés (aucune navigation réelle)', () => {
+  it('rend les accès rapides « bientôt » non navigables (aria-disabled, pas de lien)', () => {
     const { fixture } = setup(makeUser());
     const root = fixture.nativeElement as HTMLElement;
-    const actions = allByTestId<HTMLButtonElement>(root, 'dashboard-quick-action');
+    const actions = allByTestId<HTMLElement>(root, 'dashboard-quick-action');
 
-    expect(actions.every((btn) => btn.disabled)).toBe(true);
+    expect(actions.length).toBeGreaterThan(0);
+    expect(actions.every((el) => el.getAttribute('aria-disabled') === 'true')).toBe(true);
+    expect(actions.every((el) => el.tagName !== 'A')).toBe(true);
   });
 });

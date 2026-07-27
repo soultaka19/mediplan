@@ -1,0 +1,541 @@
+// =============================================================================
+// MediPlan — Classes partagées du redesign (MediPlan.dc.html)
+// Patterns réutilisés par plusieurs écrans (table, recherche, chips, panneau
+// latéral, boutons, bannières, skeletons, pagination). Globales (non scopées)
+// pour être consommées sans duplication ; couleurs via tokens `--mp-*`.
+// =============================================================================
+
+// --- Boutons -----------------------------------------------------------------
+.mp-btn-primary {
+  height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-primary);
+  color: var(--mp-color-on-primary);
+  font-size: 14.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  box-shadow: 0 2px 8px rgb(30 95 168 / 24%);
+  transition:
+    background 120ms var(--mp-ease-standard),
+    transform 120ms var(--mp-ease-standard),
+    box-shadow 120ms var(--mp-ease-standard);
+
+  &:hover:not(:disabled) {
+    background: var(--mp-color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgb(30 95 168 / 30%);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgb(30 95 168 / 24%);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.mp-btn-outline {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--mp-color-input-border);
+  background: var(--mp-color-surface);
+  border-radius: var(--mp-radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mp-color-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  transition:
+    background 120ms var(--mp-ease-standard),
+    transform 120ms var(--mp-ease-standard);
+
+  &:hover {
+    background: var(--mp-color-hover);
+    border-color: color-mix(in srgb, var(--mp-color-primary) 40%, var(--mp-color-border));
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.mp-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--mp-color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// --- Bannière (erreur / avertissement) --------------------------------------
+.mp-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3);
+  margin-bottom: var(--mp-space-4);
+  padding: 13px 16px;
+  border-radius: var(--mp-radius-lg);
+
+  &--error {
+    background: var(--mp-status-cancelled-bg);
+    border: 1px solid color-mix(in srgb, var(--mp-color-error) 32%, transparent);
+  }
+
+  &__mark {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--mp-color-error);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__text {
+    flex: 1;
+    font-size: 13.5px;
+    color: var(--mp-color-error);
+  }
+
+  &__action {
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid color-mix(in srgb, var(--mp-color-error) 45%, transparent);
+    background: var(--mp-color-surface);
+    border-radius: var(--mp-radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mp-color-error);
+  }
+}
+
+// --- Recherche ---------------------------------------------------------------
+.mp-search {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+  max-width: 420px;
+
+  &__icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--mp-color-text-secondary);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    height: 42px;
+    padding: 0 13px 0 40px;
+    border: 1px solid var(--mp-color-input-border);
+    border-radius: var(--mp-radius-md);
+    background: var(--mp-color-surface);
+    color: var(--mp-color-text);
+    font-size: 14px;
+
+    &::placeholder {
+      color: var(--mp-color-text-disabled);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--mp-color-primary);
+    }
+  }
+}
+
+// --- Chips de filtre ---------------------------------------------------------
+.mp-chip-filter {
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--mp-color-input-border);
+  background: var(--mp-color-surface);
+  color: var(--mp-color-text-secondary);
+  border-radius: var(--mp-radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition:
+    border-color 120ms var(--mp-ease-standard),
+    background 120ms var(--mp-ease-standard),
+    transform 120ms var(--mp-ease-standard);
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--mp-color-primary) 45%, var(--mp-color-border));
+    background: var(--mp-color-hover);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &--on {
+    border-color: var(--mp-color-primary);
+    background: var(--mp-color-primary-container);
+    color: var(--mp-color-primary);
+    font-weight: 600;
+  }
+
+  &__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  // Variante rectangulaire (filtre de rôle).
+  &--square {
+    border-radius: var(--mp-radius-md);
+  }
+}
+
+// --- Table (grille CSS) ------------------------------------------------------
+.mp-table {
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-lg);
+  overflow: hidden;
+
+  &__scroll {
+    overflow-x: auto;
+  }
+
+  &__grid {
+    display: grid;
+    gap: var(--mp-space-4);
+    padding: 0 20px;
+    align-items: center;
+  }
+
+  &__head {
+    padding-top: 13px;
+    padding-bottom: 13px;
+    background: var(--mp-color-background);
+    border-bottom: 1px solid var(--mp-color-border);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--mp-color-text-secondary);
+  }
+
+  &__row {
+    min-height: 56px;
+    border-bottom: 1px solid var(--mp-color-border);
+    animation: mpUp 0.24s var(--mp-ease-standard) both;
+
+    &--click {
+      cursor: pointer;
+      transition:
+        background 120ms var(--mp-ease-standard),
+        box-shadow 120ms var(--mp-ease-standard);
+
+      // Affordance de clic : fond au survol + liseré teal inséré à gauche.
+      &:hover {
+        background: var(--mp-color-hover);
+        box-shadow: inset 3px 0 0 0 var(--mp-color-accent);
+      }
+
+      &:active {
+        background: var(--mp-color-surface-variant);
+      }
+    }
+  }
+
+  &__empty {
+    padding: 56px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+  }
+
+  &__empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--mp-color-text);
+  }
+
+  &__empty-text {
+    font-size: 13.5px;
+    color: var(--mp-color-text-secondary);
+    margin-bottom: var(--mp-space-3);
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--mp-space-4);
+    padding: 12px 20px;
+    font-size: 13px;
+    color: var(--mp-color-text-secondary);
+  }
+}
+
+// --- Pagination --------------------------------------------------------------
+.mp-pager {
+  display: flex;
+  gap: 4px;
+
+  button {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--mp-color-border);
+    background: var(--mp-color-surface);
+    border-radius: var(--mp-radius-md);
+    color: var(--mp-color-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background 120ms var(--mp-ease-standard),
+      transform 120ms var(--mp-ease-standard);
+
+    &:hover:not(:disabled) {
+      background: var(--mp-color-hover);
+      border-color: var(--mp-color-input-border);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.92);
+    }
+
+    &:disabled {
+      color: var(--mp-color-text-disabled);
+      cursor: default;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+// --- Skeleton (cellule) ------------------------------------------------------
+.mp-skel {
+  display: block;
+  height: 14px;
+  border-radius: var(--mp-radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--mp-color-surface-variant),
+    var(--mp-color-border),
+    var(--mp-color-surface-variant)
+  );
+  background-size: 320px 100%;
+  animation: mpShimmer 1.2s linear infinite;
+
+  &--70 {
+    width: 70%;
+  }
+  &--60 {
+    width: 60%;
+  }
+  &--80 {
+    width: 80%;
+  }
+  &--chip {
+    width: 82px;
+    height: 22px;
+    border-radius: var(--mp-radius-md);
+  }
+
+  &--avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+  }
+}
+
+// --- Panneau latéral (détail / formulaire) -----------------------------------
+.mp-panel-backdrop {
+  position: fixed;
+  inset: 64px 0 0;
+  background: rgb(26 34 51 / 30%);
+  z-index: 34;
+  animation: mpFade 0.16s var(--mp-ease-standard);
+}
+
+.mp-panel {
+  position: fixed;
+  top: 64px;
+  right: 0;
+  bottom: 0;
+  width: min(396px, 100vw);
+  background: var(--mp-color-surface);
+  border-left: 1px solid var(--mp-color-border);
+  box-shadow: -14px 0 34px rgb(26 34 51 / 12%);
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  // Tiroir droit : glissement horizontal (cohérent avec l'ancrage à droite).
+  animation: mpPanelIn 0.2s var(--mp-ease-standard);
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--mp-space-3);
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid var(--mp-color-border);
+  }
+
+  &__eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--mp-color-text-secondary);
+  }
+
+  &__title {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    margin-top: 4px;
+    color: var(--mp-color-text);
+  }
+
+  &__close {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    background: transparent;
+    border-radius: var(--mp-radius-md);
+    color: var(--mp-color-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: var(--mp-color-hover);
+    }
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    overflow: auto;
+    padding: 18px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--mp-space-4);
+  }
+
+  &__fields {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  &__field {
+    display: flex;
+    gap: var(--mp-space-3);
+    align-items: baseline;
+
+    dt {
+      flex: none;
+      width: 96px;
+      font-size: 12.5px;
+      color: var(--mp-color-text-secondary);
+    }
+
+    dd {
+      flex: 1;
+      margin: 0;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--mp-color-text);
+      line-height: 1.5;
+    }
+  }
+
+  &__foot {
+    flex: none;
+    padding: 16px 22px;
+    border-top: 1px solid var(--mp-color-border);
+    display: flex;
+    gap: var(--mp-space-3);
+  }
+}
+
+// Badge de rôle : rectangulaire (jamais pilule) pour ne pas concurrencer les
+// statuts (StatusChip). Neutre, texte porteur du sens.
+.mp-role-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: var(--mp-radius-sm);
+  background: var(--mp-color-surface-variant);
+  color: var(--mp-color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// Placeholder de cellule (nom manquant, motif vide).
+.rdv-cell--placeholder {
+  color: var(--mp-color-text-disabled);
+  font-style: italic;
+}
+
+// --- En-tête de page (titre + sous-titre + action) ---------------------------
+.mp-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--mp-space-4);
+}
+
+.mp-page-title {
+  margin: 0;
+  font-family: var(--mp-font-display-family);
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  color: var(--mp-color-text);
+}
+
+.mp-page-subtitle {
+  margin: 5px 0 0;
+  font-size: 14px;
+  color: var(--mp-color-text-secondary);
+}

@@ -1,0 +1,43 @@
+:host {
+  display: inline-flex;
+}
+
+.mp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &--md {
+    height: 26px;
+    padding: 0 11px;
+    border-radius: 13px;
+    font-size: 12.5px;
+  }
+
+  &--strike span:last-child {
+    text-decoration: line-through;
+  }
+}
+
+.mp-chip__dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.mp-chip--md .mp-chip__dot {
+  width: 7px;
+  height: 7px;
+}
+
+.mp-chip--pulse .mp-chip__dot {
+  animation: mpPulse 2.4s ease-in-out infinite;
+}

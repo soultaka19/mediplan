@@ -2,182 +2,401 @@
   display: block;
 }
 
-// Espacement vertical entre les blocs du dashboard.
-.dashboard-hero,
-.dashboard-stats,
-.dashboard-next,
-.dashboard-quick {
+// --- Accueil -----------------------------------------------------------------
+.dash-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3);
+  margin-bottom: var(--mp-space-5);
+}
+
+.dash-hero__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  flex-wrap: wrap;
+}
+
+.dash-hero__title {
+  margin: 0;
+  font-family: var(--mp-font-display-family);
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: -0.7px;
+  color: var(--mp-color-text);
+}
+
+.dash-hero__subtitle {
+  margin: 3px 0 0;
+  font-size: 14px;
+  color: var(--mp-color-text-secondary);
+}
+
+// --- KPI ---------------------------------------------------------------------
+.dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--mp-space-4);
   margin-bottom: var(--mp-space-6);
 }
 
-// --- Zone d'accueil ----------------------------------------------------------
-.dashboard-hero {
-  display: flex;
-  align-items: center;
-  gap: var(--mp-space-4);
+.dash-kpi {
+  position: relative;
+  overflow: hidden;
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-lg);
+  padding: 18px 20px 20px;
+  text-decoration: none;
+  color: inherit;
+
+  // Filet supérieur : teal (carte vivante) ou neutre.
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--mp-color-border);
+  }
+
+  &--teal::before {
+    background: var(--mp-color-accent);
+  }
+
+  &--link {
+    cursor: pointer;
+    transition:
+      box-shadow 120ms var(--mp-ease-standard),
+      transform 120ms var(--mp-ease-standard),
+      border-color 120ms var(--mp-ease-standard);
+
+    &:hover {
+      box-shadow: var(--mp-elevation-hover);
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--mp-color-accent) 40%, var(--mp-color-border));
+      text-decoration: none;
+    }
+
+    &:active {
+      transform: translateY(-1px) scale(0.995);
+    }
+  }
 }
 
-// Salutation + badge de rôle sur la même ligne (badge frère du <h1>, pas dedans).
-.dashboard-hero__heading {
+.dash-kpi__top {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: var(--mp-space-3);
+  justify-content: space-between;
 }
 
-.dashboard-hero__title {
-  margin: 0;
-  font-family: var(--mp-font-display-family);
-  font-size: var(--mp-font-display-size);
-  line-height: var(--mp-font-display-line);
-  font-weight: var(--mp-font-display-weight);
-  letter-spacing: var(--mp-font-display-spacing);
+.dash-kpi__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-accent-soft);
+  color: var(--mp-color-accent-ink);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.dash-kpi__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--mp-color-primary);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.dash-kpi__value {
+  margin: 14px 0 2px;
+  font-size: var(--mp-font-kpi-size);
+  line-height: var(--mp-font-kpi-line);
+  font-weight: var(--mp-font-kpi-weight);
+  letter-spacing: -1px;
   color: var(--mp-color-text);
+
+  &--muted {
+    color: var(--mp-color-text-disabled);
+    font-weight: 600;
+  }
 }
 
-.dashboard-hero__subtitle {
-  margin: var(--mp-space-1) 0 0;
+.dash-kpi__label {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  font-size: 13.5px;
   color: var(--mp-color-text-secondary);
 }
 
-// --- Titres de section -------------------------------------------------------
-.dashboard-section-title {
+.dash-soon {
+  padding: 2px 7px;
+  border-radius: var(--mp-radius-sm);
+  background: var(--mp-color-surface-variant);
+  color: var(--mp-color-text-secondary);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+// --- Sections ----------------------------------------------------------------
+.dash-section {
+  margin-top: var(--mp-space-6);
+}
+
+.dash-section__title {
   margin: 0 0 var(--mp-space-3);
-  font-family: var(--mp-font-display-family);
-  font-size: var(--mp-font-title-size);
-  line-height: var(--mp-font-title-line);
-  font-weight: var(--mp-font-title-weight);
-  letter-spacing: var(--mp-font-title-spacing);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
   color: var(--mp-color-text);
 }
 
-// --- Grille de KPI -----------------------------------------------------------
-// 1 colonne en mobile ; 3 colonnes dès le pivot md (exploite la largeur 1200px).
-// Paliers KPI : 1 colonne en mobile, 2 en tablette, 3 en bureau.
-.dashboard-stats {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--mp-space-4);
+.dash-card {
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-lg);
 }
 
-@media (min-width: 641px) and (max-width: 1024px) {
-  .dashboard-stats {
-    grid-template-columns: repeat(2, 1fr);
+// --- Prochain rendez-vous ----------------------------------------------------
+.dash-next {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-5);
+  flex-wrap: wrap;
+  padding: 20px 22px;
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-lg);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    box-shadow 120ms var(--mp-ease-standard),
+    border-color 120ms var(--mp-ease-standard),
+    transform 120ms var(--mp-ease-standard);
+
+  &:hover {
+    box-shadow: var(--mp-elevation-hover);
+    border-color: color-mix(in srgb, var(--mp-color-accent) 35%, var(--mp-color-border));
+    text-decoration: none;
+  }
+
+  &:active {
+    transform: scale(0.995);
   }
 }
 
-@media (min-width: 1025px) {
-  .dashboard-stats {
-    grid-template-columns: repeat(3, 1fr);
+.dash-next__time {
+  flex: none;
+  text-align: center;
+  padding-right: 22px;
+  border-right: 1px solid var(--mp-color-border);
+}
+
+.dash-next__day {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--mp-color-text-secondary);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.dash-next__hour {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+  color: var(--mp-color-text);
+}
+
+.dash-next__body {
+  flex: 1;
+  min-width: 200px;
+}
+
+.dash-next__head {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  flex-wrap: wrap;
+}
+
+.dash-next__patient {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.dash-next__meta {
+  font-size: 13.5px;
+  color: var(--mp-color-text-secondary);
+  margin-top: 4px;
+}
+
+.dash-next__link {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mp-color-primary);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
   }
-}
-
-.dashboard-next__card,
-.dashboard-account__card {
-  border-radius: var(--mp-radius-md);
-}
-
-// Carte « prochain rendez-vous » : l'état vide compact (dense) gère déjà son
-// espacement interne ; on supprime le padding propre de mat-card pour une carte
-// équilibrée (plus de grande zone vide ~250px).
-.dashboard-next__card {
-  padding: 0;
 }
 
 // --- Accès rapides -----------------------------------------------------------
-.dashboard-quick__grid {
+.dash-quick {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--mp-space-4);
 }
 
-@media (min-width: 960px) {
-  .dashboard-quick__grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-// Carte-action désactivée : affordance « bientôt » cohérente avec la nav.
-// Cible ≥ 44px, focus géré par le navigateur (bouton natif désactivé = inerte).
-.dashboard-quick__item {
+.dash-quick__item {
   display: flex;
   align-items: center;
   gap: var(--mp-space-3);
-  min-height: 56px;
-  padding: var(--mp-space-3) var(--mp-space-4);
-  border: 1px solid var(--mp-color-border);
-  border-radius: var(--mp-radius-md);
+  height: 62px;
+  padding: 0 18px;
   background: var(--mp-color-surface);
-  color: var(--mp-color-text-disabled);
-  font: inherit;
-  text-align: left;
-  cursor: not-allowed;
-}
-
-// Carte-action active (l'écran existe) : lien cliquable, texte plein contraste,
-// affordance au survol cohérente avec la nav (surface-variant).
-.dashboard-quick__item--active {
-  color: var(--mp-color-text);
+  border: 1px solid var(--mp-color-border);
+  border-radius: var(--mp-radius-lg);
   text-decoration: none;
-  cursor: pointer;
+  color: var(--mp-color-text);
   transition:
-    background-color var(--mp-motion-base) var(--mp-ease-standard),
-    box-shadow var(--mp-motion-base) var(--mp-ease-standard);
+    background 120ms var(--mp-ease-standard),
+    border-color 120ms var(--mp-ease-standard);
 
-  .dashboard-quick__icon {
-    color: var(--mp-color-primary);
+  &:not(.dash-quick__item--soon):hover {
+    background: var(--mp-color-background);
+    border-color: var(--mp-color-input-border);
+    text-decoration: none;
   }
 
-  &:hover {
-    background: var(--mp-color-surface-variant);
-    box-shadow: var(--mp-elevation-1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dashboard-quick__item--active {
-    transition: none;
+  &--soon {
+    border-style: dashed;
+    color: var(--mp-color-text-disabled);
   }
 }
 
-.dashboard-quick__icon {
-  flex: 0 0 auto;
-  color: var(--mp-color-text-disabled);
+.dash-quick__icon {
+  flex: none;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--mp-color-primary);
+
+  .dash-quick__item--soon & {
+    color: var(--mp-color-text-disabled);
+  }
 }
 
-.dashboard-quick__label {
-  flex: 1 1 auto;
-  font-size: 14px;
+.dash-quick__label {
+  flex: 1;
+  font-size: 14.5px;
   font-weight: 500;
 }
 
-// Chevron de l'action active (décoratif) : indique la navigation.
-.dashboard-quick__chevron {
-  flex: 0 0 auto;
-  color: var(--mp-color-text-secondary);
-}
-
-.dashboard-quick__soon {
-  flex: 0 0 auto;
-  font-size: 12px;
-  font-style: italic;
+.dash-quick__chevron {
+  flex: none;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
   color: var(--mp-color-text-disabled);
 }
 
-// --- Carte « Mon compte » ----------------------------------------------------
-.dashboard-account__list {
-  margin: 0;
+// --- Mon compte --------------------------------------------------------------
+.dash-account {
+  padding: var(--mp-space-4) var(--mp-space-5);
+}
+
+.dash-account__list {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--mp-space-2) var(--mp-space-4);
-}
-
-.dashboard-account__list dt {
-  font-weight: 600;
-  color: var(--mp-color-text-secondary);
-}
-
-.dashboard-account__list dd {
+  grid-template-columns: max-content 1fr;
+  gap: var(--mp-space-2) var(--mp-space-5);
   margin: 0;
-  color: var(--mp-color-text);
+
+  dt {
+    font-size: 13px;
+    color: var(--mp-color-text-secondary);
+  }
+
+  dd {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--mp-color-text);
+  }
+}
+
+// --- Skeletons ---------------------------------------------------------------
+.dash-skel {
+  display: block;
+  border-radius: var(--mp-radius-md);
+  background: linear-gradient(
+    90deg,
+    var(--mp-color-surface-variant),
+    var(--mp-color-border),
+    var(--mp-color-surface-variant)
+  );
+  background-size: 320px 100%;
+  animation: mpShimmer 1.2s linear infinite;
+
+  &--icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  &--value {
+    width: 64px;
+    height: 32px;
+    margin: 16px 0 10px;
+  }
+
+  &--label {
+    width: 112px;
+    height: 13px;
+  }
+
+  &--wide {
+    width: 100%;
+    height: 96px;
+    border-radius: var(--mp-radius-lg);
+  }
+}
+
+.dash-kpi--skeleton {
+  &::before {
+    background: var(--mp-color-border);
+  }
+}
+
+.dash-next--skeleton {
+  padding: 0;
+  border: 0;
+}
+
+// --- Responsive --------------------------------------------------------------
+@media (max-width: 899.98px) {
+  .dash-kpis,
+  .dash-quick {
+    grid-template-columns: 1fr;
+  }
 }

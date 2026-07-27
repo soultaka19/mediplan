@@ -40,7 +40,9 @@
 }
 
 .auth-form__submit {
-  margin-top: var(--mp-space-2);
+  // Marge accrue : la consigne de mot de passe (mat-hint) tient sur deux lignes ;
+  // on évite qu'elle ne colle au bouton « Créer mon compte ».
+  margin-top: var(--mp-space-4);
 }
 
 .auth-switch {
