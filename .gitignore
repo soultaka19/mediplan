@@ -38,3 +38,11 @@ creation-diagramme-cas-d'utilisation/
 
 # Companion visuel de brainstorming (local)
 .superpowers/
+
+# Captures d'audit à la racine (locales, non versionnées)
+/*.png
+
+# Fichiers de sauvegarde (jamais versionnés, où qu'ils soient), y compris les
+# sauvegardes de .env (secrets) telles que .env.backup-avant-seed
+*.backup
+.env.backup*
