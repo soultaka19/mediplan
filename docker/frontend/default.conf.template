@@ -5,12 +5,22 @@ server {
     index index.html;
 
     # Proxy des appels API vers le backend NestJS (préfixe /api/v1).
-    # BACKEND_ORIGIN : http://backend:3000 en local (Compose) ; domaine privé
-    # Railway en cloud (ex. http://backend.railway.internal:3000).
+    # BACKEND_ORIGIN : http://backend:3000 en local (Compose) ; nom de domaine
+    # interne de l'application en cloud (Azure Container Apps).
     location /api/ {
         proxy_pass ${BACKEND_ORIGIN};
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
+
+        # $proxy_host (l'hôte du backend), et NON $host (celui de la requête
+        # entrante). Les plateformes conteneurisées routent le trafic d'après
+        # l'en-tête Host : renvoyer celui du frontend fait chercher à l'ingress
+        # une application qui n'est pas la bonne, et il répond 404. Le piège est
+        # invisible en local, où Docker Compose ne route pas par Host.
+        proxy_set_header Host $proxy_host;
+
+        # Nom d'hôte réellement demandé par le navigateur, si le backend en a
+        # besoin (journalisation, construction d'URL absolues).
+        proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
