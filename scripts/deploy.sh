@@ -68,8 +68,7 @@ echo ""
 az deployment sub what-if \
   --location "$REGION" \
   --template-file "$TEMPLATE" \
-  --parameters "$PARAMETRES" \
-  --parameters databaseUrl="$DATABASE_URL" jwtSecret="$JWT_SECRET"
+  --parameters "$PARAMETRES"
 
 if $MODE_PREVISUALISATION; then
   echo ""
@@ -95,7 +94,6 @@ az deployment sub create \
   --location "$REGION" \
   --template-file "$TEMPLATE" \
   --parameters "$PARAMETRES" \
-  --parameters databaseUrl="$DATABASE_URL" jwtSecret="$JWT_SECRET" \
   --output none
 
 URL="$(az deployment sub show --name "$NOM_DEPLOIEMENT" --query properties.outputs.applicationUrl.value -o tsv)"

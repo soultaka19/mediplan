@@ -4,10 +4,16 @@
 //
 // Ce fichier est VERSIONNÉ : il ne doit contenir aucun secret.
 //
-// `databaseUrl` et `jwtSecret` sont volontairement absents. Ils sont fournis en
-// ligne de commande par scripts/deploy.sh, qui les lit dans .env.azure (ignoré
-// par git). Un paramètre marqué @secure() n'apparaît ni dans les journaux de
-// déploiement, ni dans la sortie de what-if.
+// Les secrets sont lus dans l'ENVIRONNEMENT au moment de la compilation, via
+// readEnvironmentVariable() : aucune valeur sensible n'apparaît ici. C'est
+// scripts/deploy.sh qui les exporte depuis .env.azure (ignoré par git).
+//
+// Un fichier .bicepparam exige que TOUS les paramètres soient assignés et
+// n'accepte pas de surcharge en ligne de commande — d'où cette lecture depuis
+// l'environnement plutôt qu'un passage par `--parameters cle=valeur`.
+//
+// Ces paramètres étant déclarés @secure() dans main.bicep, Azure ne les inscrit
+// ni dans l'historique de déploiement, ni dans la sortie de what-if.
 // =============================================================================
 
 using 'main.bicep'
@@ -21,3 +27,7 @@ param environmentName = 'dev'
 // d'un déploiement scripté, pour qu'une révision déployée soit traçable.
 param backendImage = 'ghcr.io/soultaka19/mediplan-backend:latest'
 param frontendImage = 'ghcr.io/soultaka19/mediplan-frontend:latest'
+
+// Secrets — lus dans l'environnement, jamais écrits dans ce fichier.
+param databaseUrl = readEnvironmentVariable('DATABASE_URL')
+param jwtSecret = readEnvironmentVariable('JWT_SECRET')
