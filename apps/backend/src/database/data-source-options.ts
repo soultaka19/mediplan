@@ -32,6 +32,40 @@ export interface DbEnv {
   DB_NAME?: string;
   DB_USER?: string;
   DB_PASSWORD?: string;
+  DB_SSL?: string;
+  DB_SSL_REJECT_UNAUTHORIZED?: string;
+}
+
+/** Lit une variable d'environnement booléenne (« true » / « false »). */
+function readBoolean(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined || value === '') {
+    return fallback;
+  }
+  return value.trim().toLowerCase() === 'true';
+}
+
+/**
+ * Configuration TLS de la connexion PostgreSQL.
+ *
+ * En local (Docker Compose), la base vit sur le réseau interne des conteneurs :
+ * TLS est inutile, d'où le défaut désactivé qui préserve l'expérience de
+ * développement existante.
+ *
+ * En hébergement infogéré (Neon, Azure Database for PostgreSQL), TLS est
+ * OBLIGATOIRE : le serveur refuse toute connexion en clair. Poser `DB_SSL=true`
+ * suffit — ces fournisseurs présentent un certificat signé par une autorité
+ * publique, que Node valide avec son magasin de certificats racine.
+ *
+ * `DB_SSL_REJECT_UNAUTHORIZED=false` désactive cette vérification de chaîne.
+ * Réservé aux certificats auto-signés : la connexion reste chiffrée, mais plus
+ * rien ne garantit l'identité du serveur (exposition à une interception).
+ */
+function buildSslOptions(env: DbEnv): boolean | { rejectUnauthorized: boolean } {
+  if (!readBoolean(env.DB_SSL, false)) {
+    return false;
+  }
+
+  return { rejectUnauthorized: readBoolean(env.DB_SSL_REJECT_UNAUTHORIZED, true) };
 }
 
 export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
@@ -42,6 +76,7 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
     database: env.DB_NAME ?? 'mediplan',
     username: env.DB_USER ?? 'mediplan_app',
     password: env.DB_PASSWORD ?? 'change_me',
+    ssl: buildSslOptions(env),
 
     // Schéma piloté UNIQUEMENT par les migrations versionnées (décision Phase 2).
     synchronize: false,

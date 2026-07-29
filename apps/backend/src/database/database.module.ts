@@ -23,6 +23,8 @@ import { buildDataSourceOptions } from './data-source-options';
           DB_NAME: configService.get<string>('DB_NAME'),
           DB_USER: configService.get<string>('DB_USER'),
           DB_PASSWORD: configService.get<string>('DB_PASSWORD'),
+          DB_SSL: configService.get<string>('DB_SSL'),
+          DB_SSL_REJECT_UNAUTHORIZED: configService.get<string>('DB_SSL_REJECT_UNAUTHORIZED'),
         }),
     }),
   ],

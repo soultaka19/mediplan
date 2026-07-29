@@ -32,11 +32,15 @@ import { buildDataSourceOptions } from '../data-source-options';
  * chaque réinsertion. Rejouer le script remet le jeu de démo dans un état connu
  * sans dupliquer ni casser les clés étrangères.
  *
- * ⚠ Données de démonstration uniquement — mots de passe publics, jamais en
- * production. Le script refuse de s'exécuter si NODE_ENV vaut 'production'.
+ * ⚠ Données de démonstration uniquement — mots de passe publics, jamais sur des
+ * données réelles. Le script refuse de s'exécuter si NODE_ENV vaut 'production',
+ * sauf autorisation explicite par ALLOW_DEMO_SEED=true (environnement vitrine).
  */
 
 loadEnv({ path: join(__dirname, '..', '..', '..', '..', '..', '.env') });
+
+/** Autorisation explicite de semer malgré NODE_ENV=production (voir `run`). */
+const ALLOW_DEMO_SEED = process.env.ALLOW_DEMO_SEED?.trim().toLowerCase() === 'true';
 
 /** Fuseau de référence du projet : « aujourd'hui » se lit à Toronto. */
 const TIMEZONE_OFFSET_NOTE = 'America/Toronto';
@@ -761,8 +765,26 @@ async function seedSlotsAndAppointments(manager: EntityManager): Promise<void> {
 }
 
 async function run(): Promise<void> {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('Le seed de démonstration ne doit jamais être exécuté en production.');
+  // Garde-fou : en `NODE_ENV=production`, le seed est refusé par défaut.
+  //
+  // L'environnement déployé de ce projet est une VITRINE DE DÉMONSTRATION, pas
+  // une clinique réelle : il doit contenir le jeu de démo, et son image tourne
+  // avec NODE_ENV=production. Le garde-fou reste donc en place mais devient
+  // franchissable par un geste explicite et séparé (`ALLOW_DEMO_SEED=true`),
+  // qu'on ne pose jamais par accident — plutôt que d'être simplement retiré.
+  if (process.env.NODE_ENV === 'production' && !ALLOW_DEMO_SEED) {
+    throw new Error(
+      'Le seed de démonstration est bloqué en production. ' +
+        "Poser ALLOW_DEMO_SEED=true pour l'autoriser explicitement — " +
+        'à ne faire que sur un environnement de démonstration, jamais sur des données réelles.',
+    );
+  }
+
+  if (ALLOW_DEMO_SEED) {
+    console.warn(
+      '\n⚠  ALLOW_DEMO_SEED=true : insertion de comptes à mots de passe publics.\n' +
+        '   Les données existantes de la clinique de démonstration seront purgées.\n',
+    );
   }
 
   const dataSource = new DataSource(buildDataSourceOptions(process.env));
