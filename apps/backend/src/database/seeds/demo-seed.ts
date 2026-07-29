@@ -101,6 +101,56 @@ const DEMO_PATIENTS = [
   { id: uuid('55555555', 8), firstName: 'Liam', lastName: "O'Connor", email: null },
   { id: uuid('55555555', 9), firstName: 'Sophie', lastName: 'Nadeau', email: 'sophie.nadeau@example.com' },
   { id: uuid('55555555', 10), firstName: 'William', lastName: 'Gagné', email: null },
+  // Patients supplémentaires : alimentent l'historique et le planning à venir,
+  // pour que la liste des patients et la recherche au comptoir soient crédibles.
+  { id: uuid('55555555', 11), firstName: 'Amélie', lastName: 'Lévesque', email: 'amelie.levesque@example.com' },
+  { id: uuid('55555555', 12), firstName: 'Jacob', lastName: 'Fortin', email: null },
+  { id: uuid('55555555', 13), firstName: 'Noémie', lastName: 'Pelletier', email: null },
+  { id: uuid('55555555', 14), firstName: 'Antoine', lastName: 'Girard', email: 'antoine.girard@example.com' },
+  { id: uuid('55555555', 15), firstName: 'Yasmine', lastName: 'Haddad', email: null },
+  { id: uuid('55555555', 16), firstName: 'Thomas', lastName: 'Beaulieu', email: null },
+  { id: uuid('55555555', 17), firstName: 'Camille', lastName: 'Ouellet', email: 'camille.ouellet@example.com' },
+  { id: uuid('55555555', 18), firstName: 'Raphaël', lastName: 'Mercier', email: null },
+  { id: uuid('55555555', 19), firstName: 'Jade', lastName: 'Boucher', email: null },
+  { id: uuid('55555555', 20), firstName: 'Samuel', lastName: 'Desjardins', email: 'samuel.desjardins@example.com' },
+  { id: uuid('55555555', 21), firstName: 'Maya', lastName: 'Sirois', email: null },
+  { id: uuid('55555555', 22), firstName: 'Étienne', lastName: 'Lapointe', email: null },
+  { id: uuid('55555555', 23), firstName: 'Priya', lastName: 'Sharma', email: 'priya.sharma@example.com' },
+  { id: uuid('55555555', 24), firstName: 'Gabriel', lastName: 'Morin', email: null },
+] as const;
+
+/**
+ * Motifs de consultation courants en clinique de première ligne. Piochés de
+ * façon déterministe pour l'historique et le planning à venir, afin que les
+ * écrans ne répètent pas trois fois le même libellé.
+ */
+const CONSULTATION_REASONS = [
+  'Suivi de tension artérielle',
+  "Renouvellement d'ordonnance",
+  'Résultats de prise de sang',
+  'Vaccination antigrippale',
+  'Douleurs lombaires',
+  'Consultation dermatologie',
+  'Bilan de santé annuel',
+  'Suivi de diabète',
+  'Infection respiratoire',
+  'Certificat médical',
+  'Migraine récurrente',
+  'Suivi post-opératoire',
+  'Douleurs articulaires',
+  'Otite — enfant',
+  'Suivi de grossesse',
+  'Consultation de santé mentale',
+  'Entorse à la cheville',
+  'Renouvellement de contraception',
+] as const;
+
+/** Motifs d'annulation observés au comptoir. */
+const CANCELLATION_REASONS = [
+  "Annulé par le patient — conflit d'horaire.",
+  'Annulé par le patient — symptômes résolus.',
+  'Annulé par la clinique — médecin indisponible.',
+  'Annulé par le patient — reporté à une date ultérieure.',
 ] as const;
 
 /** Identifiants des disponibilités du jeu de démo. */
@@ -302,6 +352,193 @@ const TODAY_APPOINTMENTS: readonly AppointmentPlan[] = [
 ];
 
 /**
+ * Rendez-vous de demain. Volontairement clairsemés : demain est la journée
+ * utilisée pour démontrer la prise de rendez-vous en direct, il doit donc
+ * rester des créneaux libres évidents — tout en évitant une journée vide au
+ * milieu d'un planning par ailleurs rempli.
+ */
+const TOMORROW_APPOINTMENTS: readonly AppointmentPlan[] = [
+  // Dre Bergeron — matin (6 créneaux : 09:00 → 11:30)
+  {
+    availabilityId: AVAIL.bergeronDemain,
+    slotIndex: 0,
+    patientId: DEMO_PATIENTS[10].id,
+    status: AppointmentStatus.BOOKED,
+    reason: 'Suivi de diabète',
+  },
+  {
+    availabilityId: AVAIL.bergeronDemain,
+    slotIndex: 2,
+    patientId: DEMO_PATIENTS[13].id,
+    status: AppointmentStatus.BOOKED,
+    reason: 'Douleurs lombaires',
+  },
+  {
+    availabilityId: AVAIL.bergeronDemain,
+    slotIndex: 5,
+    patientId: DEMO_PATIENTS[16].id,
+    status: AppointmentStatus.BOOKED,
+    reason: "Renouvellement d'ordonnance",
+  },
+  // Dr Lefebvre — après-midi (6 créneaux : 13:00 → 15:30)
+  {
+    availabilityId: AVAIL.lefebvreDemain,
+    slotIndex: 1,
+    patientId: DEMO_PATIENTS[19].id,
+    status: AppointmentStatus.BOOKED,
+    reason: 'Bilan de santé annuel',
+  },
+  {
+    availabilityId: AVAIL.lefebvreDemain,
+    slotIndex: 3,
+    patientId: DEMO_PATIENTS[22].id,
+    status: AppointmentStatus.BOOKED,
+    reason: 'Consultation dermatologie',
+  },
+];
+
+/**
+ * Générateur pseudo-aléatoire déterministe (mulberry32), amorcé par une graine
+ * fixe. Le jeu de démonstration doit être *varié* sans être *aléatoire* : deux
+ * exécutions produisent le même planning, ce qui rend la démo reproductible et
+ * les captures d'écran stables.
+ */
+function createRandom(seed: number): () => number {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Profondeur de l'historique et du planning à venir, en jours calendaires. */
+const HISTORY_DAYS = 14;
+const UPCOMING_DAYS = 7;
+
+/** Jours ouvrés seulement : la clinique est fermée le samedi et le dimanche. */
+function isWorkingDay(date: Date): boolean {
+  const day = date.getDay();
+  return day >= 1 && day <= 5;
+}
+
+/**
+ * Plage type de chaque médecin sur les journées générées. Aujourd'hui et demain
+ * gardent leur planning déclaré à la main (flux du jour soigné) ; les autres
+ * journées suivent ce gabarit.
+ */
+const DOCTOR_SHIFTS = [
+  { doctorId: IDS.doctorBergeron, startHour: 9, startMinute: 0, endHour: 12, endMinute: 0 },
+  { doctorId: IDS.doctorLefebvre, startHour: 13, startMinute: 30, endHour: 16, endMinute: 30 },
+] as const;
+
+/**
+ * Construit l'historique (J-14 → J-1) et le planning à venir (J+2 → J+7).
+ *
+ * Objectif de démonstration : que l'historique des rendez-vous, les filtres par
+ * statut et la navigation par date aient de la matière, sans toucher au flux
+ * du jour déjà réglé. Les journées passées sont majoritairement `completed`
+ * (avec quelques absences et annulations, comme en clinique réelle) ; les
+ * journées à venir sont `booked` et volontairement incomplètes, pour qu'il
+ * reste des créneaux libres à réserver pendant la présentation.
+ */
+function buildExtendedSchedule(): {
+  availabilities: AvailabilityConfig[];
+  appointments: AppointmentPlan[];
+} {
+  const random = createRandom(20260729);
+  const availabilities: AvailabilityConfig[] = [];
+  const appointments: AppointmentPlan[] = [];
+  let sequence = 100; // au-delà des identifiants fixes d'AVAIL
+
+  for (let offset = -HISTORY_DAYS; offset <= UPCOMING_DAYS; offset++) {
+    // 0 et 1 sont déjà couverts par le planning déclaré à la main.
+    if (offset === 0 || offset === 1) {
+      continue;
+    }
+
+    const reference = dayAt(offset, 12);
+    if (!isWorkingDay(reference)) {
+      continue;
+    }
+
+    const isPast = offset < 0;
+
+    for (const shift of DOCTOR_SHIFTS) {
+      const availabilityId = uuid('66666666', sequence++);
+
+      availabilities.push({
+        id: availabilityId,
+        doctorId: shift.doctorId,
+        start: dayAt(offset, shift.startHour, shift.startMinute),
+        end: dayAt(offset, shift.endHour, shift.endMinute),
+        slotDurationMin: 30,
+        type: AvailabilityType.AVAILABLE,
+        note: isPast ? 'Consultations' : 'Consultations (à venir)',
+      });
+
+      // 6 créneaux par plage de 3 h. Le passé est bien rempli (une journée de
+      // clinique se remplit), le futur l'est partiellement.
+      const slotCount = 6;
+      const fillRate = isPast ? 0.75 : 0.45;
+
+      for (let slotIndex = 0; slotIndex < slotCount; slotIndex++) {
+        if (random() > fillRate) {
+          continue; // créneau laissé libre
+        }
+
+        const patient = DEMO_PATIENTS[Math.floor(random() * DEMO_PATIENTS.length)];
+        const reason = CONSULTATION_REASONS[Math.floor(random() * CONSULTATION_REASONS.length)];
+
+        let status = AppointmentStatus.BOOKED;
+        let cancellationReason: string | undefined;
+
+        if (isPast) {
+          const draw = random();
+          if (draw < 0.08) {
+            status = AppointmentStatus.CANCELLED;
+            cancellationReason =
+              CANCELLATION_REASONS[Math.floor(random() * CANCELLATION_REASONS.length)];
+          } else if (draw < 0.16) {
+            status = AppointmentStatus.ABSENT;
+          } else {
+            status = AppointmentStatus.COMPLETED;
+          }
+        }
+
+        appointments.push({
+          availabilityId,
+          slotIndex,
+          patientId: patient.id,
+          status,
+          reason,
+          cancellationReason,
+        });
+      }
+    }
+  }
+
+  return { availabilities, appointments };
+}
+
+const EXTENDED_SCHEDULE = buildExtendedSchedule();
+
+/** Planning complet : journées déclarées à la main + journées générées. */
+const ALL_AVAILABILITIES: readonly AvailabilityConfig[] = [
+  ...AVAILABILITIES,
+  ...EXTENDED_SCHEDULE.availabilities,
+];
+
+/** Rendez-vous complets : flux du jour soigné + historique et jours à venir. */
+const ALL_APPOINTMENTS: readonly AppointmentPlan[] = [
+  ...TODAY_APPOINTMENTS,
+  ...TOMORROW_APPOINTMENTS,
+  ...EXTENDED_SCHEDULE.appointments,
+];
+
+/**
  * Découpe une plage en créneaux consécutifs de `durationMin` minutes.
  * Réplique la règle de génération des disponibilités (MEDIPLAN-20) : le seed
  * doit rester autonome, il ne passe pas par le service NestJS.
@@ -446,7 +683,7 @@ async function seedUsers(manager: EntityManager): Promise<void> {
 async function seedAvailabilities(manager: EntityManager): Promise<void> {
   await manager.upsert(
     Availability,
-    AVAILABILITIES.map((config) => ({
+    ALL_AVAILABILITIES.map((config) => ({
       id: config.id,
       doctorId: config.doctorId,
       clinicId: IDS.clinic,
@@ -472,7 +709,7 @@ async function seedAvailabilities(manager: EntityManager): Promise<void> {
 async function seedSlotsAndAppointments(manager: EntityManager): Promise<void> {
   const slotsByAvailability = new Map<string, AppointmentSlot[]>();
 
-  for (const config of AVAILABILITIES) {
+  for (const config of ALL_AVAILABILITIES) {
     if (config.type !== AvailabilityType.AVAILABLE) {
       continue; // un congé n'ouvre aucun créneau réservable
     }
@@ -490,7 +727,7 @@ async function seedSlotsAndAppointments(manager: EntityManager): Promise<void> {
 
   const bookedSlotIds: string[] = [];
 
-  for (const plan of TODAY_APPOINTMENTS) {
+  for (const plan of ALL_APPOINTMENTS) {
     const slots = slotsByAvailability.get(plan.availabilityId);
     const slot = slots?.[plan.slotIndex];
     if (!slot) {
@@ -549,7 +786,10 @@ async function run(): Promise<void> {
     console.log(`  Médecins      : Dre Sophie Bergeron, Dr Marc Lefebvre`);
     console.log(`  Patients      : ${patients}`);
     console.log(`  Créneaux      : ${slots}`);
-    console.log(`  Rendez-vous   : ${appointments} (statuts variés, du jour)`);
+    console.log(
+      `  Rendez-vous   : ${appointments} — historique sur ${HISTORY_DAYS} j, flux du jour, ` +
+        `planning jusqu'à J+${UPCOMING_DAYS} (jours ouvrés)`,
+    );
     console.log('\n  Comptes (mots de passe de démonstration) :');
     for (const account of DEMO_ACCOUNTS) {
       console.log(`    ${account.email.padEnd(28)} ${account.password.padEnd(15)} ${account.role}`);

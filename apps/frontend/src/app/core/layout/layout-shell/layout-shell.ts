@@ -11,7 +11,16 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationStart,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { filter, map } from 'rxjs';
 
 import { AuthFacade } from '@core/auth';
@@ -92,6 +101,17 @@ export class LayoutShell {
   private readonly userMenuState = signal(false);
   readonly userMenuOpen = this.userMenuState.asReadonly();
 
+  /**
+   * Navigation en cours : alimente la barre de progression de la topbar.
+   *
+   * Les écrans sont chargés paresseusement ; au premier accès à une route, le
+   * temps de récupération du chunk se traduisait par une interface immobile,
+   * sans indication que quelque chose se passait. La barre couvre cette
+   * fenêtre, tandis que les View Transitions gèrent le fondu du contenu.
+   */
+  private readonly navigatingState = signal(false);
+  readonly navigating = this.navigatingState.asReadonly();
+
   /** Vrai si les libellés de nav sont visibles (masqués quand rail réduit desktop). */
   readonly showLabels = computed(() => this.isMobile() || !this.railCollapsed());
 
@@ -133,6 +153,21 @@ export class LayoutShell {
         takeUntilDestroyed(),
       )
       .subscribe(() => this.mobileNavState.set(false));
+
+    // Progression de navigation. `NavigationCancel` et `NavigationError` sont
+    // traités comme des fins : un guard qui refuse l'accès ou un chunk qui
+    // échoue doit éteindre la barre, pas la laisser tourner indéfiniment.
+    this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.navigatingState.set(true);
+      } else if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationCancel ||
+        event instanceof NavigationError
+      ) {
+        this.navigatingState.set(false);
+      }
+    });
   }
 
   /** Burger : bascule le rail (desktop) ou l'overlay (mobile). */

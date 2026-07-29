@@ -10,7 +10,7 @@ import {
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerIntl } from '@angular/material/datepicker';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withViewTransitions } from '@angular/router';
 
 import { authBearerInterceptor, authErrorInterceptor } from '@core/http';
 import { routes } from './app.routes';
@@ -41,7 +41,11 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     // Conservé : le reste du projet est en zone-based (pas de zoneless ici).
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    // `withViewTransitions` : fondu natif entre deux écrans (API View Transitions).
+    // Le contenu sortant reste visible jusqu'à ce que l'entrant soit prêt, ce qui
+    // supprime le flash blanc au changement de page. Les navigateurs sans support
+    // ignorent simplement l'effet — la navigation reste identique.
+    provideRouter(routes, withViewTransitions()),
     provideHttpClient(withInterceptors([authBearerInterceptor, authErrorInterceptor])),
     // Requis par les composants Material animés (sidenav, menu, snackbar).
     provideAnimationsAsync(),

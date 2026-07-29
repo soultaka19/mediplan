@@ -8,8 +8,10 @@
   </button>
 </div>
 
-@if (loading() || saving()) {
-  <mat-progress-bar mode="indeterminate" [attr.aria-label]="saving() ? 'Réservation en cours' : 'Chargement'" />
+@if (saving()) {
+  <!-- Réservée à l'action en cours : le chargement du formulaire, lui, est
+       représenté par un skeleton dans le contenu (langage commun aux écrans). -->
+  <mat-progress-bar mode="indeterminate" aria-label="Réservation en cours" />
 }
 
 <mat-dialog-content>
@@ -20,7 +22,15 @@
     </div>
   }
 
-  @if (loadError(); as message) {
+  @if (loading()) {
+    <div class="mp-skel-stack" aria-busy="true" data-testid="book-skeleton">
+      <span class="mp-skel mp-skel--field"></span>
+      <span class="mp-skel mp-skel--field"></span>
+      <span class="mp-skel mp-skel--field"></span>
+      <span class="mp-skel mp-skel--title"></span>
+      <span class="mp-skel mp-skel--field"></span>
+    </div>
+  } @else if (loadError(); as message) {
     <app-error-state
       [message]="message"
       title="Impossible de charger le formulaire"
