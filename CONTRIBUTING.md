@@ -49,7 +49,7 @@ Le fichier `.env` (copié depuis `.env.example`) alimente le backend **et** Dock
 
 | Variable | Rôle | Note |
 | -------- | ---- | ---- |
-| `DB_HOST` | Hôte PostgreSQL | `localhost` hors Docker ; `postgres` dans Compose (géré automatiquement). |
+| `DB_HOST` | Hôte PostgreSQL | `127.0.0.1` hors Docker ; `postgres` dans Compose (géré automatiquement). Sous Windows, préférer `127.0.0.1` à `localhost` (cf. §9). |
 | `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` | Connexion BD | Cohérents avec le service `postgres`. |
 | `JWT_SECRET` | Clé de signature des JWT | **≥ 32 caractères**, aléatoire, différent par environnement. Le backend refuse de démarrer sinon. |
 | `JWT_EXPIRES_IN` | Durée de validité du jeton | ex. `60m`. |
@@ -168,6 +168,7 @@ pnpm build                                 # Build de production (backend + fron
 | -------- | ------------------------- |
 | Le backend ne démarre pas, erreur sur le secret | `JWT_SECRET` absent ou < 32 caractères dans `.env`. |
 | `ECONNREFUSED` / erreurs BD au démarrage backend | Postgres pas lancé (`docker compose up -d postgres`) ou migrations non appliquées (`pnpm --filter backend migration:run`). |
+| `ECONNRESET` sur la BD **sous Windows**, alors que le conteneur est `healthy` | `localhost` résout d'abord en IPv6 (`::1`), où `wslrelay.exe` intercepte le port publié par Docker. Mettre `DB_HOST=127.0.0.1` dans `.env`. Diagnostic : `Get-NetTCPConnection -LocalPort <port> -State Listen` révèle deux processus à l'écoute. |
 | Erreurs de tables manquantes | Migrations non exécutées — relancer `migration:run`. |
 | `ng` / build échoue avec une erreur de version Node | Node trop ancien — passer à 22.22+ ou 24.15+ (cf. §1). |
 | `pnpm` introuvable ou mauvaise version | `corepack enable && corepack prepare pnpm@11.7.0 --activate`. |
