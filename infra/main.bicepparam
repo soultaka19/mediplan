@@ -23,10 +23,15 @@ param resourceGroupName = 'rg-projet-dev'
 param appName = 'mediplan'
 param environmentName = 'dev'
 
-// Images publiques sur ghcr.io. Le tag est remplacé par le SHA du commit lors
-// d'un déploiement scripté, pour qu'une révision déployée soit traçable.
-param backendImage = 'ghcr.io/soultaka19/mediplan-backend:latest'
-param frontendImage = 'ghcr.io/soultaka19/mediplan-frontend:latest'
+// Images publiques sur ghcr.io.
+//
+// Le tag vient de l'environnement (IMAGE_TAG), avec `latest` par défaut.
+// deploy.sh y place le SHA du commit déployé : deux bénéfices concrets — on sait
+// exactement quel code tourne, et Container Apps crée bien une nouvelle
+// révision. Avec un tag `latest` figé, la définition de l'application reste
+// identique et la plateforme ne redéploie rien, même après republication.
+param backendImage = 'ghcr.io/soultaka19/mediplan-backend:${readEnvironmentVariable('IMAGE_TAG', 'latest')}'
+param frontendImage = 'ghcr.io/soultaka19/mediplan-frontend:${readEnvironmentVariable('IMAGE_TAG', 'latest')}'
 
 // Secrets — lus dans l'environnement, jamais écrits dans ce fichier.
 param databaseUrl = readEnvironmentVariable('DATABASE_URL')

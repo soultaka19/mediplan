@@ -48,12 +48,31 @@ az account show >/dev/null 2>&1 || erreur "Session Azure expirée. Lancer :  az 
 
 SOUSCRIPTION="$(az account show --query name -o tsv)"
 
+# Étiquette des images à déployer.
+#
+# Par défaut, le SHA du commit courant — le format que publie le workflow
+# GitHub. Deux raisons : on sait exactement quel code tourne, et Container Apps
+# crée bien une nouvelle révision. Avec `latest`, la définition de l'application
+# reste identique d'un déploiement à l'autre et la plateforme ne redéploie rien,
+# même si l'image a été republiée entre-temps.
+#
+# Surchargeable :  IMAGE_TAG=latest ./scripts/deploy.sh
+if [[ -z "${IMAGE_TAG:-}" ]]; then
+  if COMMIT="$(git -C "$RACINE" rev-parse HEAD 2>/dev/null)"; then
+    IMAGE_TAG="sha-$COMMIT"
+  else
+    IMAGE_TAG="latest"
+  fi
+fi
+export IMAGE_TAG
+
 # --- Récapitulatif -----------------------------------------------------------
 
 echo ""
 echo "  Souscription : $SOUSCRIPTION"
 echo "  Région       : $REGION"
 echo "  Template     : infra/main.bicep (portée souscription)"
+echo "  Images       : tag $IMAGE_TAG"
 echo "  Secrets      : chargés depuis .env.azure (jamais affichés)"
 echo ""
 
