@@ -27,21 +27,78 @@ import { AddSlotUniqueDoctorStart1781674897616 } from './migrations/178167489761
  * tests e2e). Toute nouvelle entité/migration doit être ajoutée ici.
  */
 export interface DbEnv {
+  DATABASE_URL?: string;
   DB_HOST?: string;
   DB_PORT?: string;
   DB_NAME?: string;
   DB_USER?: string;
   DB_PASSWORD?: string;
+  DB_SSL?: string;
+  DB_SSL_REJECT_UNAUTHORIZED?: string;
 }
 
-export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
+/** Lit une variable d'environnement booléenne (« true » / « false »). */
+function readBoolean(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined || value === '') {
+    return fallback;
+  }
+  return value.trim().toLowerCase() === 'true';
+}
+
+/**
+ * Configuration TLS de la connexion PostgreSQL.
+ *
+ * En local (Docker Compose), la base vit sur le réseau interne des conteneurs :
+ * TLS est inutile, d'où le défaut désactivé qui préserve l'expérience de
+ * développement existante.
+ *
+ * En hébergement infogéré (Neon, Azure Database for PostgreSQL), TLS est
+ * OBLIGATOIRE : le serveur refuse toute connexion en clair. Poser `DB_SSL=true`
+ * suffit — ces fournisseurs présentent un certificat signé par une autorité
+ * publique, que Node valide avec son magasin de certificats racine.
+ *
+ * `DB_SSL_REJECT_UNAUTHORIZED=false` désactive cette vérification de chaîne.
+ * Réservé aux certificats auto-signés : la connexion reste chiffrée, mais plus
+ * rien ne garantit l'identité du serveur (exposition à une interception).
+ */
+function buildSslOptions(env: DbEnv): boolean | { rejectUnauthorized: boolean } {
+  if (!readBoolean(env.DB_SSL, false)) {
+    return false;
+  }
+
+  return { rejectUnauthorized: readBoolean(env.DB_SSL_REJECT_UNAUTHORIZED, true) };
+}
+
+/**
+ * Coordonnées de la base.
+ *
+ * Deux formes équivalentes, au choix de l'environnement :
+ *  - `DATABASE_URL` : chaîne de connexion unique, format universel des
+ *    hébergeurs infogérés (Neon, Railway, Heroku…). Prioritaire quand elle est
+ *    présente, car c'est ce que le fournisseur donne à copier tel quel — la
+ *    découper en cinq variables dans un script shell casse dès qu'un mot de
+ *    passe contient un caractère encodé.
+ *  - Variables séparées : forme historique du projet, utilisée en local.
+ */
+function buildConnection(env: DbEnv) {
+  if (env.DATABASE_URL) {
+    return { url: env.DATABASE_URL };
+  }
+
   return {
-    type: 'postgres',
     host: env.DB_HOST ?? 'localhost',
     port: Number(env.DB_PORT ?? 5432),
     database: env.DB_NAME ?? 'mediplan',
     username: env.DB_USER ?? 'mediplan_app',
     password: env.DB_PASSWORD ?? 'change_me',
+  };
+}
+
+export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
+  return {
+    type: 'postgres',
+    ...buildConnection(env),
+    ssl: buildSslOptions(env),
 
     // Schéma piloté UNIQUEMENT par les migrations versionnées (décision Phase 2).
     synchronize: false,

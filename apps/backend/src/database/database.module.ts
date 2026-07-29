@@ -18,11 +18,14 @@ import { buildDataSourceOptions } from './data-source-options';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) =>
         buildDataSourceOptions({
+          DATABASE_URL: configService.get<string>('DATABASE_URL'),
           DB_HOST: configService.get<string>('DB_HOST'),
           DB_PORT: configService.get<string>('DB_PORT'),
           DB_NAME: configService.get<string>('DB_NAME'),
           DB_USER: configService.get<string>('DB_USER'),
           DB_PASSWORD: configService.get<string>('DB_PASSWORD'),
+          DB_SSL: configService.get<string>('DB_SSL'),
+          DB_SSL_REJECT_UNAUTHORIZED: configService.get<string>('DB_SSL_REJECT_UNAUTHORIZED'),
         }),
     }),
   ],

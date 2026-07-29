@@ -1,0 +1,16 @@
+# Normalisation des fins de ligne.
+#
+# L'équipe développe sous Windows avec core.autocrlf=true : sans ces règles, git
+# checkoute les scripts shell en CRLF. Un conteneur Linux échoue alors au
+# démarrage avec « exec format error » ou « no such file or directory », car le
+# \r fait partie du chemin de l'interpréteur lu dans le shebang.
+#
+# Ces fichiers sont exécutés ou interprétés par Linux : ils restent en LF.
+
+* text=auto
+
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.Dockerfile text eol=lf
+*.conf text eol=lf
+*.conf.template text eol=lf

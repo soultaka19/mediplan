@@ -25,5 +25,15 @@ FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /app ./
+
+# Point d'entrée : joue les migrations si RUN_MIGRATIONS_ON_BOOT=true, puis
+# démarre l'API. Indispensable en cloud, où aucune console ne permet de lancer
+# une commande avant le démarrage du conteneur.
+COPY docker/backend/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Exécution sans privilèges : l'image node fournit déjà l'utilisateur `node`.
+USER node
+
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
