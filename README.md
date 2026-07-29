@@ -100,6 +100,56 @@ docker compose logs -f   # journaux
 docker compose down      # arrêter (le volume de données est conservé)
 ```
 
+## Déploiement (Azure)
+
+L'application est déployée sur **Azure Container Apps**, avec une base PostgreSQL
+infogérée hébergée chez Neon.
+
+> **Coût : ~0 $/mois.** Le projet tourne sur un crédit étudiant de 100 $ non
+> renouvelable : les deux conteneurs sont en *scale-to-zero* (rien ne tourne, donc
+> rien n'est facturé au repos) et leur consommation reste sous la franchise
+> mensuelle gratuite de Container Apps. Détail des coûts et justification de
+> chaque choix : [`infra/README.md`](infra/README.md).
+
+```
+Internet (HTTPS)
+    │
+ca-mediplan-frontend   ingress externe · nginx + Angular · minReplicas 0
+    │  proxy /api/ (réseau privé)
+ca-mediplan-backend    ingress interne · NestJS · minReplicas 0
+    │  TLS obligatoire
+PostgreSQL (Neon)      hors Azure, palier gratuit
+```
+
+Le backend **n'a aucune adresse publique** : il n'est joignable que par le
+frontend. L'API est donc hors d'atteinte directe depuis Internet, et le navigateur
+ne voyant qu'une seule origine, aucune configuration CORS n'est nécessaire.
+
+### Déployer
+
+> Prérequis : **Azure CLI** connecté (`az login`), et un fichier `.env.azure` à la
+> racine (ignoré par git) contenant `DATABASE_URL` et `JWT_SECRET`.
+
+```bash
+# Prévisualiser les changements sans rien appliquer
+./scripts/deploy.sh --what-if
+
+# Déployer (réaffiche le plan, puis demande confirmation)
+./scripts/deploy.sh
+
+# Peupler le jeu de démonstration — ÉCRASE les données existantes
+az containerapp job start --name caj-mediplan-seed --resource-group rg-projet-dev
+
+# Tout supprimer
+./scripts/teardown.sh
+```
+
+Toute l'infrastructure est décrite en **Bicep** dans [`infra/`](infra/) : aucune
+ressource n'est créée à la main, et chaque déploiement est prévisualisé avant
+d'être appliqué. Le guide complet — première mise en ligne, dépannage, comptes de
+démonstration — est dans
+[`docs/deployment/azure.md`](docs/deployment/azure.md).
+
 ## Dossier de conception
 
 Le dossier de conception du **Sprint 1** se trouve dans

@@ -1,6 +1,19 @@
 # Déploiement sur Railway
 
-> **Statut : préparé, non déployé.** Les adaptations cloud sont en place dans le repo, mais le
+> ## ⚠️ Piste abandonnée — conservée pour mémoire
+>
+> **Le déploiement retenu est Azure** : voir [`azure.md`](azure.md). L'application
+> y est en ligne et fonctionnelle, pour **~0 $/mois**.
+>
+> Railway a été écarté sur le coût : pas d'offre gratuite durable (crédit d'essai
+> unique de 5 $, puis ~5 $/mois), là où Azure Container Apps offre une franchise
+> mensuelle permanente qui couvre entièrement l'usage de ce projet.
+>
+> Ce document reste utile : les adaptations cloud qu'il décrit (`PORT`,
+> `BACKEND_ORIGIN`, proxy nginx) sont celles qui ont rendu le déploiement Azure
+> possible sans retoucher l'application.
+
+> **Statut historique : préparé, non déployé.** Les adaptations cloud sont en place dans le repo, mais le
 > déploiement réel est volontairement reporté **après l'authentification (MEDIPLAN-15)** :
 > tant que TypeORM n'est pas branché, la base PostgreSQL serait inactive et la démo live se
 > limiterait au squelette (`/health` + coquille Angular).
