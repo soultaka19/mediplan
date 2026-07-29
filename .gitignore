@@ -14,6 +14,11 @@ coverage/
 .env.local
 *.local
 
+# Secrets de déploiement (chaîne de connexion de la base infogérée, secret JWT
+# de production…). Alimente les scripts de /scripts, n'est JAMAIS versionné.
+.env.azure
+.env.azure.*
+
 # Logs
 *.log
 npm-debug.log*

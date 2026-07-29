@@ -18,6 +18,7 @@ import { buildDataSourceOptions } from './data-source-options';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) =>
         buildDataSourceOptions({
+          DATABASE_URL: configService.get<string>('DATABASE_URL'),
           DB_HOST: configService.get<string>('DB_HOST'),
           DB_PORT: configService.get<string>('DB_PORT'),
           DB_NAME: configService.get<string>('DB_NAME'),

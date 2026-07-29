@@ -1,0 +1,89 @@
+name: Publication des images
+
+# Construit les images backend et frontend, puis les publie sur GitHub Container
+# Registry (ghcr.io).
+#
+# Pourquoi ghcr.io plutôt qu'Azure Container Registry : ACR facture ~5 $/mois
+# pour son plus petit palier, soit 60 $ par an — 60 % du crédit étudiant total,
+# dépensés à héberger deux images. ghcr.io est gratuit pour des images publiques
+# et s'authentifie avec le jeton fourni par le workflow, sans secret à gérer.
+#
+# Les images sont publiques : Container Apps les récupère sans authentification,
+# donc aucune identité de registre à configurer côté Azure.
+
+on:
+  push:
+    branches: [main]
+    # Ne republie que si ce qui compose les images a changé.
+    paths:
+      - 'apps/**'
+      - 'docker/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+      - '.github/workflows/publish-images.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  publier:
+    name: Construire et publier (${{ matrix.composant }})
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      # Autorise la poussée vers ghcr.io avec le GITHUB_TOKEN du workflow :
+      # aucun mot de passe de registre à stocker dans le dépôt.
+      packages: write
+
+    strategy:
+      # Une image qui échoue ne doit pas annuler la construction de l'autre :
+      # le diagnostic est plus clair quand les deux résultats sont connus.
+      fail-fast: false
+      matrix:
+        composant: [backend, frontend]
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authentification sur ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Calcul des étiquettes
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/mediplan-${{ matrix.composant }}
+          # Deux étiquettes par image :
+          #  - `latest` : cible stable des templates Bicep ;
+          #  - le SHA du commit : permet de savoir exactement quel code tourne,
+          #    et de revenir à une version précise sans reconstruire.
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      - name: Construction et publication
+        uses: docker/build-push-action@v6
+        with:
+          # Contexte = racine du dépôt : les Dockerfiles installent depuis le
+          # workspace pnpm et ont besoin du lockfile et des deux manifestes.
+          context: .
+          file: docker/${{ matrix.composant }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Cache porté par le registre : les couches d'installation pnpm sont
+          # réutilisées d'une exécution à l'autre, ce qui évite de refaire un
+          # `pnpm install` complet à chaque publication.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
