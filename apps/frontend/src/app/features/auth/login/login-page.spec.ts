@@ -50,7 +50,7 @@ describe('LoginPage', () => {
     expect(facade.login).not.toHaveBeenCalled();
   });
 
-  it('appelle login avec les valeurs et redirige en cas de succès', () => {
+  it('appelle login avec les valeurs et redirige en cas de succès', async () => {
     const fixture = setup();
     const component = fixture.componentInstance;
     const router = TestBed.inject(Router);
@@ -65,6 +65,12 @@ describe('LoginPage', () => {
       password: 'Str0ng!Pass',
     });
     expect(navigateSpy).toHaveBeenCalledWith(['/dashboard']);
+
+    // L'indicateur reste allumé PENDANT la navigation : le tableau de bord est
+    // chargé paresseusement, et le relâcher plus tôt laissait un écran figé.
+    expect(component.loading()).toBe(true);
+
+    await fixture.whenStable();
     expect(component.loading()).toBe(false);
   });
 

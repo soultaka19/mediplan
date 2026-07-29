@@ -85,14 +85,26 @@ function eachDay(start: Date, end: Date): Date[] {
 /** Garde-fou : plage maximale créée en une fois. */
 const MAX_RANGE_DAYS = 62;
 
-/** Groupe de disponibilités par médecin (carte repliable). */
+/**
+ * Nombre de plages affichées par médecin et par page. Un médecin peut cumuler
+ * plusieurs dizaines de plages (une par jour ouvré) : sans pagination, la carte
+ * dépliée devenait une liste interminable et illisible.
+ */
+const AVAILABILITY_PAGE_SIZE = 8;
+
+/** Groupe de disponibilités par médecin (carte repliable et paginée). */
 interface DoctorGroup {
   readonly doctorId: string;
   readonly name: string;
   readonly initials: string;
   readonly summary: string;
   readonly open: boolean;
+  /** Lignes de la page courante uniquement. */
   readonly rows: readonly AvailabilityRowView[];
+  readonly totalRows: number;
+  readonly rangeLabel: string;
+  readonly canPrev: boolean;
+  readonly canNext: boolean;
 }
 
 /** Ligne de disponibilité prête à l'affichage. */
@@ -170,6 +182,8 @@ export class AvailabilitiesPage {
   readonly panelOpen = signal(false);
   /** Médecins repliés (par id). */
   private readonly collapsed = signal<ReadonlySet<string>>(new Set());
+  /** Page courante de chaque médecin (0 par défaut). */
+  private readonly pageByDoctor = signal<ReadonlyMap<string, number>>(new Map());
 
   protected readonly slotDurationOptions = [15, 20, 30, 45, 60] as const;
 
@@ -192,6 +206,7 @@ export class AvailabilitiesPage {
       byDoctor.set(a.doctorId, list);
     }
     const collapsed = this.collapsed();
+    const pages = this.pageByDoctor();
     return [...byDoctor.keys()]
       .sort((x, y) => this.doctorName(x).localeCompare(this.doctorName(y), 'fr'))
       .map((doctorId) => {
@@ -201,13 +216,26 @@ export class AvailabilitiesPage {
         const off = items.length - available;
         const parts = [`${items.length} plage${items.length > 1 ? 's' : ''}`];
         if (off > 0) parts.push(`${off} congé${off > 1 ? 's' : ''}`);
+
+        // La page est bornée ici plutôt qu'au clic : une suppression peut vider
+        // la dernière page, qui doit alors se replier sur la précédente.
+        const total = items.length;
+        const lastPage = Math.max(0, Math.ceil(total / AVAILABILITY_PAGE_SIZE) - 1);
+        const page = Math.min(pages.get(doctorId) ?? 0, lastPage);
+        const start = page * AVAILABILITY_PAGE_SIZE;
+        const end = Math.min(start + AVAILABILITY_PAGE_SIZE, total);
+
         return {
           doctorId,
           name,
           initials: initialsOf(name),
           summary: parts.join(' · '),
           open: !collapsed.has(doctorId),
-          rows: items.map((item) => this.toRow(item)),
+          rows: items.slice(start, end).map((item) => this.toRow(item)),
+          totalRows: total,
+          rangeLabel: total === 0 ? '0' : `${start + 1} – ${end} sur ${total}`,
+          canPrev: page > 0,
+          canNext: page < lastPage,
         };
       });
   });
@@ -306,6 +334,26 @@ export class AvailabilitiesPage {
     if (next.has(doctorId)) next.delete(doctorId);
     else next.add(doctorId);
     this.collapsed.set(next);
+  }
+
+  /** Page précédente des plages d'un médecin. */
+  prevPage(doctorId: string): void {
+    this.shiftPage(doctorId, -1);
+  }
+
+  /** Page suivante des plages d'un médecin. */
+  nextPage(doctorId: string): void {
+    this.shiftPage(doctorId, 1);
+  }
+
+  /**
+   * Décale la page d'un médecin. La borne haute est appliquée par
+   * `doctorGroups` : on se contente ici d'empêcher les pages négatives.
+   */
+  private shiftPage(doctorId: string, delta: number): void {
+    const next = new Map(this.pageByDoctor());
+    next.set(doctorId, Math.max(0, (next.get(doctorId) ?? 0) + delta));
+    this.pageByDoctor.set(next);
   }
 
   private computeSlotPreview(): string | null {

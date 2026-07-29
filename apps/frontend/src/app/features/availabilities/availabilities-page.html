@@ -79,6 +79,32 @@
                   </div>
                 </div>
               }
+
+              @if (g.canPrev || g.canNext) {
+                <div class="mp-table__foot">
+                  <span class="mp-tnum">{{ g.rangeLabel }}</span>
+                  <div class="mp-pager">
+                    <button
+                      type="button"
+                      aria-label="Page précédente"
+                      (click)="prevPage(g.doctorId)"
+                      [disabled]="!g.canPrev"
+                      data-testid="availability-prev-page"
+                    >
+                      <mat-icon>chevron_left</mat-icon>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Page suivante"
+                      (click)="nextPage(g.doctorId)"
+                      [disabled]="!g.canNext"
+                      data-testid="availability-next-page"
+                    >
+                      <mat-icon>chevron_right</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
           }
         </section>

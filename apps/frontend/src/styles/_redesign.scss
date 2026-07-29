@@ -375,6 +375,29 @@
     height: 30px;
     border-radius: 50%;
   }
+
+  // Champ de formulaire : reprend la hauteur d'un `mat-form-field` en apparence
+  // « outline », pour que la mise en page ne saute pas au remplacement.
+  &--field {
+    height: 56px;
+    border-radius: var(--mp-radius-md);
+  }
+
+  // Titre de section.
+  &--title {
+    width: 34%;
+    height: 18px;
+  }
+}
+
+// Pile de skeletons : espacement régulier pour esquisser un formulaire ou une
+// section pendant le chargement. Partagée par les écrans afin que l'attente ait
+// partout la même allure.
+.mp-skel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+  padding-top: var(--mp-space-2);
 }
 
 // --- Panneau latéral (détail / formulaire) -----------------------------------

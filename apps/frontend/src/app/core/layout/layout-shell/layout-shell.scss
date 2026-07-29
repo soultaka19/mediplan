@@ -15,13 +15,51 @@
   display: flex;
   align-items: center;
   gap: var(--mp-space-3);
-  padding: 0 var(--mp-space-5) 0 var(--mp-space-3);
+  // Le hamburger partage l'axe vertical des icônes du rail situé juste en
+  // dessous : le rail les pose à 12px (gouttière) + 12px (padding d'item) +
+  // 11px (demi-icône) = 35px du bord. Le bouton faisant 40px de large, sa
+  // gouttière vaut donc 35 − 20 = 15px.
+  padding: 0 var(--mp-space-5) 0 15px;
   background: var(--mp-color-surface);
   border-bottom: 1px solid var(--mp-color-border);
 }
 
 .mp-topbar__spacer {
   flex: 1;
+}
+
+// Barre de progression de navigation : filet posé sur la bordure basse de la
+// topbar. Volontairement discrète — elle signale l'attente sans déplacer le
+// contenu, et l'apparition est retardée pour ne pas clignoter sur les
+// navigations instantanées (chunk déjà en cache).
+.mp-route-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+  background: transparent;
+  animation: mpFade 120ms var(--mp-ease-standard) 140ms both;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--mp-color-accent), var(--mp-color-primary));
+    animation: mpRouteSlide 1.1s var(--mp-ease-standard) infinite;
+  }
+}
+
+@keyframes mpRouteSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
 }
 
 .mp-topbar__icon-btn {
@@ -431,7 +469,12 @@
 
 .mp-nav-item__label {
   flex: 1;
+  min-width: 0;
   white-space: nowrap;
+  // Pendant l'animation de repli du rail, la largeur disponible passe sous la
+  // longueur du libellé : sans ellipsis, le texte débordait sous l'icône.
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mp-nav-item__soon {

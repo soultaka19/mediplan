@@ -78,8 +78,11 @@ export class LoginPage {
     this.loading.set(true);
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => {
-        this.loading.set(false);
-        void this.router.navigate(['/dashboard']);
+        // L'état de chargement est maintenu jusqu'à la FIN de la navigation :
+        // le tableau de bord est chargé paresseusement, et relâcher le bouton
+        // dès la réponse d'authentification laissait l'utilisateur devant un
+        // formulaire réactif mais figé, le temps que le chunk arrive.
+        void this.router.navigate(['/dashboard']).finally(() => this.loading.set(false));
       },
       error: (error: unknown) => {
         this.loading.set(false);

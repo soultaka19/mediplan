@@ -29,6 +29,25 @@ mat-icon {
     'opsz' 24;
 }
 
+// Centrage des glyphes d'icônes.
+//
+// `mat-icon` ne définit pas de `line-height` : il hérite donc du `1.5` du body.
+// La boîte de ligne du glyphe (1.5 × font-size) dépasse alors la boîte de
+// l'icône (calée sur font-size par les composants), ce qui décale visuellement
+// le symbole vers le bas et le fait rogner par l'`overflow: hidden` de Material.
+//
+// Le symptôme est global — rail de navigation, hamburger, bascule de thème,
+// chevrons, boutons d'action — donc le correctif l'est aussi : on neutralise
+// l'héritage et on centre le glyphe dans sa boîte, quelle que soit sa taille.
+.material-symbols-outlined,
+mat-icon.mat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  overflow: visible;
+}
+
 // Animations partagées du redesign (MediPlan.dc.html) : réutilisées par le shell,
 // les écrans et les composants (spinners, skeletons, entrées de liste, pastilles).
 @keyframes mpSpin {

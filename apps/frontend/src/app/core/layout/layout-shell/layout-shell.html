@@ -2,6 +2,10 @@
 <a class="skip-link" href="#main-content">Aller au contenu</a>
 
 <header class="mp-topbar">
+  @if (navigating()) {
+    <span class="mp-route-progress" role="status" aria-label="Chargement de la page"></span>
+  }
+
   <button
     type="button"
     class="mp-topbar__icon-btn"
@@ -34,7 +38,6 @@
       <mat-icon>add</mat-icon>
       @if (!isMobile()) {
         <span class="mp-topbar__cta-label">Nouveau rendez-vous</span>
-        <kbd class="mp-kbd mp-kbd--on-primary">N</kbd>
       }
     </button>
   }

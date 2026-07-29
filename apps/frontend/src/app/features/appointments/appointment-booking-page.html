@@ -10,12 +10,19 @@
 }
 
 <mat-card class="booking-card" appearance="outlined">
-  @if (loading()) {
-    <mat-progress-bar mode="indeterminate" aria-label="Chargement" />
-  }
-
   <mat-card-content>
-    @if (loadError(); as message) {
+    @if (loading()) {
+      <!-- Même langage d'attente que les autres écrans : une esquisse du
+           formulaire à venir, plutôt qu'une barre de progression. -->
+      <div class="mp-skel-stack" aria-busy="true" data-testid="booking-skeleton">
+        <span class="mp-skel mp-skel--field"></span>
+        <span class="mp-skel mp-skel--field"></span>
+        <span class="mp-skel mp-skel--field"></span>
+        <span class="mp-skel mp-skel--title"></span>
+        <span class="mp-skel mp-skel--field"></span>
+        <span class="mp-skel mp-skel--field"></span>
+      </div>
+    } @else if (loadError(); as message) {
       <app-error-state
         [message]="message"
         title="Impossible de charger le formulaire"
