@@ -45,10 +45,25 @@ en continu coûte **~108 $/mois** au plus petit palier réellement proposé en
 Même arrêtée, son stockage et ses sauvegardes coûtent ~7,50 $/mois. Neon offre
 un palier gratuit avec mise en veille automatique et sauvegardes.
 
-*Contrepartie assumée* : les données quittent Azure. Le projet manipulant des
-données de patients — fictives —, le projet Neon est créé en **région
-canadienne** pour rester cohérent avec `canadacentral`. Sur un déploiement réel,
-cette question de résidence des données devrait être tranchée autrement.
+*Contrepartie assumée — résidence des données* : la base est hébergée chez Neon
+en **`us-east-2` (Ohio, États-Unis)**, hors Azure et hors Canada. Neon n'offre
+aucune région canadienne : les régions disponibles sont N. Virginia, Ohio,
+Oregon, Francfort, Londres, Singapour, Sydney et São Paulo.
+
+Ce choix est **délibéré**, pas subi. L'alternative examinée — Supabase, qui offre
+bien `ca-central-1` — met les projets de son palier gratuit **en pause après 7
+jours d'inactivité, avec réveil manuel**. Une démonstration consultée une semaine
+plus tard serait donc hors service. Neon se réveille automatiquement en quelques
+centaines de millisecondes, ce qui garantit une application disponible à tout
+moment. Pour un projet académique manipulant des données **fictives**, la
+fiabilité de la démonstration a été jugée prioritaire sur une localisation qui
+n'a ici aucune portée réglementaire.
+
+**Sur un déploiement réel**, cet arbitrage s'inverserait : des données de santé
+de patients réels au Canada relèvent de la LPRPDE et des lois provinciales sur
+les renseignements personnels de santé. Il faudrait alors une base en territoire
+canadien — Azure Database for PostgreSQL en `canadacentral`, dont le coût
+(~108 $/mois) est précisément ce que ce projet ne peut pas assumer.
 
 **Les images ne sont pas sur Azure Container Registry.** ACR facture ~5 $/mois
 au plus petit palier, soit **60 $/an — 60 % du crédit** pour héberger deux
