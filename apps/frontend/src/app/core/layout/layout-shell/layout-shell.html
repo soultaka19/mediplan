@@ -42,6 +42,55 @@
     </button>
   }
 
+  <!-- Centre de notifications internes (MEDIPLAN-25) -->
+  <button
+    type="button"
+    class="mp-topbar__icon-btn mp-toolbar__notifications"
+    [matMenuTriggerFor]="notificationsMenu"
+    [matBadge]="unreadCount()"
+    [matBadgeHidden]="unreadCount() === 0"
+    matBadgeColor="warn"
+    aria-label="Notifications"
+    data-testid="shell-notifications-trigger"
+    (click)="refreshNotifications()"
+  >
+    <mat-icon>notifications</mat-icon>
+  </button>
+
+  <mat-menu #notificationsMenu="matMenu" class="mp-notifications-menu">
+    <div class="mp-notifications__header" mat-menu-item disabled>
+      <span>Notifications</span>
+      @if (unreadCount() > 0) {
+        <strong>{{ unreadCount() }} non lue(s)</strong>
+      }
+    </div>
+    <mat-divider />
+
+    @if (notificationsLoading()) {
+      <div class="mp-notifications__empty" mat-menu-item disabled>Chargement...</div>
+    } @else if (notifications().length === 0) {
+      <div class="mp-notifications__empty" mat-menu-item disabled>Aucune notification</div>
+    } @else {
+      @for (notification of notifications(); track notification.id) {
+        <button
+          mat-menu-item
+          type="button"
+          class="mp-notification"
+          [class.mp-notification--unread]="!notification.readAt"
+          (click)="markNotificationAsRead(notification)"
+          data-testid="shell-notification-item"
+        >
+          <mat-icon>{{ notification.readAt ? 'notifications_none' : 'notifications_active' }}</mat-icon>
+          <span class="mp-notification__content">
+            <span class="mp-notification__title">{{ notification.title }}</span>
+            <span class="mp-notification__message">{{ notification.message }}</span>
+            <span class="mp-notification__date">{{ notification.createdAt | date: 'short' }}</span>
+          </span>
+        </button>
+      }
+    }
+  </mat-menu>
+
   <!-- Bascule de thème clair/sombre -->
   <button
     type="button"
