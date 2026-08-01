@@ -1,6 +1,8 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +15,8 @@ import { filter, map } from 'rxjs';
 
 import { AuthFacade } from '@core/auth';
 import { ThemeService } from '@core/theme';
+import { InternalNotification } from '@features/notifications/notification.models';
+import { NotificationCenterService } from '@features/notifications/notification-center.service';
 import { Avatar } from '@shared/ui';
 import { resolveDisplayName } from '@shared/user/display-name';
 import { NAV_ITEMS, visibleNavItems } from '../nav-items';
@@ -39,10 +43,12 @@ const MOBILE_QUERY = '(max-width: 959.98px)';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
+    DatePipe,
     MatToolbarModule,
     MatSidenavModule,
     MatListModule,
     MatIconModule,
+    MatBadgeModule,
     MatButtonModule,
     MatMenuModule,
     MatDividerModule,
@@ -56,6 +62,7 @@ export class LayoutShell {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthFacade);
   private readonly themeService = inject(ThemeService);
+  private readonly notificationCenter = inject(NotificationCenterService);
 
   /** Utilisateur courant (signal lecture seule) pour le menu utilisateur. */
   readonly user = this.auth.currentUser;
@@ -98,8 +105,13 @@ export class LayoutShell {
 
   /** Nom affichable : prénom/nom si présents, sinon la partie locale de l'e-mail. */
   readonly displayName = computed(() => resolveDisplayName(this.user()));
+  readonly notifications = signal<readonly InternalNotification[]>([]);
+  readonly unreadCount = signal(0);
+  readonly notificationsLoading = signal(false);
 
   constructor() {
+    this.refreshNotifications();
+
     // En mode overlay, refermer le sidenav à chaque navigation (item cliqué).
     this.router.events
       .pipe(
@@ -124,6 +136,46 @@ export class LayoutShell {
   }
 
   /** Synchronise l'état quand l'utilisateur ferme via backdrop/Échap. */
+  refreshNotifications(): void {
+    if (!this.auth.isAuthenticated()) {
+      return;
+    }
+
+    this.notificationsLoading.set(true);
+    this.notificationCenter.list().subscribe({
+      next: (notifications) => {
+        this.notifications.set(notifications);
+        this.unreadCount.set(notifications.filter((notification) => !notification.readAt).length);
+        this.notificationsLoading.set(false);
+      },
+      error: () => this.notificationsLoading.set(false),
+    });
+  }
+
+  markNotificationAsRead(notification: InternalNotification): void {
+    const goToAction = () => {
+      if (notification.actionUrl) {
+        void this.router.navigateByUrl(notification.actionUrl);
+      }
+    };
+
+    if (notification.readAt) {
+      goToAction();
+      return;
+    }
+
+    this.notificationCenter.markAsRead(notification.id).subscribe({
+      next: (updated) => {
+        this.notifications.update((items) =>
+          items.map((item) => (item.id === updated.id ? updated : item)),
+        );
+        this.unreadCount.update((count) => Math.max(0, count - 1));
+        goToAction();
+      },
+      error: () => goToAction(),
+    });
+  }
+
   onOpenedChange(opened: boolean): void {
     this.openedState.set(opened);
   }
@@ -131,6 +183,8 @@ export class LayoutShell {
   /** Déconnecte l'utilisateur et le renvoie vers l'écran de connexion. */
   logout(): void {
     this.auth.logout();
+    this.notifications.set([]);
+    this.unreadCount.set(0);
     void this.router.navigate(['/login']);
   }
 }

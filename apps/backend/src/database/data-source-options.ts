@@ -4,6 +4,7 @@ import { Appointment } from '../appointment/appointment.entity';
 import { AppointmentSlot } from '../appointment/appointment-slot.entity';
 import { Availability } from '../availability/availability.entity';
 import { Clinic } from '../clinic/clinic.entity';
+import { Notification } from '../notification/notification.entity';
 import { User } from '../user/user.entity';
 import { InitAuthSchema1781674897611 } from './migrations/1781674897611-InitAuthSchema';
 import { AddPasswordReset1781674897612 } from './migrations/1781674897612-AddPasswordReset';
@@ -11,6 +12,7 @@ import { AddSelfRegistrationFlag1781674897613 } from './migrations/1781674897613
 import { CreateAvailability1781674897614 } from './migrations/1781674897614-CreateAvailability';
 import { AddAppointmentReceptionBooking1781674897615 } from './migrations/1781674897615-AddAppointmentReceptionBooking';
 import { AddSlotUniqueDoctorStart1781674897616 } from './migrations/1781674897616-AddSlotUniqueDoctorStart';
+import { CreateNotification1781674897617 } from './migrations/1781674897617-CreateNotification';
 
 /**
  * Construit les options TypeORM partagées entre :
@@ -48,7 +50,7 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
     migrationsRun: false,
     // Les migrations ne s'exécutent que via la CLI explicite, jamais au boot.
 
-    entities: [Clinic, User, Availability, AppointmentSlot, Appointment],
+    entities: [Clinic, User, Availability, AppointmentSlot, Appointment, Notification],
     migrations: [
       InitAuthSchema1781674897611,
       AddPasswordReset1781674897612,
@@ -56,6 +58,7 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
       CreateAvailability1781674897614,
       AddAppointmentReceptionBooking1781674897615,
       AddSlotUniqueDoctorStart1781674897616,
+      CreateNotification1781674897617,
     ],
 
     namingStrategy: new SnakeNamingStrategy(),

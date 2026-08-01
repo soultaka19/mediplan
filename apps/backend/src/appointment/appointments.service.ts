@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { AuthenticatedUser } from '../auth/auth.types';
+import { NotificationsService } from '../notification/notifications.service';
 import { UserRole } from '../user/user-role.enum';
 import { User } from '../user/user.entity';
 import { UsersService } from '../user/users.service';
@@ -32,6 +33,7 @@ export class AppointmentsService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly usersService: UsersService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async findToday(currentUser: AuthenticatedUser): Promise<AppointmentResponse[]> {
@@ -87,6 +89,11 @@ export class AppointmentsService {
 
       appointment.status = dto.status;
       await manager.save(Appointment, appointment);
+      const fullAppointment = await this.loadAppointmentWithRelations(manager, appointment.id);
+      await this.notificationsService.notifyAppointmentUpdated({
+        manager,
+        appointment: fullAppointment ?? appointment,
+      });
       return this.buildResponse(manager, appointment);
     });
   }
@@ -129,6 +136,12 @@ export class AppointmentsService {
         await manager.save(AppointmentSlot, slot);
       }
 
+      const fullAppointment = await this.loadAppointmentWithRelations(manager, appointment.id);
+      await this.notificationsService.notifyAppointmentCancelled({
+        manager,
+        appointment: fullAppointment ?? appointment,
+      });
+
       return this.buildResponse(manager, appointment);
     });
   }
@@ -157,6 +170,16 @@ export class AppointmentsService {
       relations: { slot: true, patient: true, doctor: true },
     });
     return toAppointmentResponse(full ?? appointment);
+  }
+
+  private loadAppointmentWithRelations(
+    manager: EntityManager,
+    appointmentId: string,
+  ): Promise<Appointment | null> {
+    return manager.findOne(Appointment, {
+      where: { id: appointmentId },
+      relations: { slot: true, patient: true, doctor: true },
+    });
   }
 
   async createByReception(
@@ -213,6 +236,12 @@ export class AppointmentsService {
       }
 
       saved.slot = slot;
+      saved.patient = patient;
+      const fullAppointment = await this.loadAppointmentWithRelations(manager, saved.id);
+      await this.notificationsService.notifyAppointmentBooked({
+        manager,
+        appointment: fullAppointment ?? saved,
+      });
       return toAppointmentResponse(saved);
     });
   }
