@@ -5,10 +5,36 @@
       <p class="flow-page__subtitle">Suivi des rendez-vous et statuts de consultation.</p>
     </div>
 
-    <button matButton="outlined" type="button" (click)="load()" [disabled]="loading()">
-      <mat-icon aria-hidden="true">refresh</mat-icon>
-      Actualiser
-    </button>
+    <div class="flow-page__actions">
+      @if (canExport()) {
+        <form [formGroup]="exportForm" class="flow-export" (ngSubmit)="exportCsv()" novalidate>
+          <mat-form-field appearance="outline" class="flow-export__field">
+            <mat-label>Du</mat-label>
+            <input matInput type="date" formControlName="from" data-testid="export-from" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="flow-export__field">
+            <mat-label>Au</mat-label>
+            <input matInput type="date" formControlName="to" data-testid="export-to" />
+          </mat-form-field>
+
+          <button
+            matButton="filled"
+            type="submit"
+            [disabled]="exporting()"
+            data-testid="export-csv"
+          >
+            <mat-icon aria-hidden="true">download</mat-icon>
+            Exporter CSV
+          </button>
+        </form>
+      }
+
+      <button matButton="outlined" type="button" (click)="load()" [disabled]="loading()">
+        <mat-icon aria-hidden="true">refresh</mat-icon>
+        Actualiser
+      </button>
+    </div>
   </header>
 
   @if (loading()) {

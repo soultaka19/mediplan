@@ -10,6 +10,19 @@
   justify-content: space-between;
 }
 
+.flow-page__actions,
+.flow-export {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-2);
+  justify-content: flex-end;
+}
+
+.flow-export__field {
+  width: 150px;
+}
+
 .flow-page__title {
   color: var(--mp-color-text);
   font-family: var(--mp-font-display-family);
@@ -88,5 +101,15 @@
   .flow-page__header {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .flow-page__actions,
+  .flow-export {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .flow-export__field {
+    width: 100%;
   }
 }

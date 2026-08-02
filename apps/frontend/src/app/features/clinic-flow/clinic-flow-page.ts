@@ -1,8 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 
 import { AuthFacade } from '@core/auth';
@@ -22,7 +25,18 @@ const CANCELLABLE_STATUSES: readonly AppointmentStatus[] = ['booked', 'arrived']
 @Component({
   selector: 'app-clinic-flow-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, MatButtonModule, MatIconModule, MatTableModule, Alert, EmptyState, Skeleton],
+  imports: [
+    DatePipe,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatTableModule,
+    Alert,
+    EmptyState,
+    Skeleton,
+  ],
   templateUrl: './clinic-flow-page.html',
   styleUrl: './clinic-flow-page.scss',
 })
@@ -31,14 +45,25 @@ export class ClinicFlowPage {
   private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly auth = inject(AuthFacade);
+  private readonly fb = inject(NonNullableFormBuilder);
 
   readonly loading = signal(true);
+  readonly exporting = signal(false);
   readonly updatingId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly appointments = signal<readonly AppointmentFlowItem[]>([]);
+  readonly exportForm = this.fb.group({
+    from: [this.todayInputValue(), [Validators.required]],
+    to: [this.todayInputValue(), [Validators.required]],
+  });
 
   /** L'annulation est une action de réception (clinic_admin/super_admin). */
   readonly canCancel = computed(() => {
+    const role = this.auth.currentUser()?.role;
+    return role === 'clinic_admin' || role === 'super_admin';
+  });
+
+  readonly canExport = computed(() => {
     const role = this.auth.currentUser()?.role;
     return role === 'clinic_admin' || role === 'super_admin';
   });
@@ -66,6 +91,32 @@ export class ClinicFlowPage {
       error: (err: unknown) => {
         this.error.set(authErrorMessage(err));
         this.loading.set(false);
+      },
+    });
+  }
+
+  exportCsv(): void {
+    if (this.exportForm.invalid) {
+      this.exportForm.markAllAsTouched();
+      return;
+    }
+
+    const { from, to } = this.exportForm.getRawValue();
+    if (from > to) {
+      this.notifications.error('La date de debut doit etre avant la date de fin.');
+      return;
+    }
+
+    this.exporting.set(true);
+    this.flowService.exportCsv(from, to).subscribe({
+      next: (blob) => {
+        this.exporting.set(false);
+        this.downloadBlob(blob, `mediplan-rendez-vous-${from}-${to}.csv`);
+        this.notifications.success('Export CSV telecharge.');
+      },
+      error: (err: unknown) => {
+        this.exporting.set(false);
+        this.notifications.error(authErrorMessage(err));
       },
     });
   }
@@ -159,5 +210,18 @@ export class ClinicFlowPage {
 
   protected doctorLabel(appointment: AppointmentFlowItem): string {
     return appointment.doctorName || `Medecin ${appointment.doctorId.slice(0, 8)}`;
+  }
+
+  private todayInputValue(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 }

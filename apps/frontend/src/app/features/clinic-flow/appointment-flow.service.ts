@@ -14,6 +14,13 @@ export class AppointmentFlowService {
     return this.http.get<AppointmentFlowItem[]>(`${this.apiUrl}/appointments/today`);
   }
 
+  exportCsv(from: string, to: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/appointments/export.csv`, {
+      params: { from, to },
+      responseType: 'blob',
+    });
+  }
+
   updateStatus(
     appointmentId: string,
     payload: UpdateAppointmentStatusPayload,
