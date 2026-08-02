@@ -1,8 +1,12 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { AuthFacade } from '@core/auth';
 import { authErrorMessage } from '@shared/http/http-error-message';
@@ -85,7 +89,16 @@ function frTime(iso: string | undefined): string {
 @Component({
   selector: 'app-clinic-flow-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, MatIconModule, MatMenuModule, StatusChip],
+  imports: [
+    NgTemplateOutlet,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatMenuModule,
+    StatusChip,
+  ],
   templateUrl: './clinic-flow-page.html',
   styleUrl: './clinic-flow-page.scss',
 })
@@ -94,18 +107,30 @@ export class ClinicFlowPage {
   private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly auth = inject(AuthFacade);
+  private readonly fb = inject(NonNullableFormBuilder);
 
   readonly loading = signal(true);
   readonly refreshing = signal(false);
+  readonly exporting = signal(false);
   readonly updatingId = signal<string | null>(null);
   /** Ligne à surligner brièvement après une transition réussie (flash de succès). */
   readonly flashId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly appointments = signal<readonly AppointmentFlowItem[]>([]);
   private readonly lastSync = signal<Date | null>(null);
+  readonly exportForm = this.fb.group({
+    from: [this.todayInputValue(), [Validators.required]],
+    to: [this.todayInputValue(), [Validators.required]],
+  });
 
   /** L'annulation est une action de réception (clinic_admin/super_admin). */
   readonly canCancel = computed(() => {
+    const role = this.auth.currentUser()?.role;
+    return role === 'clinic_admin' || role === 'super_admin';
+  });
+
+  /** L'export CSV est lui aussi une action de réception. */
+  readonly canExport = computed(() => {
     const role = this.auth.currentUser()?.role;
     return role === 'clinic_admin' || role === 'super_admin';
   });
@@ -183,6 +208,33 @@ export class ClinicFlowPage {
     setTimeout(() => {
       if (this.flashId() === id) this.flashId.set(null);
     }, 900);
+  }
+
+  /** Télécharge l'export CSV de la période saisie (MEDIPLAN-27). */
+  exportCsv(): void {
+    if (this.exportForm.invalid) {
+      this.exportForm.markAllAsTouched();
+      return;
+    }
+
+    const { from, to } = this.exportForm.getRawValue();
+    if (from > to) {
+      this.notifications.error('La date de début doit être avant la date de fin.');
+      return;
+    }
+
+    this.exporting.set(true);
+    this.flowService.exportCsv(from, to).subscribe({
+      next: (blob) => {
+        this.exporting.set(false);
+        this.downloadBlob(blob, `mediplan-rendez-vous-${from}-${to}.csv`);
+        this.notifications.success('Export CSV téléchargé.');
+      },
+      error: (err: unknown) => {
+        this.exporting.set(false);
+        this.notifications.error(authErrorMessage(err));
+      },
+    });
   }
 
   updateStatus(
@@ -319,5 +371,18 @@ export class ClinicFlowPage {
 
   private doctorLabel(appointment: AppointmentFlowItem): string {
     return appointment.doctorName || `Médecin ${appointment.doctorId.slice(0, 8)}`;
+  }
+
+  private todayInputValue(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 }

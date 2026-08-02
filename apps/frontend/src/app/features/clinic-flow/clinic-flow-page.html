@@ -11,6 +11,26 @@
           Synchronisé {{ syncLabel() }}
         </span>
       }
+
+      @if (canExport()) {
+        <form [formGroup]="exportForm" class="flow-export" (ngSubmit)="exportCsv()" novalidate>
+          <mat-form-field appearance="outline" class="flow-export__field">
+            <mat-label>Du</mat-label>
+            <input matInput type="date" formControlName="from" data-testid="export-from" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="flow-export__field">
+            <mat-label>Au</mat-label>
+            <input matInput type="date" formControlName="to" data-testid="export-to" />
+          </mat-form-field>
+
+          <button matButton="filled" type="submit" [disabled]="exporting()" data-testid="export-csv">
+            <mat-icon aria-hidden="true">download</mat-icon>
+            Exporter CSV
+          </button>
+        </form>
+      }
+
       <button type="button" class="flux-refresh" (click)="refresh()" [disabled]="refreshing()">
         @if (refreshing()) {
           <span class="mp-spinner mp-spinner--primary" aria-hidden="true"></span>
