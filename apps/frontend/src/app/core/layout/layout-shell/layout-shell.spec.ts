@@ -2,8 +2,12 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
 
 import { AuthFacade, PublicUser } from '@core/auth';
+import { ThemeService } from '@core/theme';
+import { InternalNotification } from '@features/notifications/notification.models';
+import { NotificationCenterService } from '@features/notifications/notification-center.service';
 import { LayoutShell } from './layout-shell';
 
 function patient(overrides: Partial<PublicUser> = {}): PublicUser {
@@ -32,6 +36,33 @@ function createFakeFacade(user: PublicUser | null) {
   };
 }
 
+function createFakeNotificationCenter() {
+  const notification: InternalNotification = {
+    id: 'notification-1',
+    type: 'appointment_booked',
+    title: 'Nouveau rendez-vous',
+    message: 'Un rendez-vous a ete reserve.',
+    actionUrl: null,
+    readAt: null,
+    createdAt: '2026-07-05T13:00:00.000Z',
+  };
+
+  return {
+    list: vi.fn(() => of([notification])),
+    unreadCount: vi.fn(() => of({ unreadCount: 1 })),
+    markAsRead: vi.fn(() => of({ ...notification, readAt: '2026-07-05T13:05:00.000Z' })),
+  };
+}
+
+function createFakeThemeService() {
+  const theme = signal<'light' | 'dark'>('light');
+
+  return {
+    theme: theme.asReadonly(),
+    toggle: vi.fn(() => theme.update((value) => (value === 'light' ? 'dark' : 'light'))),
+  };
+}
+
 function byTestId<T extends HTMLElement>(root: ParentNode, id: string): T {
   return root.querySelector(`[data-testid="${id}"]`) as T;
 }
@@ -43,15 +74,21 @@ function overlay(): HTMLElement {
 
 describe('LayoutShell', () => {
   let facade: ReturnType<typeof createFakeFacade>;
+  let notificationCenter: ReturnType<typeof createFakeNotificationCenter>;
+  let themeService: ReturnType<typeof createFakeThemeService>;
 
   function setup(user: PublicUser | null = patient()) {
     facade = createFakeFacade(user);
+    notificationCenter = createFakeNotificationCenter();
+    themeService = createFakeThemeService();
     TestBed.configureTestingModule({
       imports: [LayoutShell],
       providers: [
         provideRouter([]),
         provideNoopAnimations(),
         { provide: AuthFacade, useValue: facade },
+        { provide: ThemeService, useValue: themeService },
+        { provide: NotificationCenterService, useValue: notificationCenter },
       ],
     });
     const fixture = TestBed.createComponent(LayoutShell);
@@ -162,5 +199,28 @@ describe('LayoutShell', () => {
 
     expect(fixture.componentInstance.isDarkTheme()).toBe(!initialDark);
     expect(toggle.getAttribute('aria-pressed')).toBe(String(!initialDark));
+  });
+  it('affiche les notifications non lues dans la cloche', () => {
+    const fixture = setup(patient({ role: 'doctor' }));
+    const root = fixture.nativeElement as HTMLElement;
+
+    byTestId<HTMLButtonElement>(root, 'shell-notifications-trigger').click();
+    fixture.detectChanges();
+
+    expect(notificationCenter.list).toHaveBeenCalled();
+    expect(overlay().textContent).toContain('1 non lue(s)');
+    expect(overlay().textContent).toContain('Nouveau rendez-vous');
+  });
+
+  it('marque une notification comme lue au clic', () => {
+    const fixture = setup(patient({ role: 'doctor' }));
+    const root = fixture.nativeElement as HTMLElement;
+
+    byTestId<HTMLButtonElement>(root, 'shell-notifications-trigger').click();
+    fixture.detectChanges();
+
+    byTestId<HTMLButtonElement>(overlay(), 'shell-notification-item').click();
+
+    expect(notificationCenter.markAsRead).toHaveBeenCalledWith('notification-1');
   });
 });
