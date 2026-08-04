@@ -72,7 +72,7 @@ export class NotificationsService {
       ...params,
       type: NotificationType.APPOINTMENT_CANCELLED,
       title: 'Rendez-vous annule',
-      message: this.appointmentMessage(params.appointment, 'Un rendez-vous a ete annule'),
+      message: this.cancellationMessage(params.appointment),
     });
   }
 
@@ -146,6 +146,17 @@ export class NotificationsService {
       : 'un creneau';
 
     return `${prefix} pour ${patientName} avec ${doctorName}, le ${slot}.`;
+  }
+
+  private cancellationMessage(appointment: Appointment): string {
+    const message = this.appointmentMessage(appointment, 'Un rendez-vous a ete annule');
+    const reason = appointment.cancellationReason?.trim();
+
+    if (!reason) {
+      return message;
+    }
+
+    return `${message} Motif : ${reason}.`;
   }
 
   private displayName(user?: User | null): string | null {
