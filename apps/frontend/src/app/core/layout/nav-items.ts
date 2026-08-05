@@ -48,6 +48,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     roles: ['doctor', 'clinic_admin', 'super_admin'],
   },
   {
+    label: 'Statistiques',
+    icon: 'monitoring',
+    route: '/admin/statistics',
+    roles: ['clinic_admin', 'super_admin'],
+  },
+  {
     label: 'Utilisateurs',
     icon: 'group',
     route: '/admin/users',
