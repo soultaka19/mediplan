@@ -167,23 +167,91 @@ const AVAIL = {
   lefebvreDemain: uuid('66666666', 6),
 } as const;
 
-/**
- * Début de journée ouvrée, exprimé en heure locale du serveur.
- * Le seed vise une démo lisible (« RDV aujourd'hui » non vide), pas une
- * reconstitution exacte du fuseau : les créneaux sont posés relativement à
- * aujourd'hui, ce qui suffit aux écrans et aux KPI.
- */
-function todayAt(hour: number, minute = 0): Date {
-  const date = new Date();
-  date.setHours(hour, minute, 0, 0);
-  return date;
+/** Lecture d'un instant dans le fuseau de la clinique. */
+const CLINIC_PARTS = new Intl.DateTimeFormat('en-CA', {
+  timeZone: TIMEZONE_OFFSET_NOTE,
+  hour12: false,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+});
+
+/** Décalage du fuseau de la clinique, en minutes, à un instant donné. */
+function clinicOffsetMinutes(at: Date): number {
+  const parts: Record<string, string> = {};
+  for (const part of CLINIC_PARTS.formatToParts(at)) {
+    if (part.type !== 'literal') {
+      parts[part.type] = part.value;
+    }
+  }
+  const asUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour) % 24,
+    Number(parts.minute),
+    Number(parts.second),
+  );
+  return (asUtc - at.getTime()) / 60_000;
 }
 
-/** Même heure, décalée de `days` jours. */
+/** Date civile (année, mois, jour) telle qu'elle se lit à la clinique. */
+function clinicDateParts(at: Date): { year: number; month: number; day: number } {
+  const parts: Record<string, string> = {};
+  for (const part of CLINIC_PARTS.formatToParts(at)) {
+    if (part.type !== 'literal') {
+      parts[part.type] = part.value;
+    }
+  }
+  return { year: Number(parts.year), month: Number(parts.month), day: Number(parts.day) };
+}
+
+/**
+ * Instant correspondant à une heure **murale de la clinique**.
+ *
+ * `setHours()` travaille dans le fuseau du serveur. Sur nos postes, réglés à
+ * l'heure de l'Est, le résultat était juste — c'est pourquoi le défaut est passé
+ * inaperçu. Dans le conteneur, qui tourne en UTC, une journée déclarée de 9 h à
+ * 12 h s'affichait de 5 h à 8 h : à l'écran, la clinique ouvrait à 4 h 30 du
+ * matin. Le seed vise donc explicitement le fuseau de la clinique.
+ */
+function clinicTime(year: number, month: number, day: number, hour: number, minute: number): Date {
+  // On interprète d'abord l'heure murale comme si elle était en UTC, puis on
+  // retranche le décalage réel du fuseau à cet instant. Deux passes suffisent à
+  // converger, y compris autour des changements d'heure.
+  const naive = Date.UTC(year, month - 1, day, hour, minute, 0, 0);
+  let instant = new Date(naive);
+  for (let pass = 0; pass < 2; pass++) {
+    instant = new Date(naive - clinicOffsetMinutes(instant) * 60_000);
+  }
+  return instant;
+}
+
+/** Heure du jour, à la clinique. */
+function todayAt(hour: number, minute = 0): Date {
+  const today = clinicDateParts(new Date());
+  return clinicTime(today.year, today.month, today.day, hour, minute);
+}
+
+/**
+ * Même heure, décalée de `days` jours **de calendrier**.
+ *
+ * On décale la date civile, pas l'instant : un jour ne fait pas toujours 24 h
+ * (changement d'heure), et c'est bien « le lendemain à 9 h » que l'on veut.
+ */
 function dayAt(days: number, hour: number, minute = 0): Date {
-  const date = todayAt(hour, minute);
-  date.setDate(date.getDate() + days);
-  return date;
+  const today = clinicDateParts(new Date());
+  const shifted = new Date(Date.UTC(today.year, today.month - 1, today.day + days));
+  return clinicTime(
+    shifted.getUTCFullYear(),
+    shifted.getUTCMonth() + 1,
+    shifted.getUTCDate(),
+    hour,
+    minute,
+  );
 }
 
 /**
@@ -422,10 +490,15 @@ function createRandom(seed: number): () => number {
 const HISTORY_DAYS = 14;
 const UPCOMING_DAYS = 7;
 
-/** Jours ouvrés seulement : la clinique est fermée le samedi et le dimanche. */
+/**
+ * Jours ouvrés seulement : la clinique est fermée le samedi et le dimanche.
+ * Le jour de la semaine se lit dans le fuseau de la clinique, pas dans celui du
+ * serveur — sans quoi un conteneur en UTC pourrait basculer de journée.
+ */
 function isWorkingDay(date: Date): boolean {
-  const day = date.getDay();
-  return day >= 1 && day <= 5;
+  const { year, month, day } = clinicDateParts(date);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  return weekday >= 1 && weekday <= 5;
 }
 
 /**
