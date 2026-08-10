@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { AppointmentsModule } from './appointment/appointments.module';
 import { StatisticsModule } from './statistics/statistics.module';
+import { NotificationsModule } from './notification/notifications.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { StatisticsModule } from './statistics/statistics.module';
     AvailabilityModule,
     AppointmentsModule,
     StatisticsModule,
+    NotificationsModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],

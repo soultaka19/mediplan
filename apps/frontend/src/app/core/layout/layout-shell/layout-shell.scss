@@ -178,6 +178,61 @@
   }
 }
 
+// --- Centre de notifications (MEDIPLAN-25) -----------------------------------
+.mp-toolbar__notifications {
+  margin-inline-end: var(--mp-space-1);
+}
+
+.mp-notifications__header {
+  cursor: default;
+  opacity: 1 !important;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+  min-width: 360px;
+  color: var(--mp-color-text);
+
+  strong {
+    color: var(--mp-color-primary);
+    font-size: 12px;
+  }
+}
+
+.mp-notifications__empty {
+  cursor: default;
+  opacity: 1 !important;
+  color: var(--mp-color-text-secondary);
+}
+
+.mp-notification {
+  min-width: 360px;
+  min-height: 80px;
+
+  &--unread {
+    background: var(--mp-color-primary-container);
+  }
+}
+
+.mp-notification__content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  white-space: normal;
+}
+
+.mp-notification__title {
+  color: var(--mp-color-text);
+  font-weight: 700;
+}
+
+.mp-notification__message,
+.mp-notification__date {
+  color: var(--mp-color-text-secondary);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 // --- Menu utilisateur --------------------------------------------------------
 .mp-usermenu {
   position: relative;
