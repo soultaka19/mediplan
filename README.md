@@ -164,4 +164,5 @@ projet **MediPlan** (`MEDIPLAN`).
 ## Équipe
 
 - Souleymane DIALLO
-- _(coéquipiers à compléter)_
+- Zakaria Lahouiri
+- Larbi Saib
