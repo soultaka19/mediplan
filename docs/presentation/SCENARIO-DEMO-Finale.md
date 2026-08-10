@@ -229,7 +229,8 @@ Bergeron → la plage du jour → ouvrir la liste des créneaux.
 > réponse : « Un index unique partiel en base. C'est PostgreSQL qui refuse la
 > seconde écriture, pas notre code. Et il est *partiel* : il ignore les
 > rendez-vous annulés, c'est exactement ce qui permet au créneau de revenir. Nous
-> le testons en concurrence : deux réservations simultanées, une seule passe. »
+> l'avons vérifié en lançant deux réservations en même temps sur ce même créneau :
+> une passe, l'autre est refusée. »
 
 ---
 

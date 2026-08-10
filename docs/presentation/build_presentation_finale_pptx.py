@@ -445,7 +445,7 @@ carte(s, Inches(6.75), Inches(1.65), Inches(6.1), Inches(2.5),
 carte(s, Inches(0.45), Inches(4.4), Inches(12.4), Inches(2.2),
       "Ce que ce choix nous donne en plus",
       ["L'annulation est « hors index » : un rendez-vous annulé ne bloque plus le créneau, qui redevient donc réservable. Le deuxième irritant est réglé par le même mécanisme.",
-       "Le comportement est testé en conditions de concurrence — deux réservations simultanées, une seule passe.",
+       "Vérifié sur l'application déployée : deux réservations lancées en même temps sur le même créneau — une passe (201), l'autre est refusée (409).",
        "La garantie ne dépend pas de la qualité du code applicatif : même si une nouvelle fonctionnalité oubliait la vérification, la base tiendrait."], BLEU)
 pied(s, "Souleymane DIALLO", "1 min")
 notes(s, "SOULEYMANE — 1 minute. Diapo à ne PAS survoler : c'est notre meilleur argument "
@@ -601,8 +601,10 @@ carte(s, Inches(0.45), Inches(3.35), Inches(6.1), Inches(3.3),
       "Notre stratégie de test",
       ["Backend : les règles métier et la sécurité — transitions de",
        "   statut, droits par rôle, périmètre de clinique",
-       "Le cas critique testé en concurrence : deux réservations",
-       "   simultanées sur le même créneau, une seule passe",
+       "Le cas critique vérifié en concurrence sur l'application en",
+       "   ligne : deux réservations simultanées, une seule passe.",
+       "   Vérification manuelle et reproductible — nos tests backend",
+       "   simulent la base, ils ne peuvent pas le prouver seuls",
        "Frontend : le comportement des écrans et des formulaires,",
        "   pas leur apparence",
        "Validation manuelle : le scénario complet rejoué sur",
@@ -621,10 +623,14 @@ notes(s, "LARBI — 1 minute.\n\n"
          "« Nous avons 186 tests automatisés : 57 côté serveur, 129 côté interface. Ils "
          "tournent à chaque push, et une pull request dont la CI est rouge n'est pas "
          "fusionnée.\n\n"
-         "Le test dont je suis le plus content, c'est celui de la double réservation. Nous "
-         "ne testons pas seulement que ça marche : nous lançons deux réservations en même "
-         "temps sur le même créneau et nous vérifions qu'une seule passe. C'est le test qui "
-         "prouve que la garantie tient sous charge.\n\n"
+         "La vérification dont je suis le plus content n'est pas dans cette suite, et je "
+         "veux être précis là-dessus. Pour la double réservation, nous avons lancé deux "
+         "réservations en même temps sur le même créneau, sur l'application en ligne : une "
+         "passe, l'autre est refusée avec un 409. C'est reproductible, mais c'est manuel — "
+         "nos tests serveur simulent la base de données, donc ils ne peuvent pas prouver "
+         "un comportement qui appartient à PostgreSQL. Le rendre automatique demanderait "
+         "une vraie base dans la chaîne d'intégration : c'est la première ligne de nos "
+         "pistes d'amélioration.\n\n"
          "Un choix que j'assume : le lint et le formatage sont rapportés mais ne bloquent "
          "pas. Nous avons de la dette là-dessus. Si nous les rendions bloquants "
          "aujourd'hui, la CI serait rouge en permanence — et une CI toujours rouge, plus "
@@ -810,8 +816,10 @@ carte(s, Inches(0.45), Inches(1.65), Inches(4.0), Inches(4.9),
        "   7 cas d'utilisation, socle du",
        "   monorepo et Docker,",
        "   authentification JWT, RBAC à",
-       "   4 rôles, design system,",
-       "   déploiement Azure en Bicep",
+       "   4 rôles, design system, passage",
+       "   de la contrainte d'unicité à un",
+       "   index PARTIEL (qui rend possible",
+       "   l'annulation), déploiement Azure",
        "",
        "Difficulté : le 404 en production,",
        "   invisible en local",
@@ -839,16 +847,16 @@ carte(s, Inches(8.85), Inches(1.65), Inches(4.0), Inches(4.9),
       ["Réalisé : diagrammes de séquence,",
        "   modèle du patient léger, prise de",
        "   RDV par la réception, socle des",
-       "   rendez-vous et index anti-double-",
-       "   réservation, tableau de bord et",
-       "   statistiques",
+       "   rendez-vous (entités, migration,",
+       "   contrainte d'unicité), tableau de",
+       "   bord et statistiques",
        "",
        "Difficulté : garantir qu'un créneau",
        "   ne soit jamais pris deux fois",
        "",
-       "Solution : déplacer la garantie du",
-       "   code vers la base, avec un index",
-       "   unique partiel"], BLEU_CLAIR)
+       "Solution : sortir la garantie du code",
+       "   pour la poser en base, comme",
+       "   contrainte d'unicité sur le créneau"], BLEU_CLAIR)
 pied(s, "Chacun présente sa colonne", "1 min à trois")
 notes(s, "LES TROIS — 20 secondes chacun. Chacun parle de SA colonne, à la première "
          "personne.\n\n"
@@ -863,10 +871,13 @@ notes(s, "LES TROIS — 20 secondes chacun. Chacun parle de SA colonne, à la pr
          "jusqu'à 56 commits de retard sur une interface entièrement refondue. Je les ai "
          "réintégrées par pull request, conflit par conflit, en gardant les deux apports "
          "plutôt qu'en écrasant. »\n\n"
-         "LARBI : « J'ai porté le patient léger, la prise de rendez-vous et les "
-         "statistiques. Ma difficulté a été de garantir qu'un créneau ne soit jamais pris "
-         "deux fois. La solution a été de sortir cette garantie du code pour la mettre dans "
-         "la base. »\n\n"
+         "LARBI : « J'ai porté le patient léger, la prise de rendez-vous par la réception et "
+         "les statistiques. Ma difficulté a été de garantir qu'un créneau ne soit jamais "
+         "pris deux fois. Vérifier dans le code ne suffit pas : entre la vérification et "
+         "l'écriture, une autre requête peut passer. J'ai donc sorti la garantie du code "
+         "pour la poser en base, comme contrainte d'unicité sur le créneau. Souleymane l'a "
+         "ensuite transformée en index partiel, pour qu'une annulation libère le "
+         "créneau. »\n\n"
          "CHACUN doit pouvoir répondre à une question sur SA colonne.")
 
 # =========================================================================
@@ -900,8 +911,8 @@ notes(s, "SOULEYMANE — 20 secondes, puis on ouvre les questions.\n\n"
          "coupe pas la parole. Si on ne sait pas : « je ne l'ai pas vérifié, voici comment "
          "je le vérifierais » — jamais d'invention.\n\n"
          "QUESTIONS PROBABLES :\n"
-         "· Doubles réservations ? → index unique partiel, PostgreSQL tranche, testé en "
-         "concurrence (Larbi)\n"
+         "· Doubles réservations ? → index unique partiel, PostgreSQL tranche ; vérifié en "
+         "concurrence sur l'app en ligne, 201 + 409. Manuel, pas automatisé (Larbi)\n"
          "· Pourquoi le patient ne réserve pas ? → il appelle, c'est le flux réel (Souleymane)\n"
          "· Données de santé et sécurité ? → JWT, RBAC, chaque requête bornée à la clinique, "
          "mots de passe hachés, aucun secret dans le dépôt (Souleymane)\n"
