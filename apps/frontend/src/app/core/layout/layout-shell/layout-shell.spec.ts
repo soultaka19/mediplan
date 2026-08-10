@@ -126,8 +126,8 @@ describe('LayoutShell', () => {
 
     expect(root.textContent).toContain('Utilisateurs');
     // Liens actifs : Tableau de bord + Disponibilités + Rendez-vous + Flux du
-    // jour + Utilisateurs = 5 ; aucun item désactivé.
-    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(5);
+    // jour + Statistiques + Utilisateurs = 6 ; aucun item désactivé.
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(6);
     expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
@@ -136,7 +136,7 @@ describe('LayoutShell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('Utilisateurs');
-    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(5);
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(6);
     expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 
