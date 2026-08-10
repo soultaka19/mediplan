@@ -9,33 +9,50 @@
 
 ---
 
-## ⚠️ À faire le matin du 13 août — sinon la démonstration est vide
+## Les données : ce qu'il faut savoir
 
 Le jeu de démonstration calcule ses dates **au moment où il s'exécute**
-(`todayAt()` dans `demo-seed.ts`). Il a été lancé mi-juillet : pour l'application,
-« aujourd'hui » est resté ce jour-là. **Vérifié le 10 août : le flux du jour
-affichait « Aucun rendez-vous prévu aujourd'hui ».**
+(`todayAt()` dans `demo-seed.ts`) et le job qui le déclenche est **volontairement
+manuel** : écraser des données ne doit résulter que d'un geste délibéré.
 
-Le matin de la présentation, dans cet ordre :
+Il couvre **14 jours d'historique et une semaine complète à venir**. Un
+lancement le lundi laisse donc une clinique utilisable jusqu'au lundi suivant :
+**le 13 août est déjà couvert par le lancement du 10**. Aucune commande n'est à
+taper le matin de la présentation.
+
+Chaque journée ouvrée de la fenêtre est une vraie journée de clinique :
+
+| | |
+|---|---|
+| Plages | 4 par jour — les deux médecins, matin et après-midi |
+| Créneaux | 24 par jour, dont **environ 15 libres** |
+| Rendez-vous | 8 à 10, patients tous différents, motifs variés |
+| Annulations | 1 à 2 par jour, créneau libéré, motif renseigné |
+| Congé | une demi-journée, placée en **fin** de fenêtre |
+
+**Vérifié pour le jeudi 13 août** : 24 créneaux, 9 rendez-vous répartis sur les
+deux médecins matin et après-midi, 2 annulations, 15 créneaux libres.
+
+### Le seul geste indispensable
+
+**Réveiller l'application** avant de passer : ouvrir l'URL et se connecter une
+fois. Les conteneurs dorment (scale-to-zero) et le premier accès prend **10 à 15
+secondes**. Ensuite, la navigation est instantanée.
+
+### Si vous voulez malgré tout repartir d'une base fraîche
 
 ```bash
-# 1. Régénérer les données autour de la vraie date du jour (~1 min)
 az containerapp job start --name caj-mediplan-seed --resource-group rg-projet-dev
-
-# 2. Suivre l'exécution jusqu'à « Succeeded »
 az containerapp job execution list --name caj-mediplan-seed \
-  --resource-group rg-projet-dev -o table
+  --resource-group rg-projet-dev -o table   # attendre « Succeeded »
 ```
 
-Puis **réveiller l'application** en ouvrant l'URL et en se connectant une fois :
-les conteneurs dorment (scale-to-zero) et le premier accès prend **10 à 15
-secondes**. Une fois réveillée, la navigation est instantanée.
+Deux raisons de le faire : effacer les rendez-vous créés pendant les répétitions,
+ou obtenir un **flux du jour déjà animé** (des consultations terminées, une en
+cours) plutôt qu'une journée entièrement « Réservé ».
 
-> ⚠️ Le seed **écrase** les données existantes. À lancer avant la répétition, pas
-> pendant la démonstration.
-
-**Fenêtre de sécurité : terminer ces deux étapes au moins 30 minutes avant de
-passer.** Après le seed, rejouer le scénario une fois en entier.
+> ⚠️ Le seed **écrase** les données existantes. Jamais pendant la démonstration.
+> Si vous le lancez, rejouer le scénario une fois en entier ensuite.
 
 ---
 
@@ -298,7 +315,7 @@ Cliquer l'**icône de lune** dans la barre du haut. Recliquer pour revenir.
 | Symptôme | Réaction |
 |---|---|
 | La page met du temps au premier accès | C'est le réveil scale-to-zero. Parler pendant : « nos conteneurs dorment quand personne ne les utilise, c'est ce qui met l'hébergement à zéro dollar. » |
-| Le flux du jour est vide | Le seed n'a pas été relancé. **Basculer sur la vidéo**, ne pas improviser. |
+| Le flux du jour est vide | La fenêtre du seed est dépassée (plus de 7 jours depuis le dernier lancement). **Basculer sur la vidéo**, ne pas improviser. |
 | Une action échoue | Une seule tentative, puis la vidéo. Ne jamais déboguer devant la salle. |
 | Le réseau tombe | La vidéo. La prof l'a explicitement prévue comme solution de repli. |
 
