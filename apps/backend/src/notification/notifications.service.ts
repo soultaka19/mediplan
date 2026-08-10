@@ -63,7 +63,7 @@ export class NotificationsService {
       ...params,
       type: NotificationType.APPOINTMENT_BOOKED,
       title: 'Nouveau rendez-vous',
-      message: this.appointmentMessage(params.appointment, 'Un rendez-vous a ete reserve'),
+      message: this.appointmentMessage(params.appointment, 'Un rendez-vous a été réservé'),
     });
   }
 
@@ -71,7 +71,7 @@ export class NotificationsService {
     await this.createAppointmentNotification({
       ...params,
       type: NotificationType.APPOINTMENT_CANCELLED,
-      title: 'Rendez-vous annule',
+      title: 'Rendez-vous annulé',
       message: this.cancellationMessage(params.appointment),
     });
   }
@@ -80,7 +80,7 @@ export class NotificationsService {
     await this.createAppointmentNotification({
       ...params,
       type: NotificationType.APPOINTMENT_UPDATED,
-      title: 'Rendez-vous mis a jour',
+      title: 'Rendez-vous mis à jour',
       message: this.appointmentMessage(
         params.appointment,
         `Le statut du rendez-vous est maintenant ${this.statusLabel(params.appointment.status)}`,
@@ -143,13 +143,13 @@ export class NotificationsService {
           timeStyle: 'short',
           timeZone: 'America/Toronto',
         }).format(appointment.slot.startAt)
-      : 'un creneau';
+      : 'un créneau';
 
     return `${prefix} pour ${patientName} avec ${doctorName}, le ${slot}.`;
   }
 
   private cancellationMessage(appointment: Appointment): string {
-    const message = this.appointmentMessage(appointment, 'Un rendez-vous a ete annule');
+    const message = this.appointmentMessage(appointment, 'Un rendez-vous a été annulé');
     const reason = appointment.cancellationReason?.trim();
 
     if (!reason) {
@@ -170,12 +170,12 @@ export class NotificationsService {
 
   private statusLabel(status: AppointmentStatus): string {
     const labels: Record<AppointmentStatus, string> = {
-      [AppointmentStatus.BOOKED]: 'reserve',
-      [AppointmentStatus.ARRIVED]: 'arrive',
+      [AppointmentStatus.BOOKED]: 'réservé',
+      [AppointmentStatus.ARRIVED]: 'arrivé',
       [AppointmentStatus.IN_CONSULTATION]: 'en consultation',
-      [AppointmentStatus.COMPLETED]: 'termine',
+      [AppointmentStatus.COMPLETED]: 'terminé',
       [AppointmentStatus.ABSENT]: 'absent',
-      [AppointmentStatus.CANCELLED]: 'annule',
+      [AppointmentStatus.CANCELLED]: 'annulé',
     };
 
     return labels[status];
