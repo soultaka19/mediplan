@@ -71,6 +71,12 @@ export const routes: Routes = [
           import('@features/admin/users/users-list-page').then((m) => m.UsersListPage),
       },
       {
+        path: 'admin/statistics',
+        canActivate: [roleGuard('clinic_admin', 'super_admin')],
+        loadComponent: () =>
+          import('@features/admin/statistics/statistics-page').then((m) => m.StatisticsPage),
+      },
+      {
         path: 'availabilities',
         canActivate: [roleGuard('doctor', 'clinic_admin', 'super_admin')],
         loadComponent: () =>

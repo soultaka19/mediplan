@@ -1,0 +1,119 @@
+<section class="statistics-page">
+  <header class="statistics-page__header">
+    <div>
+      <h1 class="statistics-page__title">Tableaux de bord et statistiques</h1>
+      <p class="statistics-page__subtitle">
+        Suivi de l'activite par periode et par medecin : volumes, no-show et occupation.
+      </p>
+    </div>
+    @if (statistics()) {
+      <span class="statistics-page__period">{{ formatPeriod() }}</span>
+    }
+  </header>
+
+  <mat-card class="statistics-filters">
+    <form class="statistics-filters__form" [formGroup]="filtersForm" (ngSubmit)="load()">
+      <mat-form-field appearance="outline">
+        <mat-label>Date debut</mat-label>
+        <input matInput type="date" formControlName="startDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date fin</mat-label>
+        <input matInput type="date" formControlName="endDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Medecin</mat-label>
+        <mat-select formControlName="doctorId">
+          <mat-option value="">Tous les medecins</mat-option>
+          @for (doctor of doctors(); track doctor.id) {
+            <mat-option [value]="doctor.id">{{ doctorLabel(doctor) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading()">
+        <mat-icon>filter_alt</mat-icon>
+        Actualiser
+      </button>
+    </form>
+  </mat-card>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+    <div class="statistics-skeleton" aria-busy="true" aria-live="polite">
+      @for (row of skeletonRows; track $index) {
+        <app-skeleton height="74px" />
+      }
+    </div>
+  } @else if (error()) {
+    <app-alert variant="error" [message]="error()!" />
+  } @else if (isEmpty()) {
+    <app-empty-state
+      icon="monitoring"
+      title="Aucune statistique"
+      description="Aucun rendez-vous ou creneau ne correspond aux filtres selectionnes."
+    />
+  } @else if (statistics()) {
+    <div class="statistics-kpis">
+      @for (kpi of kpis(); track kpi.label) {
+        <mat-card class="statistics-kpi">
+          <mat-icon aria-hidden="true">{{ kpi.icon }}</mat-icon>
+          <div>
+            <span class="statistics-kpi__label">{{ kpi.label }}</span>
+            <strong>{{ kpi.value }}</strong>
+            <span class="statistics-kpi__hint">{{ kpi.hint }}</span>
+          </div>
+        </mat-card>
+      }
+    </div>
+
+    <mat-card class="statistics-table-card">
+      <header class="statistics-table-card__header">
+        <h2>Detail par medecin</h2>
+      </header>
+
+      <div class="statistics-table__wrapper">
+        <table mat-table [dataSource]="doctorRows()" class="statistics-table">
+          <ng-container matColumnDef="doctor">
+            <th mat-header-cell *matHeaderCellDef scope="col">Medecin</th>
+            <td mat-cell *matCellDef="let row">{{ row.doctorName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="appointments">
+            <th mat-header-cell *matHeaderCellDef scope="col">RDV</th>
+            <td mat-cell *matCellDef="let row">{{ row.totalAppointments }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="noShow">
+            <th mat-header-cell *matHeaderCellDef scope="col">No-show</th>
+            <td mat-cell *matCellDef="let row">
+              {{ row.noShowAppointments }} <span class="muted">({{ row.noShowRate }} %)</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="slots">
+            <th mat-header-cell *matHeaderCellDef scope="col">Creneaux</th>
+            <td mat-cell *matCellDef="let row">{{ row.occupiedSlots }}/{{ row.totalSlots }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="occupancy">
+            <th mat-header-cell *matHeaderCellDef scope="col">Occupation</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="occupation">
+                <span class="occupation__bar">
+                  <span class="occupation__fill" [style.width.%]="row.occupancyRate"></span>
+                </span>
+                {{ row.occupancyRate }} %
+              </span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </mat-card>
+  }
+</section>
