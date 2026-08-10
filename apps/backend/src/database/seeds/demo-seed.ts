@@ -432,11 +432,79 @@ function isWorkingDay(date: Date): boolean {
  * Plage type de chaque médecin sur les journées générées. Aujourd'hui et demain
  * gardent leur planning déclaré à la main (flux du jour soigné) ; les autres
  * journées suivent ce gabarit.
+ *
+ * Les deux médecins tiennent matin **et** après-midi : une journée générée
+ * compte donc 4 plages et 24 créneaux. Une journée de clinique à moitié vide se
+ * remarque tout de suite, et l'écran de statistiques a besoin d'un dénominateur
+ * crédible pour que le taux d'occupation veuille dire quelque chose.
  */
 const DOCTOR_SHIFTS = [
-  { doctorId: IDS.doctorBergeron, startHour: 9, startMinute: 0, endHour: 12, endMinute: 0 },
-  { doctorId: IDS.doctorLefebvre, startHour: 13, startMinute: 30, endHour: 16, endMinute: 30 },
+  {
+    doctorId: IDS.doctorBergeron,
+    startHour: 9,
+    startMinute: 0,
+    endHour: 12,
+    endMinute: 0,
+    note: 'Consultations du matin',
+  },
+  {
+    doctorId: IDS.doctorBergeron,
+    startHour: 13,
+    startMinute: 30,
+    endHour: 16,
+    endMinute: 30,
+    note: "Consultations de l'après-midi",
+  },
+  {
+    doctorId: IDS.doctorLefebvre,
+    startHour: 8,
+    startMinute: 30,
+    endHour: 11,
+    endMinute: 30,
+    note: 'Consultations du matin',
+  },
+  {
+    doctorId: IDS.doctorLefebvre,
+    startHour: 13,
+    startMinute: 0,
+    endHour: 16,
+    endMinute: 0,
+    note: "Consultations de l'après-midi",
+  },
 ] as const;
+
+/**
+ * Choisit `count` index de créneaux distincts parmi `total`.
+ *
+ * Le nombre de rendez-vous d'une plage est **choisi**, pas tiré créneau par
+ * créneau : c'est ce qui garantit qu'il reste toujours des créneaux libres à
+ * réserver pendant une démonstration. Un tirage indépendant par créneau peut
+ * remplir une plage entière et bloquer la démo.
+ */
+function pickSlots(count: number, total: number, random: () => number): number[] {
+  const indices = Array.from({ length: total }, (_, index) => index);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  return indices.slice(0, Math.min(count, total)).sort((a, b) => a - b);
+}
+
+/**
+ * Tire un patient qui n'a pas déjà un rendez-vous dans la journée. Voir deux
+ * fois le même nom dans un planning d'une journée trahit immédiatement des
+ * données fabriquées.
+ */
+function pickPatient(random: () => number, seenToday: Set<string>) {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const candidate = DEMO_PATIENTS[Math.floor(random() * DEMO_PATIENTS.length)];
+    if (!seenToday.has(candidate.id)) {
+      seenToday.add(candidate.id);
+      return candidate;
+    }
+  }
+  return DEMO_PATIENTS[Math.floor(random() * DEMO_PATIENTS.length)];
+}
 
 /**
  * Construit l'historique (J-14 → J-1) et le planning à venir (J+2 → J+7).
@@ -447,6 +515,14 @@ const DOCTOR_SHIFTS = [
  * (avec quelques absences et annulations, comme en clinique réelle) ; les
  * journées à venir sont `booked` et volontairement incomplètes, pour qu'il
  * reste des créneaux libres à réserver pendant la présentation.
+ *
+ * **La fenêtre à venir couvre une semaine entière.** C'est délibéré : le seed
+ * fige ses dates au moment où il s'exécute, et le job qui le déclenche est
+ * manuel. Un lancement le lundi laisse donc une clinique utilisable jusqu'au
+ * lundi suivant, sans dépendre d'une commande à ne pas oublier le matin d'une
+ * démonstration. Chaque journée de cette fenêtre est traitée comme une vraie
+ * journée de clinique : quatre plages, des créneaux libres, quelques
+ * annulations et une demi-journée de congé.
  */
 function buildExtendedSchedule(): {
   availabilities: AvailabilityConfig[];
@@ -456,6 +532,18 @@ function buildExtendedSchedule(): {
   const availabilities: AvailabilityConfig[] = [];
   const appointments: AppointmentPlan[] = [];
   let sequence = 100; // au-delà des identifiants fixes d'AVAIL
+
+  // Journées ouvrées à venir effectivement générées (J+2 → J+7, week-ends
+  // exclus). Le congé est placé sur la **dernière** : une démonstration a lieu
+  // dans les jours qui suivent le lancement du seed, et amputer l'après-midi de
+  // ce jour-là priverait la démo de la moitié de son planning.
+  const futureWorkingOffsets: number[] = [];
+  for (let offset = 2; offset <= UPCOMING_DAYS; offset++) {
+    if (isWorkingDay(dayAt(offset, 12))) {
+      futureWorkingOffsets.push(offset);
+    }
+  }
+  const dayOffOffset = futureWorkingOffsets.at(-1);
 
   for (let offset = -HISTORY_DAYS; offset <= UPCOMING_DAYS; offset++) {
     // 0 et 1 sont déjà couverts par le planning déclaré à la main.
@@ -470,8 +558,15 @@ function buildExtendedSchedule(): {
 
     const isPast = offset < 0;
 
+    // Une demi-journée de congé sur la fenêtre à venir. Le planning d'une vraie
+    // clinique n'est jamais uniforme, et cela donne de la matière au type de
+    // plage « congé », qui ne génère aucun créneau réservable.
+    const dayOff = !isPast && offset === dayOffOffset;
+    const seenToday = new Set<string>();
+
     for (const shift of DOCTOR_SHIFTS) {
       const availabilityId = uuid('66666666', sequence++);
+      const isTimeOff = dayOff && shift.doctorId === IDS.doctorLefebvre && shift.startHour >= 12;
 
       availabilities.push({
         id: availabilityId,
@@ -479,21 +574,22 @@ function buildExtendedSchedule(): {
         start: dayAt(offset, shift.startHour, shift.startMinute),
         end: dayAt(offset, shift.endHour, shift.endMinute),
         slotDurationMin: 30,
-        type: AvailabilityType.AVAILABLE,
-        note: isPast ? 'Consultations' : 'Consultations (à venir)',
+        type: isTimeOff ? AvailabilityType.TIME_OFF : AvailabilityType.AVAILABLE,
+        note: isTimeOff ? 'Congé — après-midi' : shift.note,
       });
 
+      if (isTimeOff) {
+        continue; // un congé ne matérialise aucun créneau
+      }
+
       // 6 créneaux par plage de 3 h. Le passé est bien rempli (une journée de
-      // clinique se remplit), le futur l'est partiellement.
+      // clinique se remplit), le futur volontairement à moitié — il doit rester
+      // des créneaux libres évidents à réserver devant la salle.
       const slotCount = 6;
-      const fillRate = isPast ? 0.75 : 0.45;
+      const bookedCount = isPast ? 4 + Math.floor(random() * 2) : 2 + Math.floor(random() * 2);
 
-      for (let slotIndex = 0; slotIndex < slotCount; slotIndex++) {
-        if (random() > fillRate) {
-          continue; // créneau laissé libre
-        }
-
-        const patient = DEMO_PATIENTS[Math.floor(random() * DEMO_PATIENTS.length)];
+      for (const slotIndex of pickSlots(bookedCount, slotCount, random)) {
+        const patient = pickPatient(random, seenToday);
         const reason = CONSULTATION_REASONS[Math.floor(random() * CONSULTATION_REASONS.length)];
 
         let status = AppointmentStatus.BOOKED;
@@ -510,6 +606,13 @@ function buildExtendedSchedule(): {
           } else {
             status = AppointmentStatus.COMPLETED;
           }
+        } else if (random() < 0.12) {
+          // Quelques annulations à venir : le créneau redevient libre (le seed
+          // ne le marque pas réservé) et le filtre « Annulé » de l'historique a
+          // de la matière sans qu'il faille annuler soi-même.
+          status = AppointmentStatus.CANCELLED;
+          cancellationReason =
+            CANCELLATION_REASONS[Math.floor(random() * CANCELLATION_REASONS.length)];
         }
 
         appointments.push({
