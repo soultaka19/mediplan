@@ -337,5 +337,18 @@ Cliquer l'**icône de lune** dans la barre du haut. Recliquer pour revenir.
 | Le médecin reçoit les notifications | ✅ compteur à 4 sur son compte |
 | RBAC : 6 entrées de menu pour l'admin, 3 pour le médecin | ✅ |
 | Export CSV | ✅ HTTP 200 |
-| Statistiques sur données réelles | ✅ 121 RDV, 4,1 % no-show, 59,6 % occupation |
+| Statistiques sur données réelles | ✅ 185 RDV, 7 % no-show, 65,9 % occupation |
 | Erreurs dans la console du navigateur | ✅ **aucune** |
+
+### Après enrichissement du jeu de démonstration
+
+| Point | Résultat |
+|---|---|
+| Horaires de la clinique à l'écran | ✅ 8 h 30 → 16 h 30 *(affichait 4 h 30 → 12 h 30 avant correction du fuseau)* |
+| Flux du jour : les trois groupes remplis | ✅ Présents, À venir, Clôturés |
+| Jeudi 13 août : journée exploitable | ✅ 24 créneaux, 9 RDV, 2 annulations, 15 libres |
+| Libellés accentués (statistiques, notifications) | ✅ |
+
+> La cloche de notifications est **vide juste après un seed** : les notifications
+> naissent des actions, pas des données. Elle se remplit pendant la démonstration,
+> ce qui est précisément l'effet recherché à l'étape 8.
