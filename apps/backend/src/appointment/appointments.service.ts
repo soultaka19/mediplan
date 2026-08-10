@@ -27,6 +27,11 @@ const CANCELLABLE_STATUSES: readonly AppointmentStatus[] = [
   AppointmentStatus.ARRIVED,
 ];
 
+interface ExportAppointmentsParams {
+  from?: string;
+  to?: string;
+}
+
 @Injectable()
 export class AppointmentsService {
   constructor(
@@ -91,6 +96,50 @@ export class AppointmentsService {
 
     const appointments = await query.getMany();
     return appointments.map(toAppointmentResponse);
+  }
+
+  /**
+   * Export CSV des rendez-vous d'une période (MEDIPLAN-27).
+   *
+   * Réservé aux administrateurs (garde `@Roles` côté contrôleur), d'où l'absence
+   * de branche `DOCTOR` ici. Les bornes sont interprétées dans le fuseau de la
+   * clinique : `to` est inclusif (borne haute au jour suivant, exclue).
+   */
+  async exportCsv(
+    currentUser: AuthenticatedUser,
+    params: ExportAppointmentsParams,
+  ): Promise<string> {
+    const from = this.parseExportDate(params.from, 'from');
+    const to = this.parseExportDate(params.to, 'to');
+
+    if (from > to) {
+      throw new BadRequestException('La date de debut doit etre avant la date de fin.');
+    }
+
+    const query = this.dataSource
+      .getRepository(Appointment)
+      .createQueryBuilder('appointment')
+      .innerJoinAndSelect('appointment.slot', 'slot')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.doctor', 'doctor')
+      .where("slot.start_at >= (CAST(:from AS date) AT TIME ZONE 'America/Toronto')", {
+        from,
+      })
+      .andWhere(
+        "slot.start_at < ((CAST(:to AS date) + interval '1 day') AT TIME ZONE 'America/Toronto')",
+        { to },
+      )
+      .orderBy('slot.start_at', 'ASC');
+
+    if (currentUser.role === UserRole.CLINIC_ADMIN) {
+      if (!currentUser.clinicId) {
+        return this.toCsv([]);
+      }
+      query.andWhere('appointment.clinic_id = :clinicId', { clinicId: currentUser.clinicId });
+    }
+
+    const appointments = await query.getMany();
+    return this.toCsv(appointments.map(toAppointmentResponse));
   }
 
   async updateStatus(
@@ -319,5 +368,93 @@ export class AppointmentsService {
       'code' in error &&
       (error as { code?: unknown }).code === '23505'
     );
+  }
+
+  private parseExportDate(value: string | undefined, field: 'from' | 'to'): string {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      throw new BadRequestException(
+        field === 'from'
+          ? 'La date de debut est requise au format AAAA-MM-JJ.'
+          : 'La date de fin est requise au format AAAA-MM-JJ.',
+      );
+    }
+
+    return value;
+  }
+
+  private toCsv(appointments: AppointmentResponse[]): string {
+    const headers = [
+      'Date',
+      'Heure debut',
+      'Heure fin',
+      'Patient',
+      'Medecin',
+      'Statut',
+      'Motif',
+      'Motif annulation',
+      'Cree le',
+    ];
+
+    const rows = appointments.map((appointment) => [
+      this.formatDate(appointment.startAt),
+      this.formatTime(appointment.startAt),
+      this.formatTime(appointment.endAt),
+      appointment.patientName ?? '',
+      appointment.doctorName ?? '',
+      this.statusLabel(appointment.status),
+      appointment.reason ?? '',
+      appointment.cancellationReason ?? '',
+      this.formatDateTime(appointment.createdAt),
+    ]);
+
+    return `\uFEFF${[headers, ...rows].map((row) => row.map(this.csvCell).join(',')).join('\r\n')}\r\n`;
+  }
+
+  private csvCell(value: string): string {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+
+  private formatDate(value: Date | undefined): string {
+    if (!value) {
+      return '';
+    }
+
+    return new Intl.DateTimeFormat('fr-CA', {
+      dateStyle: 'short',
+      timeZone: 'America/Toronto',
+    }).format(value);
+  }
+
+  private formatTime(value: Date | undefined): string {
+    if (!value) {
+      return '';
+    }
+
+    return new Intl.DateTimeFormat('fr-CA', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'America/Toronto',
+    }).format(value);
+  }
+
+  private formatDateTime(value: Date): string {
+    return new Intl.DateTimeFormat('fr-CA', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+      timeZone: 'America/Toronto',
+    }).format(value);
+  }
+
+  private statusLabel(status: AppointmentStatus): string {
+    const labels: Record<AppointmentStatus, string> = {
+      [AppointmentStatus.BOOKED]: 'Reserve',
+      [AppointmentStatus.CANCELLED]: 'Annule',
+      [AppointmentStatus.ARRIVED]: 'Arrive',
+      [AppointmentStatus.IN_CONSULTATION]: 'En consultation',
+      [AppointmentStatus.COMPLETED]: 'Termine',
+      [AppointmentStatus.ABSENT]: 'Absent',
+    };
+
+    return labels[status];
   }
 }

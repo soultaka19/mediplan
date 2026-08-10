@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -30,6 +31,27 @@ export class AppointmentsController {
   @Roles(UserRole.DOCTOR, UserRole.CLINIC_ADMIN, UserRole.SUPER_ADMIN)
   findToday(@CurrentUser() user: AuthenticatedUser): Promise<AppointmentResponse[]> {
     return this.appointmentsService.findToday(user);
+  }
+
+  @Get('export.csv')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLINIC_ADMIN, UserRole.SUPER_ADMIN)
+  async exportCsv(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('from') from: string | undefined,
+    @Query('to') to: string | undefined,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<string> {
+    const csv = await this.appointmentsService.exportCsv(user, { from, to });
+    const fileDate = new Date().toISOString().slice(0, 10);
+
+    response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    response.setHeader(
+      'Content-Disposition',
+      `attachment; filename="mediplan-rendez-vous-${fileDate}.csv"`,
+    );
+
+    return csv;
   }
 
   @Get()

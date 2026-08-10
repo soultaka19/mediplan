@@ -12,6 +12,19 @@
   margin-bottom: var(--mp-space-4);
 }
 
+// Export CSV (MEDIPLAN-27) — s'insère dans la barre d'outils de l'en-tête.
+.flow-export {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-2);
+  justify-content: flex-end;
+}
+
+.flow-export__field {
+  width: 150px;
+}
+
 .flux__title {
   margin: 0;
   font-family: var(--mp-font-display-family);
@@ -405,5 +418,15 @@
       width: 48px;
       height: 48px;
     }
+  }
+
+  .flow-page__actions,
+  .flow-export {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .flow-export__field {
+    width: 100%;
   }
 }
