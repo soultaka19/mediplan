@@ -1,4 +1,9 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { NotificationsService } from '../notification/notifications.service';
@@ -198,5 +203,97 @@ describe('AppointmentsService notifications', () => {
       service.cancel(currentUser(), 'missing-appointment', { cancellationReason: 'Erreur' }),
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(notificationsService.notifyAppointmentCancelled).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Réservation par le patient lui-même (MEDIPLAN-21).
+   *
+   * Ces tests portent sur les garde-fous, pas sur l'anti-double-réservation :
+   * celui-ci appartient à PostgreSQL (index unique partiel) et ne peut pas être
+   * prouvé avec un `EntityManager` simulé — voir `docs/tests/plan-et-resultats.md`.
+   */
+  describe('createBySelf', () => {
+    const patientUser = (overrides: Partial<AuthenticatedUser> = {}): AuthenticatedUser =>
+      currentUser({
+        id: 'patient-1',
+        email: 'julie@example.com',
+        role: UserRole.PATIENT,
+        ...overrides,
+      });
+
+    /** Créneau libre situé dans le futur, quelle que soit la date d'exécution. */
+    const futureSlot = (overrides: Partial<AppointmentSlot> = {}): AppointmentSlot =>
+      slot({
+        startAt: new Date(Date.now() + 86_400_000),
+        endAt: new Date(Date.now() + 88_200_000),
+        ...overrides,
+      });
+
+    it('réserve au nom du porteur du jeton et émet une notification', async () => {
+      const bookable = futureSlot();
+      const saved = appointment({ slot: bookable, createdById: 'patient-1' });
+      const manager = createManager({
+        findOne: jest.fn().mockResolvedValueOnce(bookable).mockResolvedValue(saved),
+        save: jest.fn((target: unknown, entity: unknown) =>
+          Promise.resolve(target === Appointment ? saved : entity),
+        ),
+      });
+      dataSource.transaction.mockImplementationOnce((callback) => callback(manager));
+
+      await service.createBySelf(patientUser(), { slotId: 'slot-1', reason: 'Maux de tête' });
+
+      // Le patient réservé est celui du jeton — jamais une valeur du corps.
+      const created = (manager.create as jest.Mock).mock.calls[0][1] as Partial<Appointment>;
+      expect(created.patientId).toBe('patient-1');
+      expect(created.createdById).toBe('patient-1');
+      expect(bookable.isBooked).toBe(true);
+      expect(notificationsService.notifyAppointmentBooked).toHaveBeenCalled();
+    });
+
+    it("anti-IDOR : un créneau d'une autre clinique est traité comme inexistant", async () => {
+      const manager = createManager({
+        findOne: jest.fn().mockResolvedValueOnce(futureSlot({ clinicId: 'clinic-2' })),
+      });
+      dataSource.transaction.mockImplementationOnce((callback) => callback(manager));
+
+      await expect(
+        service.createBySelf(patientUser(), { slotId: 'slot-1' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(notificationsService.notifyAppointmentBooked).not.toHaveBeenCalled();
+    });
+
+    it('créneau déjà réservé -> 409', async () => {
+      const manager = createManager({
+        findOne: jest.fn().mockResolvedValueOnce(futureSlot({ isBooked: true })),
+      });
+      dataSource.transaction.mockImplementationOnce((callback) => callback(manager));
+
+      await expect(
+        service.createBySelf(patientUser(), { slotId: 'slot-1' }),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('créneau déjà commencé -> 400 (le patient ne rattrape pas le passé)', async () => {
+      const manager = createManager({
+        findOne: jest.fn().mockResolvedValueOnce(
+          slot({
+            startAt: new Date(Date.now() - 3_600_000),
+            endAt: new Date(Date.now() - 1_800_000),
+          }),
+        ),
+      });
+      dataSource.transaction.mockImplementationOnce((callback) => callback(manager));
+
+      await expect(
+        service.createBySelf(patientUser(), { slotId: 'slot-1' }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('patient sans clinique -> 403, sans même ouvrir de transaction', async () => {
+      await expect(
+        service.createBySelf(patientUser({ clinicId: null }), { slotId: 'slot-1' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(dataSource.transaction).not.toHaveBeenCalled();
+    });
   });
 });

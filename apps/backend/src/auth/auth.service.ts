@@ -13,6 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MoreThan, Repository } from 'typeorm';
+import { ClinicsService } from '../clinic/clinics.service';
 import { UserRole } from '../user/user-role.enum';
 import { User } from '../user/user.entity';
 import { AuthResponse, PublicUser, toPublicUser } from './dto/auth-response.dto';
@@ -61,6 +62,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly clinicsService: ClinicsService,
   ) {
     // Garde défensive : une valeur absente, non numérique ("douze") ou trop
     // basse retombe sur le coût 12 (décision Phase 2) au lieu de produire un
@@ -111,6 +113,13 @@ export class AuthService {
       throw new ConflictException('Cette adresse e-mail est déjà utilisée.');
     }
 
+    // MEDIPLAN-21 : la clinique vient du client, elle est donc confrontée à la
+    // base avant toute écriture. Un identifiant inconnu ou une clinique
+    // désactivée est un 400, pas un rattachement silencieusement ignoré.
+    if (dto.clinicId && !(await this.clinicsService.existsActive(dto.clinicId))) {
+      throw new BadRequestException('Clinique introuvable.');
+    }
+
     const passwordHash = await bcrypt.hash(dto.password, this.bcryptRounds);
 
     const user = this.userRepository.create({
@@ -118,9 +127,11 @@ export class AuthService {
       passwordHash,
       firstName: dto.firstName ?? null,
       lastName: dto.lastName ?? null,
-      // SÉCURITÉ AC5 : rôle/clinique forcés, jamais issus du client.
+      // SÉCURITÉ AC5 : le rôle reste forcé, jamais issu du client. Seul le
+      // rattachement à une clinique est choisi par le patient (et validé
+      // ci-dessus) : sans lui, le compte ne donne accès à aucun créneau.
       role: UserRole.PATIENT,
-      clinicId: null,
+      clinicId: dto.clinicId ?? null,
       isSelfRegistered: true,
       isActive: true,
       failedLoginAttempts: 0,

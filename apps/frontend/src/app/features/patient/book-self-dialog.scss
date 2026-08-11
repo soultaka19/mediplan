@@ -1,0 +1,27 @@
+.self-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.self-head__title {
+  margin: 0;
+}
+
+.self-head__subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--mp-text-muted, rgb(0 0 0 / 60%));
+  font-size: 0.875rem;
+}
+
+.self-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-top: 0.5rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+}

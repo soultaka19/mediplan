@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 
 import { AuthFacade, PublicUser, UserRole } from '@core/auth';
 import { AppointmentFlowService } from '@features/clinic-flow/appointment-flow.service';
+import { PatientAppointmentsService } from '@features/patient/patient-appointments.service';
 import { DashboardPage } from './dashboard-page';
 
 function makeUser(overrides: Partial<PublicUser> = {}): PublicUser {
@@ -50,6 +51,8 @@ describe('DashboardPage', () => {
   // Faux service de flux : file du jour vide et synchrone (aucun HttpClient,
   // `isLoading` déterministe pour l'assertion des KPI/labels).
   const fakeFlow = { listToday: () => of([]) };
+  // Idem côté patient : aucun rendez-vous, réponse synchrone, aucun HttpClient.
+  const fakePatient = { listMine: () => of([]) };
 
   function setup(user: PublicUser | null) {
     const facade = createFakeFacade(user);
@@ -59,6 +62,7 @@ describe('DashboardPage', () => {
         provideRouter([]),
         { provide: AuthFacade, useValue: facade },
         { provide: AppointmentFlowService, useValue: fakeFlow },
+        { provide: PatientAppointmentsService, useValue: fakePatient },
       ],
     });
     const fixture = TestBed.createComponent(DashboardPage);
@@ -110,8 +114,11 @@ describe('DashboardPage', () => {
 
     expect(root.textContent).toContain('Rendez-vous à venir');
     expect(root.textContent).toContain('Rendez-vous passés');
-    expect(allByTestId(root, 'dashboard-quick-action').length).toBe(3);
     expect(root.textContent).toContain('Prendre un rendez-vous');
+    // MEDIPLAN-21 : les deux accès rapides du patient mènent désormais quelque
+    // part. Plus aucun « bientôt » sur cet écran — c'était le cul-de-sac.
+    expect(allByTestId(root, 'dashboard-quick-action-link').length).toBe(2);
+    expect(allByTestId(root, 'dashboard-quick-action').length).toBe(0);
   });
 
   it.each<UserRole>(['clinic_admin', 'super_admin'])(
@@ -143,17 +150,34 @@ describe('DashboardPage', () => {
     },
   );
 
-  it('n’invente aucune donnée : les KPI patient restent en placeholder « — »', () => {
-    const { fixture } = setup(makeUser());
+  // MEDIPLAN-21 : les compteurs du patient sont calculés sur ses propres
+  // rendez-vous. Le faux service n'en renvoie aucun, donc « 0 » — et « 0 » est
+  // une information, contrairement au « — » d'avant.
+  it('affiche les compteurs réels du patient plutôt qu’un placeholder', () => {
+    const { fixture } = setup(makeUser({ role: 'patient' }));
     const root = fixture.nativeElement as HTMLElement;
     const numbers = Array.from(root.querySelectorAll('.dash-kpi__value'));
 
-    expect(numbers.length).toBeGreaterThan(0);
-    expect(numbers.every((n) => n.textContent?.trim() === '—')).toBe(true);
+    expect(numbers.map((n) => n.textContent?.trim())).toEqual(['0', '0']);
+  });
+
+  it('n’invente aucune donnée : les KPI encore sans source restent en « — »', () => {
+    const { fixture } = setup(makeUser({ role: 'clinic_admin', email: 'admin@example.com' }));
+    const root = fixture.nativeElement as HTMLElement;
+    const values = Array.from(root.querySelectorAll('.dash-kpi__value')).map((n) =>
+      n.textContent?.trim(),
+    );
+
+    // « RDV du jour » est réel (file vide → 0) ; « Médecins actifs » et « Taux
+    // de remplissage » n'ont toujours pas de source et l'assument.
+    expect(values).toContain('0');
+    expect(values.filter((v) => v === '—').length).toBe(2);
   });
 
   it('rend les accès rapides « bientôt » non navigables (aria-disabled, pas de lien)', () => {
-    const { fixture } = setup(makeUser());
+    // Testé sur un rôle qui en a encore un : côté admin, « Médecins » n'a pas
+    // d'écran. Le patient, lui, n'a plus aucun accès rapide désactivé.
+    const { fixture } = setup(makeUser({ role: 'clinic_admin', email: 'admin@example.com' }));
     const root = fixture.nativeElement as HTMLElement;
     const actions = allByTestId<HTMLElement>(root, 'dashboard-quick-action');
 

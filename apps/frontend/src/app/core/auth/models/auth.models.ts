@@ -29,14 +29,19 @@ export interface AuthResponse {
 /**
  * Corps de la requête d'inscription.
  *
- * SÉCURITÉ : on n'envoie JAMAIS `role` ni `clinicId` — le backend les rejette
- * et force le rôle `patient` pour l'inscription libre-service.
+ * SÉCURITÉ : on n'envoie JAMAIS `role` — le backend le rejette et force
+ * `patient` pour l'inscription libre-service.
+ *
+ * `clinicId` est en revanche choisi par le patient depuis l'annuaire public
+ * (MEDIPLAN-21) : sans rattachement à une clinique, le compte ne donne accès à
+ * aucun créneau. Le serveur vérifie que la clinique existe et est active.
  */
 export interface RegisterPayload {
   email: string;
   password: string;
   firstName?: string;
   lastName?: string;
+  clinicId?: string;
 }
 
 /** Corps de la requête de connexion. */

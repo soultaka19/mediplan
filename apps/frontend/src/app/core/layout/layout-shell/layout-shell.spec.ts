@@ -102,10 +102,11 @@ describe('LayoutShell', () => {
 
     expect(byTestId(root, 'shell-burger')).not.toBeNull();
     expect(root.textContent).toContain('MediPlan');
-    // 1 seul item actif (Tableau de bord) ; « Rendez-vous » est réservé aux
-    // admins, donc masqué au patient. Aucun item désactivé (« Profil » retiré
-    // tant que son écran n'existe pas).
-    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(1);
+    // 2 items actifs pour le patient : Tableau de bord + Mes rendez-vous
+    // (MEDIPLAN-21). « Rendez-vous », qui réserve pour un tiers, reste réservé
+    // aux admins. Aucun item désactivé (« Profil » retiré tant que son écran
+    // n'existe pas).
+    expect(root.querySelectorAll('[data-testid="shell-nav-item"]').length).toBe(2);
     expect(root.querySelectorAll('[data-testid="shell-nav-item-disabled"]').length).toBe(0);
   });
 

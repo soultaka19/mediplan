@@ -34,6 +34,21 @@
         />
       </mat-form-field>
 
+      @if (clinics().length > 0) {
+        <mat-form-field appearance="outline">
+          <mat-label>Votre clinique</mat-label>
+          <mat-select formControlName="clinicId" data-testid="register-clinic">
+            @for (clinic of clinics(); track clinic.id) {
+              <mat-option [value]="clinic.id">{{ clinic.name }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>Elle détermine les rendez-vous que vous pourrez réserver.</mat-hint>
+          @if (clinicId.touched && clinicId.invalid) {
+            <mat-error>Choisissez votre clinique.</mat-error>
+          }
+        </mat-form-field>
+      }
+
       <mat-form-field appearance="outline">
         <mat-label>Adresse e-mail</mat-label>
         <input

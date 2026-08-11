@@ -6,18 +6,26 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthFacade, PASSWORD_MIN_LENGTH, strongPasswordValidator } from '@core/auth';
 import { RegisterPayload } from '@core/auth';
+import { ClinicDirectoryService } from '@features/patient/clinic-directory.service';
+import { PublicClinic } from '@features/patient/patient.models';
 import { Alert } from '@shared/ui';
 import { authErrorMessage } from '@shared/http/http-error-message';
 
 /**
  * Écran d'inscription patient (composant smart).
  *
- * SÉCURITÉ : n'envoie que email/password/firstName/lastName. Jamais `role` ni
- * `clinicId` — le backend force le rôle `patient` pour l'inscription libre.
+ * SÉCURITÉ : n'envoie jamais `role` — le backend force `patient` pour
+ * l'inscription libre-service.
+ *
+ * La clinique est demandée dès l'inscription (MEDIPLAN-21) : c'est elle qui
+ * détermine les créneaux visibles. Un compte sans clinique n'est pas refusé,
+ * mais il ne peut rien réserver — d'où le champ obligatoire ici dès que
+ * l'annuaire répond.
  */
 @Component({
   selector: 'app-register-page',
@@ -31,6 +39,7 @@ import { authErrorMessage } from '@shared/http/http-error-message';
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
+    MatSelectModule,
     Alert,
   ],
   templateUrl: './register-page.html',
@@ -40,6 +49,7 @@ export class RegisterPage {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly auth = inject(AuthFacade);
   private readonly router = inject(Router);
+  private readonly clinicDirectory = inject(ClinicDirectoryService);
 
   /** Longueur minimale exposée au template (message d'aide). */
   protected readonly passwordMinLength = PASSWORD_MIN_LENGTH;
@@ -48,6 +58,8 @@ export class RegisterPage {
   readonly errorMessage = signal<string | null>(null);
   /** Affiche le mot de passe en clair (toggle accessible, A5). */
   readonly showPassword = signal(false);
+  /** Cliniques proposées ; vide tant que l'annuaire n'a pas répondu. */
+  readonly clinics = signal<readonly PublicClinic[]>([]);
 
   /** Formulaire réactif typé. Prénom/nom optionnels (alignés sur le DTO). */
   readonly form = this.fb.group({
@@ -55,7 +67,31 @@ export class RegisterPage {
     lastName: [''],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, strongPasswordValidator()]],
+    clinicId: ['', [Validators.required]],
   });
+
+  constructor() {
+    // Si l'annuaire est injoignable, on ne bloque pas l'inscription : le champ
+    // devient facultatif et le compte sera créé sans clinique. Mieux vaut un
+    // compte à compléter qu'un formulaire impossible à soumettre.
+    this.clinicDirectory.listClinics().subscribe({
+      next: (clinics) => {
+        this.clinics.set(clinics);
+        if (clinics.length === 0) {
+          this.clinicId.removeValidators(Validators.required);
+          this.clinicId.updateValueAndValidity();
+        }
+      },
+      error: () => {
+        this.clinicId.removeValidators(Validators.required);
+        this.clinicId.updateValueAndValidity();
+      },
+    });
+  }
+
+  get clinicId() {
+    return this.form.controls.clinicId;
+  }
 
   get firstName() {
     return this.form.controls.firstName;
@@ -102,13 +138,16 @@ export class RegisterPage {
 
   /** Construit le payload en omettant les champs optionnels vides. */
   private buildPayload(): RegisterPayload {
-    const { email, password, firstName, lastName } = this.form.getRawValue();
+    const { email, password, firstName, lastName, clinicId } = this.form.getRawValue();
     const payload: RegisterPayload = { email, password };
     if (firstName.trim()) {
       payload.firstName = firstName.trim();
     }
     if (lastName.trim()) {
       payload.lastName = lastName.trim();
+    }
+    if (clinicId) {
+      payload.clinicId = clinicId;
     }
     return payload;
   }
