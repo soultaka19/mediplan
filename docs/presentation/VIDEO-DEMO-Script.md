@@ -242,6 +242,80 @@ l'annulation**.
 
 ---
 
+## Qui enregistre quoi, et comment
+
+### La contrainte qui décide de tout
+
+Les sept séquences ne sont pas indépendantes : **la séquence 3 réserve dans la
+plage créée en séquence 2, la séquence 6 montre la cloche remplie par les
+séquences 4 et 5.** L'application est partagée en ligne, donc l'état se propage
+d'une personne à l'autre — mais seulement si on tourne **dans l'ordre et le même
+jour**. Une matinée créée « demain » n'est plus demain le lendemain.
+
+**Donc : une seule session de tournage, les sept séquences dans l'ordre.**
+Comptez une heure et demie avec les reprises.
+
+### Deux façons de s'organiser
+
+| | Ensemble, même poste | À distance |
+|---|---|---|
+| Comment | Un seul ordinateur, chacun prend le clavier et parle à son tour | Appel Teams/Meet/Discord, **partage d'écran avec contrôle passé** à celui qui parle |
+| Qui enregistre | La personne au clavier | **Une seule personne enregistre l'appel entier**, du début à la fin |
+| Avantage | Le plus simple, aucun décalage son/image | Personne ne se déplace |
+| Piège | Aucun | Le son du micro distant est plus faible — faire un essai de 20 s et l'écouter avant de tourner |
+
+La consigne demande que chacun **participe**, pas que chacun manipule. **Une voix
+identifiable sur sa séquence suffit.** Si Zakaria ou Larbi ne peuvent pas prendre
+le clavier, ils narrent pendant que quelqu'un d'autre clique — c'est conforme.
+
+### Avec quoi enregistrer (Windows 11, sans rien installer)
+
+**Clipchamp** — c'est le meilleur choix ici : il **enregistre l'écran avec le
+micro** *et* fait le montage, dans la même application. Il est déjà installé
+(menu Démarrer → Clipchamp).
+
+1. *Créer une vidéo* → **Enregistrer et créer** → **Écran** (ou *Écran et
+   caméra*) ;
+2. choisir **Fenêtre** puis la fenêtre du navigateur — pas *Écran entier*, ce qui
+   éviterait toute notification parasite ;
+3. vérifier que le micro est **actif et le bon** (le sélecteur est sous le bouton
+   d'enregistrement) ;
+4. une séquence = un enregistrement ; il atterrit directement sur la ligne de
+   montage.
+
+Deux solutions de repli : **Win + G** (Xbox Game Bar, enregistre la fenêtre
+active avec le micro, pas de montage), ou **OBS Studio** si quelqu'un le connaît
+déjà. Ne pas tourner au téléphone.
+
+### Ordre de la session
+
+| Prise | Qui parle | Qui clique | Ce qu'on enregistre |
+|---|---|---|---|
+| 1 | Souleymane | personne | Séquence 1 — écran de connexion immobile |
+| 2 | Souleymane | Souleymane | Séquence 2 — connexion, tableau de bord, plage de demain |
+| 3 | Zakaria | Zakaria | Séquence 3 — réservation + créneau disparu |
+| 4 | Zakaria | Zakaria | Séquence 4 — cycle de vie ⚠️ **sur un RDV de Sophie Bergeron** |
+| 5 | Zakaria | Zakaria | Séquence 5 — annulation ⚠️ **sur un RDV de Sophie Bergeron** |
+| 6 | Larbi | Larbi | Séquence 6 — statistiques, export, compte médecin |
+| 7 | les trois | — | Séquence 7 — clôture, trois phrases enchaînées |
+
+> ⚠️ **Le point de coordination à ne pas rater.** Les séquences 4 et 5 doivent
+> agir sur des rendez-vous **de la Dre Bergeron**. Sa cloche, montrée en séquence
+> 6, ne se remplit que de ce qui la concerne. Si Zakaria travaille sur les
+> rendez-vous de l'autre médecin, Larbi ouvrira une cloche vide et la meilleure
+> phrase de la vidéo tombe à plat.
+
+### Réglages du navigateur, avant la première prise
+
+- Fenêtre **maximisée**, zoom **100 %** (`Ctrl + 0`) ;
+- **barre de favoris masquée** (`Ctrl + Maj + B`) ;
+- un seul onglet, **profil sans extension** — au besoin, une fenêtre invité ;
+- **mode clair** dans MediPlan (l'icône de lune bascule le thème) ;
+- **Ne pas déranger** activé sur Windows, téléphone en silencieux ;
+- **session fermée** : la vidéo commence sur l'écran de connexion.
+
+---
+
 ## Préparer le tournage
 
 ### Avant d'enregistrer
