@@ -15,6 +15,7 @@ describe('AvailabilityService', () => {
   let service: AvailabilityService;
   let availabilityRepo: jest.Mocked<Repository<Availability>>;
   let userRepo: jest.Mocked<Repository<User>>;
+  let slotRepo: jest.Mocked<Repository<AppointmentSlot>>;
 
   const doctorUser = (overrides: Partial<User> = {}): User => ({
     id: 'doctor-1',
@@ -92,6 +93,7 @@ describe('AvailabilityService', () => {
     service = module.get(AvailabilityService);
     availabilityRepo = module.get(getRepositoryToken(Availability));
     userRepo = module.get(getRepositoryToken(User));
+    slotRepo = module.get(getRepositoryToken(AppointmentSlot));
   });
 
   it('doctor -> crée une plage pour lui-même et dérive clinicId du médecin', async () => {
@@ -114,6 +116,47 @@ describe('AvailabilityService', () => {
       type: AvailabilityType.AVAILABLE,
     });
     expect(result.doctorId).toBe('doctor-1');
+  });
+
+  // MEDIPLAN-21 : sans cette insertion, les créneaux n'existent pas en base,
+  // donc n'ont pas d'identifiant, donc ne sont pas réservables. La réception ne
+  // le voyait pas (ouvrir son dialogue les créait au passage) ; un patient en
+  // libre-service, lui, serait resté devant une plage invisible.
+  it('crée les créneaux dès la publication de la plage', async () => {
+    userRepo.findOne.mockResolvedValue(doctorUser());
+    availabilityRepo.save.mockImplementation((entity) =>
+      Promise.resolve(availability(entity as Availability)),
+    );
+
+    await service.create(authUser(), {
+      startAt: '2026-06-24T13:00:00Z',
+      endAt: '2026-06-24T14:00:00Z',
+      slotDurationMin: 30,
+    });
+
+    const builder = (slotRepo.createQueryBuilder as jest.Mock).mock.results[0].value;
+    const rows = builder.values.mock.calls[0][0] as Array<{ startAt: Date }>;
+    // Une heure découpée en 30 min = 2 créneaux.
+    expect(rows).toHaveLength(2);
+    expect(rows[0].startAt).toEqual(new Date('2026-06-24T13:00:00Z'));
+    // `orIgnore` : rejouer la matérialisation ne doit jamais écraser un créneau
+    // déjà réservé.
+    expect(builder.orIgnore).toHaveBeenCalled();
+  });
+
+  it('une plage de congé ne génère aucun créneau', async () => {
+    userRepo.findOne.mockResolvedValue(doctorUser());
+    availabilityRepo.save.mockImplementation((entity) =>
+      Promise.resolve(availability(entity as Availability)),
+    );
+
+    await service.create(authUser(), {
+      startAt: '2026-06-24T13:00:00Z',
+      endAt: '2026-06-24T14:00:00Z',
+      type: AvailabilityType.TIME_OFF,
+    });
+
+    expect(slotRepo.createQueryBuilder).not.toHaveBeenCalled();
   });
 
   it('clinic_admin -> ne peut pas créer pour un médecin hors clinique', async () => {
