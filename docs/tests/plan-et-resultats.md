@@ -27,23 +27,23 @@ démonstration, selon le scénario écrit dans
 
 ## 2. Ce qui tourne
 
-**186 tests automatisés, tous verts** au 10 août 2026.
+**199 tests automatisés, tous verts** au 11 août 2026.
 
-### Backend — 57 tests, 11 suites
+### Backend — 67 tests, 11 suites
 
 | Suite | Ce qu'elle vérifie |
 |---|---|
-| `auth.service.spec` | Inscription, connexion, hachage, verrouillage après échecs, réinitialisation |
+| `auth.service.spec` | Inscription (dont **choix de la clinique, validé en base**), connexion, hachage, verrouillage après échecs, réinitialisation |
 | `password-policy.validator.spec` | Politique de mot de passe |
 | `roles.guard.spec` | Le garde de rôle laisse passer ou refuse selon le rôle porté par le jeton |
 | `users.service.spec` · `users.controller.spec` | Création du patient léger, périmètre de clinique, profil courant |
-| `availability.service.spec` · `availability.controller.spec` | Plages datées, génération des créneaux, bornes invalides |
+| `availability.service.spec` · `availability.controller.spec` | Plages datées, génération et **publication immédiate** des créneaux, bornes invalides |
 | `appointments.controller.spec` | Routes, gardes et validation des entrées |
-| `appointments.service.spec` | Émission des notifications sur les trois événements du cycle de vie |
+| `appointments.service.spec` | Émission des notifications sur les trois événements du cycle de vie ; **réservation par le patient** : identité issue du jeton, anti-IDOR, créneau passé, conflit |
 | `notifications.service.spec` | Destinataires, contenu, marquage comme lu |
 | `app.controller.spec` | Sonde de disponibilité |
 
-### Frontend — 129 tests, 28 suites
+### Frontend — 132 tests, 28 suites
 
 Regroupés en trois familles :
 
@@ -59,9 +59,9 @@ Regroupés en trois familles :
 
 - Aucun test de bout en bout automatisé — parcours validé manuellement ;
 - Aucun test de charge ;
-- Les écrans **Statistiques**, **Flux du jour** et le formulaire d'export CSV
-  n'ont pas de test de composant : leurs services HTTP sont testés, leurs
-  gabarits non ;
+- Les écrans **Statistiques**, **Flux du jour**, **Mes rendez-vous** et le
+  formulaire d'export CSV n'ont pas de test de composant : leurs services HTTP
+  sont testés, leurs gabarits non ;
 - Le jeu de démonstration n'a pas de test : il est vérifié en le rejouant et en
   interrogeant la base.
 
@@ -75,11 +75,11 @@ déclenchée à chaque push et sur chaque pull request.
 | Étape | Bloquante ? |
 |---|---|
 | Compilation du backend et du frontend | **oui** |
-| Les 186 tests | **oui** |
+| Les 199 tests | **oui** |
 | Validation des gabarits d'infrastructure Bicep | **oui** |
 | Lint et formatage | non — rapportés seulement |
 
-**Une pull request dont la CI est rouge n'est pas fusionnée.** Les 24 pull
+**Une pull request dont la CI est rouge n'est pas fusionnée.** Les 26 pull
 requests du projet sont passées par là.
 
 ### Pourquoi le lint ne bloque pas
@@ -140,12 +140,32 @@ message destiné à l'utilisateur — pas une erreur serveur.
 > appartient au moteur de base de données. Un test automatisé exigerait une vraie
 > base dans la chaîne d'intégration. C'est inscrit dans nos pistes d'amélioration.
 
+### La même vérification sur le second canal — 11 août 2026
+
+Depuis l'ouverture de la réservation en libre-service (MEDIPLAN-21), un créneau
+peut être pris de **deux façons** : par la réception, ou par le patient. La
+question devient donc « la garantie tient-elle *entre* les deux canaux ? ».
+
+Elle tient, parce qu'elle n'est pas dans le code applicatif. Les deux chemins
+passent par la même transaction, le même verrou de ligne et le même index. Rejoué
+en local sur deux réservations **patient** simultanées :
+
+```
+requête A -> HTTP 201
+requête B -> HTTP 409   « Ce créneau est déjà réservé. »
+```
+
+Et de bout en bout : un patient réserve 9 h 00 en ligne, la réception ouvre la
+même plage — **9 h 00 n'est plus dans sa liste**. C'est cette scène qui ouvre la
+démonstration du 13 août.
+
 ---
 
 ## 5. Bogues rencontrés et corrigés
 
-Cinq défauts nous ont réellement coûté du temps. Quatre ont un point commun :
-**ils n'existaient pas sur nos postes.**
+Six défauts nous ont réellement coûté du temps. Quatre ont un point commun :
+**ils n'existaient pas sur nos postes** ; le dernier n'existait que pour un
+utilisateur que nous n'avions pas encore.
 
 ### 5.1 — Le 404 sur toute l'API, en production seulement
 
@@ -225,17 +245,39 @@ repassés « À faire », avec la raison écrite dans Jira.
 
 **Notre nouvelle règle.** Terminé = fusionné dans `main`, CI verte.
 
+### 5.6 — Le créneau qui n'existait pas encore
+
+**Symptôme.** Un patient ne voyait aucun créneau sur une plage que la réception
+venait de publier. Depuis le comptoir, tout paraissait normal.
+
+**Diagnostic.** Les créneaux n'étaient créés en base qu'au premier appel de
+`POST /availabilities/:id/slots` — appel déclenché par le **dialogue de
+réservation de la réception**. Tant qu'ils n'existent pas, ils n'ont pas
+d'identifiant : il n'y a rien à réserver.
+
+Le défaut était invisible depuis la réception, puisque le geste qui aurait pu le
+révéler était précisément celui qui le corrigeait au passage. Il n'est apparu
+qu'avec un second acteur, le patient, qui ne déclenche jamais cette création.
+
+**Correction.** Publier les créneaux **dès la création de la plage**, via une
+insertion idempotente qui n'écrase jamais un créneau déjà réservé
+(PR [#26](https://github.com/soultaka19/mediplan/pull/26)).
+
+**Ce que nous en retenons.** Un état construit « au premier accès » n'est pas
+construit : il est construit *pour celui qui accède le premier*. Tant qu'un seul
+type d'utilisateur passait par là, personne ne pouvait le voir.
+
 ---
 
 ## 6. Stabilité de la solution
 
-Constaté sur l'environnement déployé, le 10 août 2026 :
+Constaté sur l'environnement déployé, le 11 août 2026 :
 
 | Point | Résultat |
 |---|---|
 | Erreurs dans la console du navigateur, parcours complet | **aucune** |
-| Connexion, réservation, cycle de vie, annulation, export, statistiques | tous fonctionnels |
-| Réservations simultanées sur le même créneau | 1 acceptée, 1 refusée en 409 |
+| Connexion, réservation (réception **et patient**), cycle de vie, annulation, export, statistiques | tous fonctionnels |
+| Réservations simultanées sur le même créneau, sur les deux canaux | 1 acceptée, 1 refusée en 409 |
 | Migrations rejouées au démarrage du conteneur | idempotentes — un réveil ne rejoue rien |
 | Dernière exécution de la CI sur `main` | verte |
 
@@ -257,5 +299,8 @@ Par ordre de valeur décroissante :
 2. **Des tests de bout en bout** sur le parcours complet, pour ne plus dépendre
    d'une validation manuelle avant chaque démonstration ;
 3. **Résorber la dette de formatage**, puis rendre le lint bloquant ;
-4. **Des tests de composant** sur les écrans Statistiques et Flux du jour ;
-5. Des tests de charge, si le produit devait servir plusieurs cliniques.
+4. **Des tests de composant** sur les écrans Statistiques, Flux du jour et Mes
+   rendez-vous ;
+5. **L'annulation par le patient**, avec sa règle de délai minimum (UC-07) —
+   nous avons préféré ne pas livrer l'une sans l'autre ;
+6. Des tests de charge, si le produit devait servir plusieurs cliniques.

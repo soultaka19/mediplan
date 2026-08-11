@@ -15,9 +15,9 @@ Jira. Les attributions ont été retracées commit par commit, pas de mémoire.
 
 | | Souleymane DIALLO | Zakaria Lahouiri | Larbi Saib |
 |---|---|---|---|
-| Rôle tenu | Pilotage, socle technique, sécurité, mise en ligne | Disponibilités, flux du jour, notifications | Rendez-vous, patient, statistiques |
+| Rôle tenu | Pilotage, socle technique, sécurité, mise en ligne, espace patient | Disponibilités, flux du jour, notifications | Rendez-vous, patient, statistiques |
 | Conception | Cahier des charges, 7 cas d'utilisation | Diagramme de classes | Diagrammes de séquence |
-| Commits sur `main` | 70 | 8 | 4 |
+| Commits sur `main` | 72 | 8 | 4 |
 | Épiques Jira | E1, E2, E4, E7 | E3, E5, E6 | — |
 
 > Le volume de commits est **très inégal, et nous l'assumons**. Souleymane a porté
@@ -59,6 +59,13 @@ créneau annulé restait bloqué à jamais
 *(migration `1781674897615`, intégration du 8 juillet)*.
 
 **Annulation d'un rendez-vous** avec motif obligatoire *(MEDIPLAN-22 — PR #15)*.
+
+**Réservation par le patient en libre-service** — le second canal : annuaire
+public des cliniques, choix de sa clinique à l'inscription, consultation des
+créneaux réellement libres, réservation, « Mes rendez-vous ». La réservation
+emprunte **la même transaction, le même verrou et le même index** que celle de la
+réception : la garantie anti-double-réservation ne dépend pas du canal
+*(MEDIPLAN-21 — PR #25, #26)*.
 
 **Mise en ligne** — infrastructure Azure entièrement décrite en Bicep, base
 PostgreSQL infogérée, publication des images, coût maintenu à environ 0 $/mois
@@ -103,6 +110,11 @@ tourne en UTC.
   *(reproductibilité : n'importe qui reconstruit exactement le même schéma)*
 - Pourquoi Azure et pas Railway comme prévu au départ ? *(crédit étudiant non
   renouvelable ; scale-to-zero, coût ~0 $/mois)*
+- Un patient peut-il réserver au nom de quelqu'un d'autre ? *(non : le corps de
+  la requête n'expose aucun identifiant de patient, l'identité vient du jeton)*
+- Pourquoi un patient ne peut-il pas annuler lui-même ? *(l'annulation suppose
+  une règle de délai minimum, UC-07, non implémentée ; nous préférons ne pas
+  livrer l'une sans l'autre)*
 
 ---
 

@@ -12,7 +12,8 @@
 
 ## La règle qui gouverne tout le script
 
-**On raconte le travail d'Alice, réceptionniste. On ne raconte pas MediPlan.**
+**On raconte la journée d'Alice, réceptionniste, et celle de Julie, patiente. On
+ne raconte pas MediPlan.**
 
 Une phrase interdite : « ici on peut voir que… ». Une phrase attendue : « le
 téléphone sonne, madame Nadeau veut un rendez-vous ».
@@ -36,15 +37,25 @@ migration. Ces mots ont leur place dans la présentation, pas dans le tutoriel.
 | # | Durée | Voix | Séquence |
 |---|---|---|---|
 | 1 | 0:00 – 0:25 | **Souleymane** | Ouverture : le problème en deux phrases |
-| 2 | 0:25 – 1:30 | **Souleymane** | Connexion · tableau de bord · publier une matinée |
-| 3 | 1:30 – 2:35 | **Zakaria** | Le téléphone sonne : réserver pour un patient |
-| 4 | 2:35 – 3:30 | **Zakaria** | La journée en cours : accueillir, consulter, terminer |
-| 5 | 3:30 – 4:05 | **Zakaria** | Un patient annule : le créneau repart |
-| 6 | 4:05 – 4:45 | **Larbi** | Le suivi : chiffres, export, côté médecin |
-| 7 | 4:45 – 5:00 | **les trois** | Clôture |
+| 2 | 0:25 – 1:25 | **Souleymane** | Connexion · tableau de bord · publier une matinée |
+| 3 | 1:25 – 2:05 | **Larbi** | Le patient réserve lui-même, en ligne |
+| 4 | 2:05 – 3:00 | **Zakaria** | Le téléphone sonne : réserver pour un patient |
+| 5 | 3:00 – 3:50 | **Zakaria** | La journée en cours : accueillir, consulter, terminer |
+| 6 | 3:50 – 4:20 | **Zakaria** | Un patient annule : le créneau repart |
+| 7 | 4:20 – 4:55 | **Larbi** | Le suivi : chiffres, export, côté médecin |
+| 8 | 4:55 – 5:10 | **les trois** | Clôture |
 
-**Total : 5 min 00.** Chacun parle environ 1 min 40, 1 min 40 et 1 min 15 — la
-consigne demande la participation de tous, pas une égalité au chronomètre.
+**Total : 5 min 10.** Chacun parle environ 1 min 25 — la consigne demande la
+participation de tous, pas une égalité au chronomètre.
+
+> **Le fil qui relie les séquences 2, 3 et 4.** Souleymane publie une matinée.
+> Larbi, en patient, y prend le créneau de **9 h 00**. Zakaria, à la réception,
+> ouvre la même matinée et découvre que **9 h 00 n'y est plus**.
+>
+> C'est le meilleur moment de la vidéo, et il ne coûte rien à filmer : il suffit
+> que les trois séquences portent sur **la même matinée**. Les deux canaux —
+> en ligne et au téléphone — puisent dans le même agenda, et aucun des deux ne
+> peut donner deux fois la même place.
 
 ---
 
@@ -56,13 +67,14 @@ consigne demande la participation de tous, pas une égalité au chronomètre.
 > La réception note tout dans un agenda partagé — et deux personnes peuvent
 > inscrire deux patients sur le même créneau sans s'en rendre compte.
 >
-> MediPlan est l'outil de la réception. Je vais vous montrer une journée
-> complète : publier les disponibilités d'un médecin, prendre un rendez-vous au
-> téléphone, suivre les patients de la journée, et gérer une annulation. »
+> MediPlan est l'outil de cette clinique. Je vais vous montrer une journée
+> complète : publier les disponibilités d'un médecin, un patient qui prend
+> rendez-vous lui-même depuis chez lui, un autre qui appelle, le suivi des
+> patients de la journée, et une annulation. »
 
 ---
 
-# Séquence 2 — Connexion et première matinée · Souleymane · 65 s
+# Séquence 2 — Connexion et première matinée · Souleymane · 60 s
 
 ### Plan 2.1 — Se connecter · 15 s
 
@@ -102,13 +114,58 @@ consigne demande la participation de tous, pas une égalité au chronomètre.
 30 min réservables ») avant de cliquer **Ajouter**.
 
 > « Je décris sa matinée une seule fois. Les six rendez-vous se découpent tout
-> seuls — je n'ai pas à les écrire un par un. »
+> seuls — je n'ai pas à les écrire un par un. Et ils sont immédiatement
+> réservables : par nous, au comptoir, comme par les patients eux-mêmes. »
 
 *(la confirmation s'affiche, cliquer **OK**)*
 
 ---
 
-# Séquence 3 — Le téléphone sonne · Zakaria · 65 s
+# Séquence 3 — Le patient réserve lui-même · Larbi · 40 s
+
+> **C'est la séquence qui montre le second canal.** Tout ce qui précède se passe
+> à la clinique ; ici, on est chez le patient.
+
+### Plan 3.1 — Changer de peau · 8 s
+
+**À l'écran** : menu utilisateur → **Se déconnecter**, puis se reconnecter avec
+`patient.demo@mediplan.test`.
+
+> « Quittons le comptoir. Voici maintenant Julie Caron, patiente de la clinique,
+> chez elle, un dimanche soir. »
+
+### Plan 3.2 — Son espace · 8 s
+
+**À l'écran** : rester sur le tableau de bord, puis cliquer **Mes rendez-vous**.
+
+> « Julie n'a aucun rendez-vous. Elle n'a pas envie d'appeler demain matin à
+> huit heures. »
+
+### Plan 3.3 — Réserver · 24 s
+
+**À l'écran** : bouton **Prendre un rendez-vous**.
+
+1. Médecin → **Sophie Bergeron** *(le libellé annonce le nombre de créneaux
+   libres)*
+2. Date et heure → **la matinée créée en séquence 2**, créneau **09 h 00 –
+   09 h 30** — ⚠️ **retenir ce créneau, la séquence 4 en dépend**
+3. Motif → `Douleur au genou`
+
+> « Elle choisit son médecin, une heure qui l'arrange, et décrit sa gêne en
+> quelques mots. »
+
+*(cliquer **Confirmer** ; la confirmation s'affiche, cliquer **OK**)*
+
+**Laisser voir la ligne apparaître sous « À venir »**, puis :
+
+> « C'est réservé. Personne n'a décroché le téléphone, et la clinique est déjà
+> au courant. »
+
+---
+
+# Séquence 4 — Le téléphone sonne · Zakaria · 55 s
+
+**Avant de filmer** : se reconnecter avec `admin.demo@mediplan.test`.
 
 **À l'écran** : bouton **Nouveau rendez-vous**, en haut à droite.
 
@@ -119,31 +176,29 @@ consigne demande la participation de tous, pas une égalité au chronomètre.
 patient.
 
 1. Médecin → **Sophie Bergeron**
-2. Disponibilité → **la matinée qu'on vient de créer** *(en bas de la liste)*
-3. Créneau → **09 h 00 – 09 h 30**
+2. Disponibilité → **la matinée créée en séquence 2** *(en bas de la liste)*
+3. **Ouvrir la liste des créneaux et MARQUER UN TEMPS** — c'est le moment fort
+   de la vidéo :
 
-> « Je choisis le médecin, la matinée, puis l'heure qui convient à la patiente. »
+> « Regardez la liste : neuf heures n'y est pas. Ce créneau vient d'être pris en
+> ligne, il y a une minute, par une patiente que je n'ai jamais eue au
+> téléphone. Je ne peux pas le donner une seconde fois — même si je le voulais. »
 
-4. Prénom **Camille**, Nom **Nadeau**, Motif **Suivi de tension**
+4. Créneau → **09 h 30 – 10 h 00**
+5. Prénom **Camille**, Nom **Nadeau**, Motif **Suivi de tension**
 
-> « Madame Nadeau n'a pas de compte, et n'en aura pas besoin. Je la crée ici, au
-> comptoir, avec son nom. C'est tout ce dont j'ai besoin pour lui donner un
-> rendez-vous. »
+> « Madame Nadeau, elle, préfère appeler. Elle n'a pas de compte et n'en aura pas
+> besoin : je la crée ici, au comptoir, avec son nom. C'est tout ce dont j'ai
+> besoin pour lui donner un rendez-vous. »
 
 *(cliquer **Réserver**)*
 
-**Rouvrir aussitôt Nouveau rendez-vous**, même médecin, même matinée, et
-**ouvrir la liste des créneaux** :
-
-> « Et regardez : neuf heures a disparu de la liste. Le créneau est pris.
-> Personne ne peut le donner une deuxième fois — même si ma collègue réserve au
-> même moment, sur un autre poste. »
-
-*(fermer le dialogue avec **Annuler**)*
+> « Deux façons de prendre rendez-vous, un seul agenda. Aucune place ne peut
+> être donnée deux fois. »
 
 ---
 
-# Séquence 4 — La journée en cours · Zakaria · 55 s
+# Séquence 5 — La journée en cours · Zakaria · 50 s
 
 **À l'écran** : menu de gauche → **Flux du jour**.
 
@@ -151,7 +206,7 @@ patient.
 > ce moment, et ceux que j'attends encore. »
 
 **Choisir une ligne du groupe « À venir » dont le médecin est Sophie Bergeron**
-— la séquence 6 montre sa cloche, et elle ne se remplit que des rendez-vous qui
+— la séquence 7 montre sa cloche, et elle ne se remplit que des rendez-vous qui
 la concernent. Puis dérouler, un clic à la fois, en laissant chaque changement
 s'afficher :
 
@@ -175,7 +230,7 @@ s'afficher :
 
 ---
 
-# Séquence 5 — Une annulation · Zakaria · 35 s
+# Séquence 6 — Une annulation · Zakaria · 30 s
 
 **À l'écran** : sur une ligne encore en « Réservé » — **de la Dre Bergeron, elle
 aussi** — bouton **⋯** → **Annuler le rendez-vous**.
@@ -196,9 +251,9 @@ l'annulation**.
 
 ---
 
-# Séquence 6 — Le suivi de la clinique · Larbi · 40 s
+# Séquence 7 — Le suivi de la clinique · Larbi · 35 s
 
-### Plan 6.1 — Les chiffres · 15 s
+### Plan 7.1 — Les chiffres · 15 s
 
 **À l'écran** : menu de gauche → **Statistiques**.
 
@@ -206,14 +261,14 @@ l'annulation**.
 > rendez-vous, combien de patients ne se sont pas présentés, et à quel point
 > l'agenda est rempli — médecin par médecin. »
 
-### Plan 6.2 — L'export · 8 s
+### Plan 7.2 — L'export · 8 s
 
 **À l'écran** : retour sur **Flux du jour**, cliquer **Exporter CSV**, puis
 **ouvrir le fichier téléchargé**.
 
 > « Et elle récupère le détail dans un tableur, en un clic. »
 
-### Plan 6.3 — Le côté médecin · 17 s
+### Plan 7.3 — Le côté médecin · 12 s
 
 **À l'écran** : menu utilisateur → **Se déconnecter** → se reconnecter avec
 `doctor.demo@mediplan.test`.
@@ -230,7 +285,7 @@ l'annulation**.
 
 ---
 
-# Séquence 7 — Clôture · les trois · 15 s
+# Séquence 8 — Clôture · les trois · 15 s
 
 **À l'écran** : revenir au tableau de bord, ou l'écran de connexion.
 
@@ -238,7 +293,8 @@ l'annulation**.
 >
 > **Zakaria** : « …une réception et des médecins qui voient la même journée… »
 >
-> **Larbi** : « …et des chiffres pour piloter. Merci de votre attention. »
+> **Larbi** : « …des patients qui réservent sans appeler, et des chiffres pour
+> piloter. Merci de votre attention. »
 
 ---
 
@@ -292,18 +348,24 @@ déjà. Ne pas tourner au téléphone.
 | Prise | Qui parle | Qui clique | Ce qu'on enregistre |
 |---|---|---|---|
 | 1 | Souleymane | personne | Séquence 1 — écran de connexion immobile |
-| 2 | Souleymane | Souleymane | Séquence 2 — connexion, tableau de bord, plage de demain |
-| 3 | Zakaria | Zakaria | Séquence 3 — réservation + créneau disparu |
-| 4 | Zakaria | Zakaria | Séquence 4 — cycle de vie ⚠️ **sur un RDV de Sophie Bergeron** |
-| 5 | Zakaria | Zakaria | Séquence 5 — annulation ⚠️ **sur un RDV de Sophie Bergeron** |
-| 6 | Larbi | Larbi | Séquence 6 — statistiques, export, compte médecin |
-| 7 | les trois | — | Séquence 7 — clôture, trois phrases enchaînées |
+| 2 | Souleymane | Souleymane | Séquence 2 — connexion, tableau de bord, **matinée de demain 9 h–12 h** |
+| 3 | Larbi | Larbi | Séquence 3 — le patient réserve **9 h 00** en ligne |
+| 4 | Zakaria | Zakaria | Séquence 4 — 9 h 00 a disparu, réservation au téléphone de **9 h 30** |
+| 5 | Zakaria | Zakaria | Séquence 5 — cycle de vie ⚠️ **sur un RDV de Sophie Bergeron** |
+| 6 | Zakaria | Zakaria | Séquence 6 — annulation ⚠️ **sur un RDV de Sophie Bergeron** |
+| 7 | Larbi | Larbi | Séquence 7 — statistiques, export, compte médecin |
+| 8 | les trois | — | Séquence 8 — clôture, trois phrases enchaînées |
 
-> ⚠️ **Le point de coordination à ne pas rater.** Les séquences 4 et 5 doivent
-> agir sur des rendez-vous **de la Dre Bergeron**. Sa cloche, montrée en séquence
-> 6, ne se remplit que de ce qui la concerne. Si Zakaria travaille sur les
-> rendez-vous de l'autre médecin, Larbi ouvrira une cloche vide et la meilleure
-> phrase de la vidéo tombe à plat.
+> ⚠️ **Deux points de coordination à ne pas rater.**
+>
+> **La même matinée, du début à la fin.** Souleymane la publie en séquence 2,
+> Larbi y prend **9 h 00** en séquence 3, Zakaria constate son absence en
+> séquence 4 et prend **9 h 30**. Si l'un des trois travaille sur une autre
+> plage, le meilleur moment de la vidéo disparaît.
+>
+> **Les séquences 5 et 6 portent sur des rendez-vous de la Dre Bergeron.** Sa
+> cloche, montrée en séquence 7, ne se remplit que de ce qui la concerne. Si
+> Zakaria manipule ceux de l'autre médecin, Larbi ouvrira une cloche vide.
 
 ### Réglages du navigateur, avant la première prise
 
@@ -317,6 +379,18 @@ déjà. Ne pas tourner au téléphone.
 ---
 
 ## Préparer le tournage
+
+### Les trois comptes utilisés
+
+| Séquences | Identifiant | Mot de passe | Qui c'est |
+|---|---|---|---|
+| 2, 4, 5, 6, 7 | `admin.demo@mediplan.test` | `Adm1n!Secret` | Alice Tremblay, la réception |
+| 3 | `patient.demo@mediplan.test` | `Pat1ent!Secret` | Julie Caron, patiente |
+| 7 (fin) | `doctor.demo@mediplan.test` | `Doct0r!Secret` | Dre Sophie Bergeron |
+
+> Julie Caron démarre **sans aucun rendez-vous** : c'est voulu, l'écran vide de
+> la séquence 3 est le point de départ du récit. Si vous répétez plusieurs fois,
+> relancez le jeu de démonstration pour retrouver cet état.
 
 ### Avant d'enregistrer
 

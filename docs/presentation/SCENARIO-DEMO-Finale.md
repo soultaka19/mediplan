@@ -4,7 +4,7 @@
 > ligne**, le 10 août 2026, à l'aide de `playwright-cli`. Chaque libellé, chaque
 > bouton et chaque message cité ci-dessous a été observé, pas supposé.
 
-**Orateur : Zakaria Lahouiri · 4 minutes**
+**Orateur : Zakaria Lahouiri · 5 minutes**
 **Application : `https://ca-mediplan-frontend.ashytree-9ad5012f.canadacentral.azurecontainerapps.io`**
 
 ---
@@ -62,6 +62,10 @@ cours) plutôt qu'une journée entièrement « Réservé ».
 |---|---|---|---|
 | Réception | `admin.demo@mediplan.test` | `Adm1n!Secret` | Alice Tremblay |
 | Médecin | `doctor.demo@mediplan.test` | `Doct0r!Secret` | Sophie Bergeron |
+| **Patient** | `patient.demo@mediplan.test` | `Pat1ent!Secret` | Julie Caron |
+
+Le compte patient démarre **sans aucun rendez-vous** : c'est le point de départ
+de l'étape 3 bis. Un seed le remet dans cet état.
 
 ---
 
@@ -159,12 +163,56 @@ gestes. »* Le suivre dans l'ordre :
 
 4. **Patient** → Prénom `Camille`, Nom `Nadeau`, Motif `Suivi de tension`
 
-   > **À dire** : « Camille Nadeau n'a pas de compte et n'en aura jamais. C'est ce
-   > que nous appelons un patient léger : la réception le crée au comptoir, avec
-   > un nom. Le patient n'a rien à retenir — il appelle, c'est tout. »
+   > **À dire** : « Camille Nadeau n'a pas de compte, et n'en a pas besoin. C'est
+   > ce que nous appelons un patient léger : la réception le crée au comptoir,
+   > avec un nom. Certains patients appellent, d'autres réservent eux-mêmes — je
+   > vous montre les deux. »
 
 Cliquer **Réserver**. L'application bascule sur la liste des rendez-vous, la
 réservation en tête.
+
+---
+
+## Étape 3 bis — Le patient réserve seul · 50 s
+
+**Le geste métier** : montrer le **second canal**. Jusqu'ici tout passait par la
+réception ; là, le patient se sert lui-même.
+
+Menu utilisateur → **Se déconnecter** → se reconnecter avec
+`patient.demo@mediplan.test` / `Pat1ent!Secret`.
+
+> **À dire en arrivant** : « Voici Julie Caron, patiente de la clinique. Trois
+> choses ont changé à l'écran : son menu n'a que deux entrées, le bouton
+> "Nouveau rendez-vous" a disparu, et elle n'a aucun rendez-vous. »
+
+**Mes rendez-vous** → **Prendre un rendez-vous** :
+
+1. **Médecin** → `Sophie Bergeron`
+
+   > **À faire remarquer** : le libellé annonce le nombre de créneaux libres.
+   > « Elle ne voit que les médecins qui ont réellement de la place. On ne
+   > propose jamais un choix qui ne mène nulle part. »
+
+2. **Date et heure** → la plage créée à l'étape 2, **un créneau encore libre**
+
+   > « Les créneaux sont groupés par journée. Julie choisit ce qui l'arrange. »
+
+3. **Motif** → `Douleur au genou` → **Confirmer**
+
+**Puis prouver que les deux canaux partagent le même agenda** : se reconnecter
+en réception, ouvrir **Nouveau rendez-vous** sur la même plage.
+
+> **À dire** : « Le créneau que Julie vient de prendre n'est plus dans ma liste.
+> Elle a réservé depuis chez elle, moi je suis au comptoir, et nous ne pouvons
+> pas donner la même place. C'est la base de données qui l'interdit, pas notre
+> code. »
+
+> 🎯 **Si la prof demande « le patient peut-il annuler lui-même ? »** — réponse
+> honnête : « Non, et c'est délibéré. L'annulation par le patient suppose une
+> règle de délai minimum — 24 heures avant, par exemple — que nous n'avons pas
+> implémentée. Nous préférons ne pas livrer une annulation sans sa règle plutôt
+> que d'en livrer une qui laisse annuler cinq minutes avant. C'est dans nos
+> pistes d'amélioration. »
 
 ---
 
@@ -340,6 +388,23 @@ Cliquer l'**icône de lune** dans la barre du haut. Recliquer pour revenir.
 | Export CSV | ✅ HTTP 200 |
 | Statistiques sur données réelles | ✅ 185 RDV, 7 % no-show, 65,9 % occupation |
 | Erreurs dans la console du navigateur | ✅ **aucune** |
+
+### Parcours patient en libre-service — vérifié le 11 août 2026
+
+| Point | Résultat |
+|---|---|
+| Inscription avec choix de la clinique (annuaire public) | ✅ |
+| Le patient auto-inscrit accède à un espace utilisable | ✅ 2 entrées de menu, compteurs réels |
+| Créneaux proposés, groupés par journée | ✅ 73 créneaux, heures de clinique correctes |
+| Réservation par le patient | ✅ confirmation nominative |
+| Créneau retiré du pool commun | ✅ 37 → 36 pour le médecin visé |
+| La réception voit le rendez-vous pris en ligne | ✅ |
+| Le médecin reçoit la notification | ✅ |
+| Gardes de rôle, patient → routes d'administration | ✅ 403 |
+| Gardes de rôle, réception → routes patient | ✅ 403 |
+| Créneau d'une autre clinique | ✅ **404**, jamais 403 |
+| Tentative de réserver au nom d'autrui | ✅ 400 |
+| **Deux réservations patient simultanées** | ✅ **201 + 409** |
 
 ### Après enrichissement du jeu de démonstration
 
