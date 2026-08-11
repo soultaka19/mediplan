@@ -273,9 +273,11 @@ notes(s, "SOULEYMANE — 1 minute.\n\n"
          "Nos objectifs, ce sont les irritants d'avant, retournés en critères vérifiables. "
          "Le premier — rendre la double réservation impossible — je vous montrerai comment "
          "nous l'avons tenu techniquement. »\n\n"
-         "Si on demande : « pourquoi le patient ne réserve pas lui-même ? » → « le libre-"
-         "service existe pour l'inscription patient, mais la prise de RDV passe par la "
-         "réception : c'est ce que fait réellement une petite clinique ».")
+         "Si on demande : « et le patient, il fait quoi ? » → « les deux canaux existent. "
+         "Celui qui appelle est pris en charge par la réception, sans jamais avoir à créer "
+         "de compte — c'est le patient léger. Celui qui préfère réserver seul le fait "
+         "depuis son espace. Les deux puisent dans le même agenda, et la base interdit "
+         "qu'une place soit donnée deux fois. »")
 
 # =========================================================================
 # DIAPO 4 — Organisation de l'equipe
@@ -473,14 +475,16 @@ carte(s, Inches(0.45), Inches(1.65), Inches(6.1), Inches(4.6),
       "Le scénario",
       ["1.  Je me connecte comme la réception de la clinique",
        "2.  Le tableau de bord m'affiche l'activité réelle",
-       "3.  Le Dr Bergeron publie une plage du matin —",
+       "3.  La Dre Bergeron publie une plage du matin —",
        "     les créneaux se génèrent automatiquement",
-       "4.  Un patient appelle : je le crée et je réserve",
-       "5.  Le flux du jour : arrivé → en consultation → terminé",
-       "6.  Un patient annule : motif obligatoire,",
+       "4.  Une patiente réserve seule, depuis son espace",
+       "5.  Un autre patient appelle : le créneau qu'elle a pris",
+       "     a disparu de ma liste — je le crée et je réserve",
+       "6.  Le flux du jour : arrivé → en consultation → terminé",
+       "7.  Un patient annule : motif obligatoire,",
        "     le créneau redevient libre",
-       "7.  J'exporte les rendez-vous du mois en CSV",
-       "8.  Je bascule sur le compte médecin :",
+       "8.  J'exporte les rendez-vous du mois en CSV",
+       "9.  Je bascule sur le compte médecin :",
        "     le menu change, et sa cloche a sonné"], SARCELLE)
 carte(s, Inches(6.75), Inches(1.65), Inches(6.1), Inches(4.6),
       "Ce que vous verrez au passage",
@@ -520,8 +524,10 @@ para(tf, "Démonstration en direct", taille=44, couleur=BLANC, gras=True,
 tb, tf = zone_texte(s, Inches(1.0), Inches(3.5), Inches(11.3), Inches(2.4))
 para(tf, "ca-mediplan-frontend.ashytree-9ad5012f.canadacentral.azurecontainerapps.io",
      taille=16, couleur=BLEU_PALE, premier=True, aligne=PP_ALIGN.CENTER, espace_avant=14)
-para(tf, "Réception : admin.demo@mediplan.test    ·    Médecin : doctor.demo@mediplan.test",
+para(tf, "Réception : admin.demo@mediplan.test    ·    Patiente : patient.demo@mediplan.test",
      taille=15, couleur=BLEU_PALE2, aligne=PP_ALIGN.CENTER, espace_avant=8)
+para(tf, "Médecin : doctor.demo@mediplan.test",
+     taille=15, couleur=BLEU_PALE2, aligne=PP_ALIGN.CENTER, espace_avant=4)
 para(tf, "Comptes et données de démonstration uniquement",
      taille=12, couleur=BLEU_PALE2, aligne=PP_ALIGN.CENTER, espace_avant=6)
 notes(s, "ZAKARIA — 4 minutes de démonstration. Cette diapo reste affichée si on revient "
@@ -530,11 +536,14 @@ notes(s, "ZAKARIA — 4 minutes de démonstration. Cette diapo reste affichée s
          "1. Connexion admin.demo / Adm1n!Secret — « je suis la réception »\n"
          "2. Tableau de bord — pointer les chiffres réels\n"
          "3. Disponibilités → créer une plage → ouvrir les créneaux générés\n"
-         "4. Nouveau rendez-vous → créer le patient → réserver\n"
-         "5. Flux du jour → Arrive → Consultation → Termine\n"
-         "6. Menu ⋯ → Annuler → motif obligatoire\n"
-         "7. Export CSV → ouvrir le fichier téléchargé\n"
-         "8. Déconnexion → doctor.demo / Doct0r!Secret → montrer le menu réduit ET la cloche\n\n"
+         "4. Déconnexion → patient.demo / Pat1ent!Secret → Mes rendez-vous →\n"
+         "   Prendre un rendez-vous → réserver le PREMIER créneau de la plage\n"
+         "5. Retour admin.demo → Nouveau rendez-vous → MARQUER UN TEMPS :\n"
+         "   le créneau pris en ligne n'est plus dans la liste → réserver le suivant\n"
+         "6. Flux du jour → Arrive → Consultation → Termine\n"
+         "7. Menu ⋯ → Annuler → motif obligatoire\n"
+         "8. Export CSV → ouvrir le fichier téléchargé\n"
+         "9. Déconnexion → doctor.demo / Doct0r!Secret → montrer le menu réduit ET la cloche\n\n"
          "NE JAMAIS FAIRE F5 pendant la démonstration.\n"
          "Parler pendant les chargements, ne pas laisser de silence.")
 
@@ -593,7 +602,7 @@ notes(s, "ZAKARIA — 45 secondes. Ne PAS lire les six lignes.\n\n"
 s = prs.slides.add_slide(BLANK)
 fond(s)
 bandeau_titre(s, 9, "Tests et validation", "Ce que nous vérifions, et à quel moment")
-chiffre(s, Inches(0.45), Inches(1.6), Inches(2.85), "186", "Tests automatisés verts", SARCELLE)
+chiffre(s, Inches(0.45), Inches(1.6), Inches(2.85), "199", "Tests automatisés verts", SARCELLE)
 chiffre(s, Inches(3.55), Inches(1.6), Inches(2.85), "57", "Tests backend", BLEU)
 chiffre(s, Inches(6.65), Inches(1.6), Inches(2.85), "129", "Tests frontend", BLEU_CLAIR)
 chiffre(s, Inches(9.75), Inches(1.6), Inches(2.85), "0", "Fusion sans CI verte", GRIS)
@@ -612,7 +621,7 @@ carte(s, Inches(0.45), Inches(3.35), Inches(6.1), Inches(3.3),
 carte(s, Inches(6.75), Inches(3.35), Inches(6.1), Inches(3.3),
       "Ce que la CI garantit à chaque push",
       ["Le projet compile — backend et frontend",
-       "Les 186 tests passent",
+       "Les 199 tests passent",
        "Les templates d'infrastructure Bicep sont valides",
        "Une pull request dont la CI est rouge n'est pas fusionnée",
        "Le lint et le formatage sont rapportés sans bloquer :",
@@ -620,7 +629,7 @@ carte(s, Inches(6.75), Inches(3.35), Inches(6.1), Inches(3.3),
        "   permanence, donc ignorée"], SARCELLE)
 pied(s, "Larbi Saib", "1 min")
 notes(s, "LARBI — 1 minute.\n\n"
-         "« Nous avons 186 tests automatisés : 57 côté serveur, 129 côté interface. Ils "
+         "« Nous avons 199 tests automatisés : 67 côté serveur, 132 côté interface. Ils "
          "tournent à chaque push, et une pull request dont la CI est rouge n'est pas "
          "fusionnée.\n\n"
          "La vérification dont je suis le plus content n'est pas dans cette suite, et je "
@@ -784,7 +793,8 @@ carte(s, Inches(8.65), Inches(1.65), Inches(4.2), Inches(2.4),
        "Liste d'attente : proposer",
        "   automatiquement un créneau",
        "   libéré par une annulation",
-       "Portail patient en libre-service"], BLEU)
+       "Annulation par le patient, avec",
+       "   son délai minimum"], BLEU)
 carte(s, Inches(0.45), Inches(4.3), Inches(12.4), Inches(2.35),
       "Notre stratégie de progression",
       ["Le produit est déjà déployable en une commande, et le schéma de base se reconstruit à l'identique. C'est le socle qui rend la suite possible.",
@@ -889,8 +899,8 @@ rect(s, 0, Inches(2.35), LARGEUR, Pt(4), SARCELLE)
 tb, tf = zone_texte(s, Inches(1.0), Inches(1.25), Inches(11.3), Inches(1.1))
 para(tf, "MediPlan", taille=46, couleur=BLANC, gras=True, premier=True,
      aligne=PP_ALIGN.CENTER, espace_avant=0)
-chiffre(s, Inches(1.4), Inches(2.85), Inches(2.5), "8", "Fonctionnalités livrées", SARCELLE)
-chiffre(s, Inches(4.15), Inches(2.85), Inches(2.5), "186", "Tests verts", BLEU_CLAIR)
+chiffre(s, Inches(1.4), Inches(2.85), Inches(2.5), "9", "Fonctionnalités livrées", SARCELLE)
+chiffre(s, Inches(4.15), Inches(2.85), Inches(2.5), "199", "Tests verts", BLEU_CLAIR)
 chiffre(s, Inches(6.9), Inches(2.85), Inches(2.5), "21", "Pull requests", BLEU_CLAIR)
 chiffre(s, Inches(9.65), Inches(2.85), Inches(2.5), "0 $", "Coût mensuel", SARCELLE)
 tb, tf = zone_texte(s, Inches(1.0), Inches(4.75), Inches(11.3), Inches(1.6))
@@ -903,7 +913,7 @@ tb, tf = zone_texte(s, Inches(1.0), Inches(6.35), Inches(11.3), Inches(0.7))
 para(tf, "Merci — nous répondons à vos questions", taille=20, couleur=BLEU_PALE2,
      premier=True, aligne=PP_ALIGN.CENTER, espace_avant=0)
 notes(s, "SOULEYMANE — 20 secondes, puis on ouvre les questions.\n\n"
-         "« Pour résumer : huit fonctionnalités livrées et intégrées, 186 tests verts, une "
+         "« Pour résumer : neuf fonctionnalités livrées et intégrées, 199 tests verts, une "
          "application en ligne pour environ zéro dollar par mois, et une infrastructure "
          "entièrement décrite en code — n'importe qui peut la redéployer d'une commande.\n\n"
          "Merci de votre attention. Nous répondons à vos questions. »\n\n"
@@ -913,13 +923,17 @@ notes(s, "SOULEYMANE — 20 secondes, puis on ouvre les questions.\n\n"
          "QUESTIONS PROBABLES :\n"
          "· Doubles réservations ? → index unique partiel, PostgreSQL tranche ; vérifié en "
          "concurrence sur l'app en ligne, 201 + 409. Manuel, pas automatisé (Larbi)\n"
-         "· Pourquoi le patient ne réserve pas ? → il appelle, c'est le flux réel (Souleymane)\n"
+         "· Le patient peut-il réserver seul ? → oui, et il peut aussi appeler ; deux canaux, "
+         "un seul agenda, et la base interdit le doublon entre les deux (Souleymane)\n"
+         "· Pourquoi le patient ne peut-il pas annuler ? → l'annulation suppose un délai "
+         "minimum (UC-07) que nous n'avons pas implémenté ; nous n'avons pas voulu livrer "
+         "l'une sans l'autre (Souleymane)\n"
          "· Données de santé et sécurité ? → JWT, RBAC, chaque requête bornée à la clinique, "
          "mots de passe hachés, aucun secret dans le dépôt (Souleymane)\n"
          "· Pourquoi Azure et pas Railway ? → crédit étudiant non renouvelable, scale-to-zero, "
          "coût ~0 $ (Souleymane)\n"
          "· Le décalage en bloc ? → codé, non intégré, assumé (Zakaria)\n"
-         "· Comment testez-vous ? → 186 tests, CI bloquante sur build et tests (Larbi)")
+         "· Comment testez-vous ? → 199 tests, CI bloquante sur build et tests (Larbi)")
 
 # =========================================================================
 sortie = os.path.join(os.path.dirname(os.path.abspath(__file__)),
