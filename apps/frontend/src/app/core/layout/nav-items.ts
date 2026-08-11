@@ -30,6 +30,14 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Tableau de bord', icon: 'dashboard', route: '/dashboard' },
   {
+    // Pendant patient de « Rendez-vous » : mêmes données, périmètre réduit à
+    // soi-même. Les deux ne coexistent jamais dans un même menu.
+    label: 'Mes rendez-vous',
+    icon: 'event',
+    route: '/my-appointments',
+    roles: ['patient'],
+  },
+  {
     label: 'Disponibilités',
     icon: 'event_note',
     route: '/availabilities',

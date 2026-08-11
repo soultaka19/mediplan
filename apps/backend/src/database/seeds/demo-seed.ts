@@ -68,6 +68,7 @@ const IDS = {
   admin: '22222222-2222-4222-8222-222222222222',
   doctorBergeron: '33333333-3333-4333-8333-333333333333',
   doctorLefebvre: '44444444-4444-4444-8444-444444444444',
+  patientSelf: '77777777-7777-4777-8777-777777777777',
 } as const;
 
 /** Comptes connectables. Mots de passe volontairement publics (démo). */
@@ -86,6 +87,11 @@ export const DEMO_ACCOUNTS = [
     email: 'doctor2.demo@mediplan.test',
     password: 'Doct0r!Secret',
     role: 'Médecin — Dr Marc Lefebvre',
+  },
+  {
+    email: 'patient.demo@mediplan.test',
+    password: 'Pat1ent!Secret',
+    role: 'Patient en libre-service (Julie Caron) — aucun rendez-vous au départ',
   },
 ] as const;
 
@@ -744,6 +750,7 @@ const DEMO_EMAILS = [
   'admin.demo@mediplan.test',
   'doctor.demo@mediplan.test',
   'doctor2.demo@mediplan.test',
+  'patient.demo@mediplan.test',
 ];
 
 /**
@@ -799,6 +806,7 @@ async function seedClinic(manager: EntityManager): Promise<void> {
 async function seedUsers(manager: EntityManager): Promise<void> {
   const adminHash = await bcrypt.hash('Adm1n!Secret', BCRYPT_ROUNDS);
   const doctorHash = await bcrypt.hash('Doct0r!Secret', BCRYPT_ROUNDS);
+  const patientHash = await bcrypt.hash('Pat1ent!Secret', BCRYPT_ROUNDS);
 
   await manager.upsert(
     User,
@@ -835,6 +843,21 @@ async function seedUsers(manager: EntityManager): Promise<void> {
         clinicId: IDS.clinic,
         isActive: true,
         isSelfRegistered: false,
+      },
+      {
+        // Patient en LIBRE-SERVICE (MEDIPLAN-21) : à la différence des patients
+        // légers ci-dessous, il possède un mot de passe et se connecte seul.
+        // Il démarre volontairement SANS rendez-vous — la démonstration
+        // consiste précisément à l'en faire prendre un.
+        id: IDS.patientSelf,
+        email: 'patient.demo@mediplan.test',
+        passwordHash: patientHash,
+        firstName: 'Julie',
+        lastName: 'Caron',
+        role: UserRole.PATIENT,
+        clinicId: IDS.clinic,
+        isActive: true,
+        isSelfRegistered: true,
       },
     ],
     ['id'],
