@@ -154,12 +154,17 @@ para(tf, "Projet intégrateur — Programmation informatique  ·  Collège La Ci
      taille=14, couleur=BLEU_PALE2, aligne=PP_ALIGN.CENTER, espace_avant=2)
 para(tf, "Présentation des 29–30 juillet 2026", taille=13,
      couleur=BLEU_PALE, aligne=PP_ALIGN.CENTER, espace_avant=6)
-notes(s, "Bonjour. Nous venons vous présenter ce que nous avons réalisé au Sprint 2 de "
-         "MediPlan, notre plateforme de gestion des rendez-vous médicaux. Nous allons "
-         "rappeler brièvement le projet, l'objectif du sprint, comment la solution est "
-         "construite, vous démontrer ce qui fonctionne, présenter nos tests, les "
-         "difficultés rencontrées et ce qui passe au Sprint 3. Chacun de nous présentera "
-         "sa partie. Environ dix minutes.")
+notes(s, "SOULEYMANE — 20 s\n\n"
+         "ACCROCHE (à dire telle quelle) :\n"
+         "« Dans une clinique, quand deux personnes décrochent le téléphone en même temps, "
+         "il arrive que le même créneau soit vendu deux fois. C'est un agenda papier, une "
+         "rature, un patient qui se déplace pour rien. »\n\n"
+         "[ MARQUER UN TEMPS — 1 seconde ]\n\n"
+         "« Le Sprint 2, c'est le sprint où ça devient impossible dans MediPlan. Bonjour, "
+         "nous sommes l'équipe MediPlan : Souleymane, Zakaria, Larbi. En dix minutes, nous "
+         "allons vous montrer ce que nous avons développé, testé et intégré. »\n\n"
+         "→ TRANSITION : « D'abord, un rappel rapide du projet. »\n\n"
+         "RAPPEL : on ouvre sur le problème métier, pas sur la technologie.")
 
 # =========================================================================
 # DIAPO 2 — Rappel du projet
@@ -188,14 +193,20 @@ carte(s, Inches(0.45), Inches(4.4), Inches(12.4), Inches(2.35),
        " ",
        "Stack : Angular (frontend) · NestJS (backend) · PostgreSQL (base) · Docker (environnement)"], BLEU)
 pied(s, "Souleymane", "1 min 30")
-notes(s, "D'abord un rappel. Le problème : dans une clinique, la prise de rendez-vous se "
-         "fait au téléphone, à la main — agendas papier, doubles réservations, oublis — et "
-         "la réception n'a pas de vue claire de sa journée. Notre solution est une "
-         "application web où la réception gère les rendez-vous à la place des patients, qui "
-         "appellent. On saisit les disponibilités d'un médecin, le système génère les "
-         "créneaux réservables, et la réception réserve. L'utilisateur principal est donc "
-         "la réception ; le médecin consulte sa journée ; le patient est « léger », créé au "
-         "comptoir sans compte. Le tout en Angular, NestJS, PostgreSQL et Docker.")
+notes(s, "SOULEYMANE — 1 min 30\n\n"
+         "« Le problème : la prise de rendez-vous se fait au téléphone, à la main. Agendas "
+         "papier, doubles réservations, oublis. Et la réception n'a aucune vue claire de sa "
+         "journée. »\n\n"
+         "« Notre solution, c'est une application web où la réception gère les rendez-vous à "
+         "la place des patients. Et c'est notre choix le plus structurant : notre "
+         "utilisateur principal n'est pas le patient — c'est la réception. Le patient "
+         "appelle, il ne s'inscrit pas en ligne. »\n\n"
+         "« Quatre profils : la réception, qui fait tout ; le médecin, qui consulte sa "
+         "journée ; le patient dit léger, créé au comptoir sans compte ni mot de passe ; et "
+         "un super-administrateur. Le tout en Angular, NestJS, PostgreSQL, dans Docker. »\n\n"
+         "ATTENTION : ne pas détailler la stack — Zakaria y revient à la diapo 4.\n\n"
+         "→ TRANSITION : « Voilà le projet. Maintenant, qu'est-ce qu'on s'était engagé à "
+         "livrer sur ce sprint ? »")
 
 # =========================================================================
 # DIAPO 3 — Objectif du Sprint 2
@@ -230,15 +241,20 @@ carte(s, Inches(6.75), Inches(2.9), Inches(6.1), Inches(3.85),
        "Note : notre découpage interne comptait plusieurs sprints ;",
        "   ils ont été alignés sur le calendrier du cours."], SARCELLE)
 pied(s, "Souleymane", "1 min")
-notes(s, "L'objectif du Sprint 2 : qu'une réception puisse se connecter de façon "
-         "sécurisée, définir les disponibilités des médecins et réserver un rendez-vous "
-         "pour un patient, sans jamais créer de double réservation. "
-         "Les fonctionnalités visées : l'authentification complète avec le contrôle "
-         "d'accès par rôle, le patient léger, les disponibilités, la génération des "
-         "créneaux, la réservation par la réception, le flux du jour, et une interface "
-         "soignée. Nous avons choisi ce périmètre parce que c'est la tranche la plus utile "
-         ": de la connexion jusqu'à un vrai rendez-vous dans l'agenda, en couvrant le cœur "
-         "métier et la sécurité.")
+notes(s, "SOULEYMANE — 1 min — C'EST ICI QU'ON POSE LA PHRASE DU JOUR. DIRE LENTEMENT.\n\n"
+         "« Notre objectif tenait en une phrase : une réception se connecte de façon "
+         "sécurisée, définit les disponibilités des médecins, et réserve un rendez-vous pour "
+         "un patient — sans jamais créer de double réservation. »\n\n"
+         "[ TEMPS ]\n\n"
+         "« Au Sprint 1, on savait ouvrir une session. Au Sprint 2, la réception fait "
+         "tourner une vraie journée de clinique : elle ouvre l'agenda, elle réserve, elle "
+         "suit le flux, elle annule. De bout en bout. »\n\n"
+         "« Pourquoi ce périmètre-là ? Parce que c'est la tranche verticale la plus utile : "
+         "de la connexion jusqu'à un vrai rendez-vous dans l'agenda. Nous avons "
+         "volontairement écarté le libre-service patient. Un sprint qui livre un parcours "
+         "complet vaut mieux que trois demi-fonctionnalités. »\n\n"
+         "→ TRANSITION : « Zakaria va vous expliquer comment tout ça est construit. » "
+         "— ET SE TOURNER VERS LUI.")
 
 # =========================================================================
 # DIAPO 4 — Developpement : architecture & lien entre les parties
@@ -275,14 +291,19 @@ carte(s, Inches(0.45), Inches(4.7), Inches(12.4), Inches(2.05),
        "3.  TypeORM écrit en base dans une transaction ; l'index unique partiel garantit qu'un créneau n'est pris qu'une fois",
        "4.  La réponse remonte au frontend, qui met à jour l'affichage via les signals — monorepo unique (frontend + backend)"], BLEU)
 pied(s, "Zakaria", "1 min 30")
-notes(s, "Voici comment la solution est construite. Trois parties dans un seul dépôt "
-         "(monorepo) : un frontend Angular, un backend NestJS, et une base PostgreSQL. "
-         "Elles communiquent ainsi : le navigateur envoie une requête au backend avec un "
-         "jeton d'authentification ; NestJS vérifie le jeton, le rôle de l'utilisateur et "
-         "les données reçues, puis applique la règle métier ; TypeORM écrit en base dans "
-         "une transaction, et c'est un index unique en base qui garantit qu'un créneau "
-         "n'est réservé qu'une seule fois ; enfin la réponse revient au frontend qui "
-         "rafraîchit l'écran. Docker permet de tout lancer d'une commande.")
+notes(s, "ZAKARIA — 1 min 30\n\n"
+         "« Trois parties dans un seul dépôt : un frontend Angular, un backend NestJS, une "
+         "base PostgreSQL. »\n\n"
+         "« Suivons une réservation, de bout en bout. Un : le navigateur envoie la requête "
+         "au backend, avec le jeton d'authentification dans l'en-tête. Deux : NestJS vérifie "
+         "le jeton, vérifie le rôle de l'utilisateur, valide les données reçues, puis "
+         "applique la règle métier. Trois : on écrit en base dans une transaction — et c'est "
+         "là que se joue le cœur du sprint : un index unique garantit qu'un créneau ne peut "
+         "être pris qu'une seule fois. Quatre : la réponse remonte, et l'écran se met à jour "
+         "tout seul. »\n\n"
+         "LE GESTE : suivre les trois blocs avec la main, de gauche à droite. On doit VOIR "
+         "le flux.\n\n"
+         "→ TRANSITION : « Regardons maintenant chaque couche de plus près. »")
 
 # =========================================================================
 # DIAPO 5 — Developpement : les trois couches en detail
@@ -329,17 +350,22 @@ carte(s, Inches(8.95), Inches(1.65), Inches(3.9), Inches(5.0),
        "Masquage des vues selon le rôle",
        "Mode clair / sombre complet"], BLEU_CLAIR)
 pied(s, "Zakaria", "1 min 30")
-notes(s, "En détail, couche par couche. La base : PostgreSQL, un schéma issu de notre "
-         "modèle de conception, avec des migrations versionnées. La pièce maîtresse est un "
-         "index unique partiel sur le créneau : c'est la base de données elle-même qui "
-         "empêche deux réservations sur le même créneau. Le patient léger est un "
-         "utilisateur sans mot de passe, donc non connectable. "
-         "Le backend, en NestJS, expose une API REST organisée en modules ; il gère "
-         "l'authentification JWT, le contrôle d'accès par rôle via des guards, valide "
-         "toutes les entrées, et utilise des transactions pour la réservation. "
-         "Le frontend, en Angular, utilise des composants autonomes et un état réactif ; "
-         "toute l'interface passe par un design system unique, avec un mode sombre complet, "
-         "et masque les écrans selon le rôle de l'utilisateur.")
+notes(s, "ZAKARIA — 1 min 30 — NE PAS LIRE LES PUCES. TROIS PHRASES PAR CARTE.\n\n"
+         "BASE : « Un schéma issu directement de notre modèle de conception, avec des "
+         "migrations versionnées — donc reproductible sur une machine neuve. La pièce "
+         "maîtresse, c'est un index unique partiel sur le créneau : les rendez-vous annulés "
+         "en sont exclus, donc un créneau annulé redevient réservable. Et le patient léger "
+         "est un utilisateur sans mot de passe : il ne peut pas se connecter, par "
+         "construction. »\n\n"
+         "BACKEND : « Une API REST en modules — authentification, utilisateurs, "
+         "disponibilités, rendez-vous. Jeton JWT, mots de passe hachés avec bcrypt, "
+         "verrouillage du compte après cinq échecs, et un contrôle d'accès par rôle sur "
+         "chaque route. Toutes les entrées sont validées avant d'atteindre la logique "
+         "métier. »\n\n"
+         "FRONTEND : « Des composants autonomes, un état réactif, et surtout un design "
+         "system unique — une seule source de couleurs et de typographie. C'est ce qui fait "
+         "qu'on a un mode sombre complet sans avoir retouché un seul écran à la main. »\n\n"
+         "→ TRANSITION : « Assez de théorie — Larbi va vous le montrer en vrai. »")
 
 # =========================================================================
 # DIAPO 6 — Demonstration
@@ -351,16 +377,16 @@ carte(s, Inches(0.45), Inches(1.65), Inches(7.4), Inches(5.05),
       "Le scénario que nous démontrons en direct",
       ["1.  Connexion réception → l'en-tête affiche « Alice Tremblay »",
        "     (le profil vient du serveur, pas du jeton)",
-       "2.  Disponibilités → saisir une plage datée + une durée",
+       "2.  Tableau de bord → le compteur « RDV du jour » est un chiffre réel",
+       "3.  Disponibilités → saisir une plage datée + une durée",
        "     → le système génère seul les créneaux réservables",
-       "3.  Réserver → choisir médecin, créneau libre, patient, motif",
+       "4.  Réserver → choisir médecin, créneau libre, patient, motif",
        "     → le rendez-vous entre dans l'agenda",
-       "4.  Flux du jour → dérouler le cycle : Arrivé → En consultation",
-       "     → Terminé (ou Absent)",
-       "5.  Annuler un rendez-vous avec motif → le créneau se libère",
+       "5.  Flux du jour → cycle : Arrivé → En consultation → Terminé",
+       "6.  Annuler un rendez-vous avec motif → le créneau se libère",
        "     et redevient réservable  (fonctionnalité déjà livrée)",
-       "6.  RBAC visible : « Utilisateurs » disparaît pour un médecin",
-       "7.  Mode sombre en un clic"], SARCELLE, taille_ligne=13)
+       "7.  RBAC visible : « Utilisateurs » disparaît pour un médecin",
+       "8.  Mode sombre en un clic"], SARCELLE, taille_ligne=13)
 carte(s, Inches(8.05), Inches(1.65), Inches(4.8), Inches(5.05),
       "Logique de fonctionnement",
       ["Le patient n'agit pas en ligne :",
@@ -379,17 +405,29 @@ carte(s, Inches(8.05), Inches(1.65), Inches(4.8), Inches(5.05),
        "   (2 médecins, 10 patients, RDV",
        "   du jour à statuts variés)"], BLEU)
 pied(s, "Larbi (démonstration)", "2 min")
-notes(s, "Passons à la démonstration — je pilote l'application. Je me connecte comme la "
-         "réception : l'en-tête affiche le nom Alice Tremblay, pas l'e-mail, car le profil "
-         "vient du serveur. Je crée une disponibilité datée avec une durée, et le système "
-         "génère tout seul les créneaux réservables. Ensuite je réserve : je choisis le "
-         "médecin, un créneau libre, je saisis le patient et un motif, et le rendez-vous "
-         "entre dans l'agenda. Dans le flux du jour, je déroule le cycle de consultation : "
-         "arrivé, en consultation, terminé. Je montre aussi l'annulation avec motif, qui "
-         "libère le créneau — une fonctionnalité que nous avons déjà livrée. Enfin, le "
-         "contrôle d'accès se voit à l'écran : l'entrée « Utilisateurs » disparaît pour un "
-         "médecin. Et le mode sombre bascule d'un clic. "
-         "Consigne pratique : naviguer par le menu, éviter de multiplier les rechargements.")
+notes(s, "LARBI — 2 min — RÈGLE D'OR : PARLER PENDANT QU'ON CLIQUE, JAMAIS APRÈS.\n\n"
+         "1. Connexion réception : « Je me connecte comme la réception. Regardez l'en-tête : "
+         "Alice Tremblay, son nom — pas son e-mail. Le profil vient du serveur. »\n\n"
+         "2. Tableau de bord : « Le compteur rendez-vous du jour est un vrai chiffre, "
+         "calculé en base. »\n\n"
+         "3. Disponibilités, créer une plage, puis Voir les créneaux : « Je saisis une plage "
+         "datée et une durée de créneau. Le système génère seul les créneaux réservables. Je "
+         "ne les ai pas créés un par un. »\n\n"
+         "4. RÉSERVER — LE SOMMET, RALENTIR ICI : « Le patient appelle. Je le crée au "
+         "comptoir — pas de compte, pas de mot de passe. Je choisis un créneau libre, un "
+         "motif, je réserve… » [TEMPS] « …et il est immédiatement dans la journée. C'est le "
+         "geste réel d'une réceptionniste. »\n\n"
+         "5. Arrivé, Consultation, Terminé : « Et voilà le cycle d'une consultation, tel "
+         "qu'il se vit au comptoir. »\n\n"
+         "6. Annuler avec motif : « J'annule, avec un motif obligatoire. Le créneau se "
+         "libère et redevient réservable. »\n\n"
+         "7. Déconnexion puis connexion médecin : « Même application, autre rôle. Regardez "
+         "le menu : Utilisateurs a disparu. Le contrôle d'accès se voit à l'écran. »\n\n"
+         "8. Mode sombre : « Et le thème sombre, en un clic, sur toute l'application. »\n\n"
+         "PRATIQUE : naviguer par le menu de gauche, éviter les rechargements de page.\n"
+         "SI ÇA PLANTE : « Le temps que ça revienne, je vous explique ce qui se passe "
+         "derrière. » — ne jamais déboguer en direct.\n\n"
+         "→ TRANSITION : « Ça, c'est ce que vous voyez. Voyons ce qu'on a vérifié. »")
 
 # =========================================================================
 # DIAPO 7 — Tests et validation
@@ -420,19 +458,20 @@ carte(s, Inches(6.75), Inches(3.35), Inches(6.1), Inches(3.4),
        "En-tête affichant l'e-mail au lieu du nom → repli sur le nom",
        "Motif d'annulation vide accepté → validation renforcée"], AMBRE)
 pied(s, "Larbi", "1 min 30")
-notes(s, "Côté tests, nous avons 171 tests automatisés qui passent : 48 sur le backend, "
-         "123 sur le frontend, zéro en échec. Sur le backend, nous testons les services et "
-         "les contrôleurs — authentification, disponibilités, réservation, flux — et la "
-         "validation des données. Le point important : l'anti-double-réservation est testé "
-         "en situation de concurrence, deux réservations simultanées sur le même créneau. "
-         "Sur le frontend, nous testons les composants, les services, les guards de rôle et "
-         "les intercepteurs. Nous complétons par des vérifications manuelles dans le "
-         "navigateur. "
-         "Nous avons aussi trouvé et corrigé de vrais bogues : une erreur 500 à la "
-         "réservation due à un verrou SQL mal placé ; un sélecteur de médecin qui ne "
-         "s'ouvrait pas parce que l'étiquette captait le clic ; des rendez-vous du jour "
-         "vides à cause du fuseau horaire ; l'en-tête qui affichait l'e-mail au lieu du "
-         "nom ; et un motif d'annulation vide accepté. Tous corrigés.")
+notes(s, "LARBI — 1 min 30\n\n"
+         "« 171 tests automatisés, tous verts : 48 sur le backend, 123 sur le frontend, zéro "
+         "en échec. »\n\n"
+         "« Le test dont nous sommes le plus fiers : la réservation en concurrence. Deux "
+         "réservations lancées sur le même créneau au même instant — une passe, l'autre est "
+         "refusée. »\n\n"
+         "« Et nous avons trouvé de vrais bogues, que nous avons corrigés : une erreur 500 "
+         "causée par un verrou SQL mal placé ; un sélecteur de médecin qui ne s'ouvrait pas "
+         "parce que l'étiquette captait le clic ; des rendez-vous du jour vides à cause d'un "
+         "problème de fuseau horaire. Tous corrigés. »\n\n"
+         "POURQUOI CITER LES BOGUES : une équipe qui nomme ses bogues prouve qu'elle a "
+         "réellement testé. Une équipe qui n'en cite aucun n'a testé que le chemin "
+         "heureux.\n\n"
+         "→ TRANSITION : « Souleymane va vous parler de ce qui a été le plus dur. »")
 
 # =========================================================================
 # DIAPO 8 — Difficultes rencontrees et solutions
@@ -446,9 +485,9 @@ carte(s, Inches(0.45), Inches(1.65), Inches(6.1), Inches(2.55),
       ["Plusieurs branches en parallèle jamais fusionnées",
        "→ deux migrations sur le même horodatage, un module",
        "   de rendez-vous recréé en double",
-       "Solution : réintégration manuelle, puis 6 règles de",
-       "   travail (socle d'abord, PR sous 72 h, un module par",
-       "   ticket, gates de fusion, point d'intégration à mi-sprint)"], AMBRE)
+       "Solution : réintégration manuelle, puis 6 règles (socle",
+       "   d'abord, PR sous 72 h, un module par ticket, gates de",
+       "   fusion, point à mi-sprint, « terminé » = fusionné dans dev)"], AMBRE)
 carte(s, Inches(6.75), Inches(1.65), Inches(6.1), Inches(2.55),
       "⚠  Technique — la réservation concurrente",
       ["Comment empêcher deux réceptions de réserver le même",
@@ -464,19 +503,27 @@ carte(s, Inches(0.45), Inches(4.45), Inches(12.4), Inches(2.3),
        "Identifiants de démo invalides (UUID) refusés par la validation → génération d'UUID conformes",
        "Fuseau horaire : rendez-vous « du jour » calculés en référence à Toronto pour rester cohérents"], SARCELLE)
 pied(s, "Souleymane", "1 min 30")
-notes(s, "Nos difficultés, en toute transparence. Sur l'organisation d'abord : au départ, "
-         "plusieurs branches ont vécu en parallèle sans être fusionnées, ce qui a produit "
-         "des migrations en double et un module recréé deux fois. Nous avons dû tout "
-         "réintégrer à la main, et surtout nous en avons tiré six règles de travail que "
-         "nous appliquons depuis : le code qui touche la base passe en premier, aucune "
-         "branche ne vit plus de trois jours sans être proposée à la fusion, un seul module "
-         "par tâche, et on ne fusionne que si les tests passent. "
-         "Sur la technique, la vraie question était la réservation concurrente : empêcher "
-         "deux personnes de prendre le même créneau au même instant. Notre solution : c'est "
-         "la base de données qui tric — un index unique et une transaction avec verrou. On "
-         "l'a vérifié par un test de concurrence. Nous avons aussi levé plusieurs bogues "
-         "plus pointus, comme un verrou SQL mal placé et une dépendance circulaire au "
-         "démarrage.")
+notes(s, "SOULEYMANE — 1 min 30 — VOTRE MOMENT. RALENTIR, REGARDER LA SALLE, NE PAS "
+         "S'EXCUSER.\n\n"
+         "« Notre difficulté la plus sérieuse n'a pas été technique. Elle a été "
+         "d'organisation. »\n\n"
+         "[ TEMPS ]\n\n"
+         "« Au début du sprint, nous avons travaillé chacun sur notre branche, et nous ne "
+         "les avons pas fusionnées assez tôt. Résultat : deux migrations sur le même "
+         "horodatage, et un module de rendez-vous écrit deux fois par deux personnes "
+         "différentes, sans qu'on le sache. Nous avons perdu une journée entière à "
+         "réintégrer au lieu de développer. »\n\n"
+         "« Nous en avons tiré six règles, que nous appliquons depuis : le code qui touche "
+         "la base passe en premier ; aucune branche ne vit plus de trois jours sans être "
+         "proposée à la fusion ; un seul module par ticket ; on ne fusionne que si les tests "
+         "passent ; un point d'intégration à mi-sprint. Et surtout, notre définition de "
+         "terminé a changé : terminé, ça ne veut plus dire codé sur ma machine, ça veut dire "
+         "fusionné dans la branche commune. »\n\n"
+         "« Côté technique, la vraie question était : comment empêcher deux réceptions de "
+         "réserver le même créneau au même instant ? Notre réponse, c'est de ne pas laisser "
+         "notre code arbitrer. C'est PostgreSQL qui tranche la course, avec un index unique "
+         "et une transaction. Vérifié par un test de concurrence. »\n\n"
+         "→ TRANSITION : « Voyons maintenant où ça nous mène dans Jira. »")
 
 # =========================================================================
 # DIAPO 9 — Avancement dans Jira
@@ -496,7 +543,7 @@ carte(s, Inches(0.45), Inches(3.35), Inches(8.5), Inches(3.4),
        "Frontend d'authentification & refonte UI (42–48) — terminés, effort partagé",
        " ",
        "En cours (Sprint 3) : notifications internes (25, Zakaria)",
-       "Déjà livré en avance : annulation d'un RDV (22) — à refléter dans Jira"], BLEU)
+       "Livré en avance sur le Sprint 3 : annulation d'un RDV avec motif (22)"], BLEU)
 carte(s, Inches(9.15), Inches(3.35), Inches(3.7), Inches(3.4),
       "Transféré au Sprint 3",
       ["CRUD médecins par l'admin",
@@ -509,17 +556,20 @@ carte(s, Inches(9.15), Inches(3.35), Inches(3.7), Inches(3.4),
        "Non bloquants pour la",
        "   démonstration"], GRIS)
 pied(s, "Souleymane", "1 min")
-notes(s, "Dans Jira, le Sprint 2 est terminé à 86 pour cent : 18 tickets sur 21. La "
-         "répartition : j'ai porté l'authentification, la réservation avec "
-         "l'anti-double-réservation, la mise en place du monorepo et Docker, et "
-         "l'intégration. Zakaria a fait les disponibilités des médecins et le flux du jour. "
-         "Larbi a modélisé le patient léger, la réservation par la réception et le socle "
-         "technique des rendez-vous. Le frontend d'authentification et la refonte de "
-         "l'interface ont été un effort partagé. "
-         "Trois tickets passent au Sprint 3 : la gestion des médecins par l'admin, une "
-         "précision de documentation, et les variables d'environnement — aucun n'est "
-         "bloquant. Une notification interne est déjà en cours, et nous avons même livré "
-         "l'annulation en avance ; nous mettrons Jira à jour en conséquence.")
+notes(s, "SOULEYMANE — 1 min — NOMMER CHAQUE PERSONNE À VOIX HAUTE (exigence de la "
+         "consigne).\n\n"
+         "« 18 tickets terminés sur 21, environ 86 % du sprint. »\n\n"
+         "« La répartition : j'ai porté l'authentification, la réservation avec "
+         "l'anti-double-réservation, la mise en place du monorepo et de Docker, et "
+         "l'intégration. Zakaria a fait les disponibilités des médecins et le flux clinique "
+         "du jour. Larbi a modélisé le patient léger, la réservation par la réception et le "
+         "socle technique des rendez-vous. Le frontend d'authentification et la refonte de "
+         "l'interface, c'est un effort partagé. »\n\n"
+         "« Trois tickets passent au Sprint 3 : la gestion des médecins par "
+         "l'administrateur, une précision de documentation, et les variables "
+         "d'environnement. Aucun n'est bloquant, et nous les assumons comme tels. Et nous "
+         "avons même livré l'annulation en avance sur le planning. »\n\n"
+         "→ TRANSITION : « Zakaria, pour la suite. »")
 
 # =========================================================================
 # DIAPO 10 — Prochaines etapes / Sprint 3
@@ -531,7 +581,7 @@ carte(s, Inches(0.45), Inches(1.65), Inches(6.1), Inches(3.1),
       "Priorités du Sprint 3 (cycle de vie du RDV)",
       ["Annuler un RDV avec motif — déjà livré, à valider (22)",
        "Notifications internes sur les changements (25) — en cours",
-       "Statistiques et tableau de bord réels (26)",
+       "Statistiques complètes du tableau de bord (26)",
        "Sécurité RDV : garde-fou patient léger + accès",
        "   en lecture cloisonné (50)",
        "Décaler en bloc les rendez-vous d'un médecin (24)"], SARCELLE)
@@ -550,14 +600,17 @@ carte(s, Inches(0.45), Inches(4.95), Inches(12.4), Inches(1.8),
        "Le Sprint 3 ajoute le cycle de vie (annulation, notifications, statistiques) et durcit la sécurité des rendez-vous."],
       BLEU)
 pied(s, "Zakaria", "1 min")
-notes(s, "Pour la suite, le Sprint 3 porte sur le cycle de vie complet du rendez-vous. "
-         "L'annulation avec motif est déjà livrée, il nous reste à la valider "
-         "officiellement. Les notifications internes sont en cours. Viennent ensuite les "
-         "statistiques réelles du tableau de bord, un renforcement de la sécurité des "
-         "rendez-vous, et le décalage en bloc. Nous reprenons aussi les trois tickets "
-         "reportés du Sprint 2. En résumé : le Sprint 2 livre une tranche complète, de la "
-         "connexion au suivi de la journée ; le Sprint 3 ajoute le cycle de vie et durcit "
-         "la sécurité.")
+notes(s, "ZAKARIA — 1 min\n\n"
+         "« Le Sprint 3 porte sur le cycle de vie complet du rendez-vous : l'annulation, "
+         "déjà livrée, à valider officiellement ; les notifications internes, en cours ; les "
+         "statistiques réelles du tableau de bord ; et un renforcement de la sécurité des "
+         "rendez-vous. »\n\n"
+         "« En un mot : le Sprint 2 livre une tranche complète, de la connexion au suivi de "
+         "la journée. Le Sprint 3 ajoute le cycle de vie et durcit la sécurité. »\n\n"
+         "PRÉCISION SI ON DEMANDE : le compteur des rendez-vous du jour est déjà réel ; ce "
+         "sont les statistiques complètes qui viennent au Sprint 3.\n\n"
+         "NE PAS PROMETTRE le décalage en bloc (24) : le code existe sur une branche, il "
+         "n'est pas intégré.")
 
 # =========================================================================
 # DIAPO 11 — Merci / Questions
@@ -573,19 +626,35 @@ para(tf, "Questions ?", taille=28, couleur=BLEU_PALE, gras=True,
      premier=True, aligne=PP_ALIGN.CENTER, espace_avant=0)
 para(tf, "Équipe MediPlan — Souleymane DIALLO  ·  Zakaria Lahouiri  ·  Larbi Saib",
      taille=16, couleur=BLEU_PALE2, aligne=PP_ALIGN.CENTER, espace_avant=14)
-notes(s, "En résumé, le Sprint 2 est réalisé et intégré : authentification sécurisée, "
-         "disponibilités, réservation par la réception sans double-réservation, flux du "
-         "jour, le tout couvert par 171 tests. Nous sommes disponibles pour vos questions."
-         "\n\nQuestions probables :\n"
-         "— « Pourquoi le patient ne réserve pas lui-même ? » → Choix métier : l'utilisateur "
-         "réel est la réception ; le patient appelle. Le libre-service pourra venir plus tard.\n"
-         "— « Comment empêchez-vous les doubles réservations ? » → Un index unique en base "
-         "et une transaction avec verrou ; testé en concurrence.\n"
-         "— « Les données sont-elles protégées ? » → RBAC à 4 rôles, cloisonnement par "
-         "clinique, mots de passe hachés (bcrypt), verrouillage de compte.\n"
-         "— « Qu'est-ce qui n'était pas fini ? » → Trois tickets non bloquants transférés au "
-         "Sprint 3 (gestion des médecins, doc, secrets).\n"
-         "— Chaque membre peut détailler sa contribution : voir la diapositive Jira.")
+notes(s, "SOULEYMANE — 15 s — REPRENDRE L'ACCROCHE DU DÉBUT. C'est ce qui donne une "
+         "présentation construite plutôt que trois exposés.\n\n"
+         "« On a commencé par un créneau vendu deux fois. Aujourd'hui, dans MediPlan, c'est "
+         "la base de données elle-même qui l'empêche. La réception se connecte, ouvre son "
+         "agenda, réserve, suit sa journée, annule — de bout en bout, avec 171 tests "
+         "derrière. Merci. Nous répondons à vos questions, chacun sur sa partie. »\n\n"
+         "RÈGLE : répondre court, puis SE TAIRE. Une réponse qui s'étire donne l'impression "
+         "qu'on cherche.\n\n"
+         "— Pourquoi le patient ne réserve pas lui-même ? (Souleymane) « Choix métier "
+         "assumé : l'utilisateur réel est la réception, le patient appelle. Le libre-service "
+         "viendra quand le cœur sera solide. »\n"
+         "— Comment évitez-vous les doubles réservations ? (Souleymane) « Un index unique "
+         "partiel en base, plus une transaction avec verrou. Ce n'est pas notre code qui "
+         "arbitre, c'est PostgreSQL. Testé en concurrence. »\n"
+         "— Les données de santé sont-elles protégées ? (Souleymane) « Quatre rôles, "
+         "cloisonnement par clinique, mots de passe hachés bcrypt, verrouillage après cinq "
+         "échecs, et un patient léger qui ne peut pas se connecter par construction. »\n"
+         "— Qu'est-ce qui n'est pas fini ? (Souleymane) « Trois tickets non bloquants "
+         "transférés au Sprint 3 : gestion des médecins, une précision de doc, les secrets "
+         "d'environnement. »\n"
+         "— Comment testez-vous le frontend ? (Larbi) « Composants, services HTTP, guards de "
+         "rôle et intercepteurs — 123 tests — plus une vérification manuelle bout-en-bout. »\n"
+         "— Pourquoi Angular / NestJS ? (Zakaria) « Un seul langage, TypeScript, du "
+         "navigateur à la base. Une équipe de trois, une seule courbe d'apprentissage. »\n"
+         "— Et le décalage en bloc ? (Souleymane) « Le code existe sur une branche, il n'est "
+         "pas intégré. Donc pour nous il n'est pas terminé — c'est le Sprint 3. »\n"
+         "— Qui a fait quoi ? Chacun reprend SA ligne de la diapo Jira.\n\n"
+         "SI ON NE SAIT PAS : « Je ne veux pas vous répondre de mémoire — c'est un point que "
+         "je vérifie et je vous reviens dessus. » Jamais de bluff.")
 
 # --- Sauvegarde ----------------------------------------------------------
 sortie = os.path.join(os.path.dirname(os.path.abspath(__file__)),
