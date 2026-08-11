@@ -7,6 +7,7 @@ import { AuthFacade, UserRole } from '@core/auth';
 import { appointmentStatusChip } from '@features/clinic-flow/appointment-status-chip';
 import { AppointmentFlowItem } from '@features/clinic-flow/appointment-flow.models';
 import { AppointmentFlowService } from '@features/clinic-flow/appointment-flow.service';
+import { PatientAppointmentsService } from '@features/patient/patient-appointments.service';
 import { Avatar, EmptyState, RoleBadge, StatusChip, StatusChipModel, roleLabel } from '@shared/ui';
 import { resolveDisplayName } from '@shared/user/display-name';
 
@@ -24,7 +25,7 @@ interface KpiCard {
   readonly route?: string;
   readonly routeLabel?: string;
   readonly accent: 'teal' | 'neutral';
-  readonly live?: 'today';
+  readonly live?: 'today' | 'mineUpcoming' | 'minePast';
   readonly soon?: boolean;
 }
 
@@ -54,10 +55,17 @@ const UPCOMING_STATUSES: readonly AppointmentFlowItem['status'][] = [
   'in_consultation',
 ];
 
-/** KPI du patient (encore sans source de données → placeholder « bientôt »). */
+/** KPI du patient, calculés sur ses propres rendez-vous (MEDIPLAN-21). */
 const PATIENT_STATS: readonly KpiCard[] = [
-  { icon: 'event_upcoming', label: 'Rendez-vous à venir', accent: 'teal', soon: true },
-  { icon: 'event_available', label: 'Rendez-vous passés', accent: 'neutral', soon: true },
+  {
+    icon: 'event_upcoming',
+    label: 'Rendez-vous à venir',
+    accent: 'teal',
+    live: 'mineUpcoming',
+    route: '/my-appointments',
+    routeLabel: 'Mes rendez-vous',
+  },
+  { icon: 'event_available', label: 'Rendez-vous passés', accent: 'neutral', live: 'minePast' },
 ];
 
 /** KPI de l'administration/médecin. « RDV du jour » réel + cliquable vers le Flux. */
@@ -74,11 +82,17 @@ const ADMIN_STATS: readonly KpiCard[] = [
   { icon: 'donut_large', label: 'Taux de remplissage', accent: 'neutral', soon: true },
 ];
 
-/** Accès rapides du patient. */
+/**
+ * Accès rapides du patient.
+ *
+ * Les deux mènent au même écran : « Prendre un rendez-vous » est le geste, « Mes
+ * rendez-vous » est la consultation. Les deux formulations existent parce que
+ * les deux intentions existent. « Mon profil » a été retiré : afficher un lien
+ * mort est pire que ne rien afficher.
+ */
 const PATIENT_ACTIONS: readonly QuickAction[] = [
-  { icon: 'add_circle', label: 'Prendre un rendez-vous' },
-  { icon: 'calendar_month', label: 'Mes rendez-vous' },
-  { icon: 'person', label: 'Mon profil' },
+  { icon: 'add_circle', label: 'Prendre un rendez-vous', route: '/my-appointments' },
+  { icon: 'calendar_month', label: 'Mes rendez-vous', route: '/my-appointments' },
 ];
 
 /** Accès rapides de l'administration et du médecin. */
@@ -87,6 +101,15 @@ const ADMIN_ACTIONS: readonly QuickAction[] = [
   { icon: 'event_note', label: 'Disponibilités', route: '/availabilities' },
   { icon: 'medical_services', label: 'Médecins' },
 ];
+
+const DATE_FMT = new Intl.DateTimeFormat('fr-CA', { day: '2-digit', month: 'long' });
+
+/** Formate une date ISO en « 12 août » (le patient voit au-delà d'aujourd'hui). */
+function frDate(iso: string | undefined): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '' : DATE_FMT.format(d);
+}
 
 /** Formate un horaire ISO en « 14 h 30 » (convention FR-CA de l'app). */
 function frTime(iso: string | undefined): string {
@@ -116,6 +139,7 @@ function frTime(iso: string | undefined): string {
 export class DashboardPage {
   private readonly auth = inject(AuthFacade);
   private readonly appointmentFlow = inject(AppointmentFlowService);
+  private readonly patientService = inject(PatientAppointmentsService);
 
   /** Utilisateur connecté (signal en lecture seule). */
   readonly user = this.auth.currentUser;
@@ -123,11 +147,21 @@ export class DashboardPage {
   /** File du jour (`null` tant que non chargée / indisponible). */
   private readonly todayItems = signal<readonly AppointmentFlowItem[] | null>(null);
 
+  /** Rendez-vous du patient connecté (`null` tant que non chargés). */
+  private readonly myItems = signal<readonly AppointmentFlowItem[] | null>(null);
+
   constructor() {
-    // Le patient n'a pas accès à la file du jour ; pour la réception/médecin, on
-    // charge la liste réelle (KPI + prochain RDV). Résilient : erreur → placeholder.
+    // Deux sources selon le rôle : le patient lit ses propres rendez-vous, la
+    // réception et le médecin lisent la file du jour de la clinique. Dans les
+    // deux cas, une erreur retombe sur le placeholder plutôt que sur un écran
+    // cassé. Le patient n'a pas accès à la file du jour, et réciproquement.
     const role = this.user()?.role;
-    if (role && role !== 'patient') {
+    if (role === 'patient') {
+      this.patientService.listMine().subscribe({
+        next: (items) => this.myItems.set(items),
+        error: () => this.myItems.set(null),
+      });
+    } else if (role) {
       this.appointmentFlow.listToday().subscribe({
         next: (items) => this.todayItems.set(items),
         error: () => this.todayItems.set(null),
@@ -157,21 +191,71 @@ export class DashboardPage {
       : 'Voici un aperçu de l’activité de votre clinique.',
   );
 
-  /** Vrai tant que la file du jour n'est pas chargée (skeletons). */
-  readonly isLoading = computed(() => !this.isPatient() && this.todayItems() === null);
+  /** Vrai tant que la source du rôle courant n'est pas chargée (skeletons). */
+  readonly isLoading = computed(() =>
+    this.isPatient() ? this.myItems() === null : this.todayItems() === null,
+  );
 
-  /** KPI visibles selon le rôle ; la carte `live` reçoit le comptage réel. */
+  /** Répartition des rendez-vous du patient entre à venir et passés. */
+  private readonly mineCounts = computed(() => {
+    const items = this.myItems();
+    if (items === null) return null;
+    const now = Date.now();
+    let upcoming = 0;
+    for (const item of items) {
+      const closed =
+        item.status === 'cancelled' || item.status === 'completed' || item.status === 'absent';
+      const start = item.startAt ? new Date(item.startAt).getTime() : NaN;
+      if (!closed && !Number.isNaN(start) && start >= now) upcoming += 1;
+    }
+    return { upcoming, past: items.length - upcoming };
+  });
+
+  /** KPI visibles selon le rôle ; les cartes `live` reçoivent le comptage réel. */
   readonly stats = computed<readonly KpiCard[]>(() => {
-    const base = this.isPatient() ? PATIENT_STATS : ADMIN_STATS;
+    if (this.isPatient()) {
+      const counts = this.mineCounts();
+      if (counts === null) return PATIENT_STATS;
+      return PATIENT_STATS.map((stat) => {
+        if (stat.live === 'mineUpcoming') return { ...stat, value: String(counts.upcoming) };
+        if (stat.live === 'minePast') return { ...stat, value: String(counts.past) };
+        return stat;
+      });
+    }
+
     const items = this.todayItems();
-    if (items === null) return base;
-    return base.map((stat) =>
+    if (items === null) return ADMIN_STATS;
+    return ADMIN_STATS.map((stat) =>
       stat.live === 'today' ? { ...stat, value: String(items.length), soon: false } : stat,
     );
   });
 
-  /** Prochain rendez-vous (le plus tôt, non clôturé) dérivé de la file du jour. */
+  /**
+   * Prochain rendez-vous.
+   *
+   * Deux lectures du même concept : la réception voit le prochain patient
+   * attendu aujourd'hui, le patient voit son propre prochain rendez-vous —
+   * qui peut être dans plusieurs jours, d'où la date en plus de l'heure.
+   */
   readonly nextAppointment = computed<NextAppointmentView | null>(() => {
+    if (this.isPatient()) {
+      const items = this.myItems();
+      if (!items || items.length === 0) return null;
+      const now = Date.now();
+      const next = items
+        .filter((it) => UPCOMING_STATUSES.includes(it.status))
+        .filter((it) => it.startAt && new Date(it.startAt).getTime() >= now)
+        .sort((a, b) => (a.startAt ?? '').localeCompare(b.startAt ?? ''))[0];
+      if (!next) return null;
+      const reason = next.reason?.trim() ? next.reason : 'Consultation';
+      return {
+        time: frTime(next.startAt),
+        patient: next.doctorName ?? 'Médecin',
+        meta: `${frDate(next.startAt)} · ${reason}`,
+        chip: appointmentStatusChip(next.status),
+      };
+    }
+
     const items = this.todayItems();
     if (!items || items.length === 0) return null;
     const upcoming = items

@@ -89,6 +89,15 @@ export const routes: Routes = [
           import('@features/clinic-flow/clinic-flow-page').then((m) => m.ClinicFlowPage),
       },
       {
+        // Espace patient (MEDIPLAN-21) : consulter ses rendez-vous et en
+        // prendre un. Réservé au rôle `patient` ; la réception passe par
+        // « Rendez-vous », qui sait réserver pour un tiers.
+        path: 'my-appointments',
+        canActivate: [roleGuard('patient')],
+        loadComponent: () =>
+          import('@features/patient/my-appointments-page').then((m) => m.MyAppointmentsPage),
+      },
+      {
         path: 'appointments',
         canActivate: [roleGuard('clinic_admin', 'super_admin')],
         loadComponent: () =>

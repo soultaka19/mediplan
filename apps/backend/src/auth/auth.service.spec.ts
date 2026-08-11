@@ -12,6 +12,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import { ClinicsService } from '../clinic/clinics.service';
 import { UserRole } from '../user/user-role.enum';
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
@@ -40,6 +41,8 @@ const bcryptCompare = bcrypt.compare as unknown as jest.Mock<
 describe('AuthService', () => {
   let service: AuthService;
   let repo: jest.Mocked<Repository<User>>;
+  /** Annuaire des cliniques : par défaut, toute clinique demandée existe. */
+  let clinicsMock: { existsActive: jest.Mock<Promise<boolean>, [string]> };
 
   const config: Record<string, string> = {
     BCRYPT_ROUNDS: '12',
@@ -63,6 +66,8 @@ describe('AuthService', () => {
       increment: jest.fn(),
     };
 
+    clinicsMock = { existsActive: jest.fn().mockResolvedValue(true) };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -74,6 +79,10 @@ describe('AuthService', () => {
         {
           provide: ConfigService,
           useValue: { get: (key: string): string | undefined => config[key] },
+        },
+        {
+          provide: ClinicsService,
+          useValue: clinicsMock,
         },
       ],
     }).compile();
@@ -147,6 +156,52 @@ describe('AuthService', () => {
       await expect(
         service.register({ email: 'patient@example.com', password: 'Str0ng!pwd' }),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    // MEDIPLAN-21 : le patient choisit sa clinique, mais ce choix est vérifié.
+    it('rattache le patient à la clinique choisie après vérification en base', async () => {
+      repo.findOne.mockResolvedValue(null);
+      repo.create.mockImplementation((dto) => buildUser(dto as Partial<User>));
+      repo.save.mockImplementation((u) => Promise.resolve(buildUser(u as Partial<User>)));
+      bcryptHash.mockResolvedValue('hashed-pw');
+
+      await service.register({
+        email: 'julie@example.com',
+        password: 'Str0ng!pwd',
+        clinicId: 'clinic-1',
+      });
+
+      expect(clinicsMock.existsActive).toHaveBeenCalledWith('clinic-1');
+      const createdArg = repo.create.mock.calls[0][0] as Partial<User>;
+      expect(createdArg.clinicId).toBe('clinic-1');
+      // Le rôle reste forcé : choisir sa clinique n'est pas choisir son rôle.
+      expect(createdArg.role).toBe(UserRole.PATIENT);
+    });
+
+    it('clinique inconnue ou désactivée -> 400, aucun compte créé', async () => {
+      repo.findOne.mockResolvedValue(null);
+      clinicsMock.existsActive.mockResolvedValue(false);
+
+      await expect(
+        service.register({
+          email: 'julie@example.com',
+          password: 'Str0ng!pwd',
+          clinicId: 'clinic-inconnue',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(repo.save.mock.calls.length).toBe(0);
+    });
+
+    it("sans clinique, le compte est créé mais n'est rattaché à rien", async () => {
+      repo.findOne.mockResolvedValue(null);
+      repo.create.mockImplementation((dto) => buildUser(dto as Partial<User>));
+      repo.save.mockImplementation((u) => Promise.resolve(buildUser(u as Partial<User>)));
+      bcryptHash.mockResolvedValue('hashed-pw');
+
+      await service.register({ email: 'sans@example.com', password: 'Str0ng!pwd' });
+
+      expect(clinicsMock.existsActive.mock.calls.length).toBe(0);
+      expect((repo.create.mock.calls[0][0] as Partial<User>).clinicId).toBeNull();
     });
   });
 

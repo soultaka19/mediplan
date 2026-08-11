@@ -16,6 +16,7 @@ import { AppointmentStatus } from './appointment-status.enum';
 import { Appointment } from './appointment.entity';
 import { CancelAppointmentDto } from './dto/cancel-appointment.dto';
 import { CreateReceptionAppointmentDto } from './dto/create-reception-appointment.dto';
+import { CreateSelfAppointmentDto } from './dto/create-self-appointment.dto';
 import { AppointmentResponse, toAppointmentResponse } from './dto/appointment-response.dto';
 import {
   FLOW_APPOINTMENT_STATUSES,
@@ -28,9 +29,35 @@ const CANCELLABLE_STATUSES: readonly AppointmentStatus[] = [
   AppointmentStatus.ARRIVED,
 ];
 
+/** Horizon de proposition des créneaux au patient (MEDIPLAN-21). */
+const OPEN_SLOTS_HORIZON_DAYS = 60;
+
+/** Plafond de créneaux renvoyés : la liste est faite pour être parcourue. */
+const OPEN_SLOTS_MAX = 300;
+
 interface ExportAppointmentsParams {
   from?: string;
   to?: string;
+}
+
+/** Créneau réservable tel que présenté au patient. */
+export interface OpenSlotResponse {
+  id: string;
+  doctorId: string;
+  doctorName: string;
+  startAt: string;
+  endAt: string;
+}
+
+/** Nom affichable d'un médecin, avec repli sur l'e-mail si l'état civil manque. */
+function formatDoctorName(doctor: User | null | undefined): string {
+  if (!doctor) {
+    return 'Médecin';
+  }
+  const name = [doctor.firstName, doctor.lastName].filter(Boolean).join(' ').trim();
+  // `email` est nullable (patient léger) ; côté médecin il est toujours présent,
+  // mais on ne s'appuie pas sur une garantie que le type ne porte pas.
+  return name.length > 0 ? name : (doctor.email ?? 'Médecin');
 }
 
 @Injectable()
@@ -322,6 +349,137 @@ export class AppointmentsService {
       });
       return toAppointmentResponse(saved);
     });
+  }
+
+  /**
+   * Créneaux encore réservables, pour le patient connecté (MEDIPLAN-21).
+   *
+   * Bornes volontaires :
+   * - **la clinique du patient**, lue dans le jeton — jamais dans la requête ;
+   * - **à venir uniquement** : proposer un créneau passé n'a aucun sens ;
+   * - **horizon de 60 jours**, pour ne pas déverser tout l'agenda futur.
+   *
+   * Un patient sans clinique de rattachement obtient une liste vide plutôt
+   * qu'une erreur : c'est un compte incomplet, pas une tentative illégitime.
+   */
+  async findOpenSlots(currentUser: AuthenticatedUser): Promise<OpenSlotResponse[]> {
+    if (!currentUser.clinicId) {
+      return [];
+    }
+
+    const horizon = new Date();
+    horizon.setDate(horizon.getDate() + OPEN_SLOTS_HORIZON_DAYS);
+
+    const slots = await this.dataSource
+      .getRepository(AppointmentSlot)
+      .createQueryBuilder('slot')
+      .innerJoinAndSelect('slot.doctor', 'doctor')
+      .where('slot.clinic_id = :clinicId', { clinicId: currentUser.clinicId })
+      .andWhere('slot.is_booked = false')
+      .andWhere('slot.start_at > now()')
+      .andWhere('slot.start_at <= :horizon', { horizon })
+      .orderBy('slot.start_at', 'ASC')
+      .take(OPEN_SLOTS_MAX)
+      .getMany();
+
+    return slots.map((slot) => ({
+      id: slot.id,
+      doctorId: slot.doctorId,
+      doctorName: formatDoctorName(slot.doctor),
+      startAt: slot.startAt.toISOString(),
+      endAt: slot.endAt.toISOString(),
+    }));
+  }
+
+  /**
+   * Réservation par le patient lui-même (MEDIPLAN-21).
+   *
+   * Même transaction, même verrou de ligne et même index unique partiel que la
+   * réservation par la réception : la garantie anti-double-réservation ne
+   * dépend pas du canal utilisé. Deux différences seulement :
+   * - le patient est l'utilisateur du jeton, il ne peut réserver pour personne
+   *   d'autre (le DTO n'expose aucun `patientId`) ;
+   * - un créneau déjà commencé est refusé, alors que la réception peut encore
+   *   enregistrer un patient qui se présente en retard.
+   */
+  async createBySelf(
+    currentUser: AuthenticatedUser,
+    dto: CreateSelfAppointmentDto,
+  ): Promise<AppointmentResponse> {
+    if (!currentUser.clinicId) {
+      throw new ForbiddenException(
+        "Votre compte n'est rattaché à aucune clinique. Contactez la réception.",
+      );
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      const slot = await manager.findOne(AppointmentSlot, {
+        where: { id: dto.slotId },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      // Anti-IDOR (MEDIPLAN-50) : un créneau d'une autre clinique est traité
+      // comme inexistant. Un 403 confirmerait au demandeur qu'il existe.
+      if (!slot || slot.clinicId !== currentUser.clinicId) {
+        throw new NotFoundException('Créneau introuvable.');
+      }
+      if (slot.isBooked) {
+        throw new ConflictException('Ce créneau est déjà réservé.');
+      }
+      if (slot.startAt.getTime() <= Date.now()) {
+        throw new BadRequestException("Ce créneau n'est plus disponible.");
+      }
+
+      const appointment = manager.create(Appointment, {
+        clinicId: slot.clinicId,
+        slotId: slot.id,
+        patientId: currentUser.id,
+        doctorId: slot.doctorId,
+        createdById: currentUser.id,
+        status: AppointmentStatus.BOOKED,
+        reason: dto.reason ?? null,
+        cancellationReason: null,
+      });
+
+      let saved: Appointment;
+      try {
+        saved = await manager.save(Appointment, appointment);
+        slot.isBooked = true;
+        await manager.save(AppointmentSlot, slot);
+      } catch (error) {
+        if (this.isUniqueViolation(error)) {
+          throw new ConflictException('Ce créneau est déjà réservé.');
+        }
+        throw error;
+      }
+
+      const fullAppointment = await this.loadAppointmentWithRelations(manager, saved.id);
+      await this.notificationsService.notifyAppointmentBooked({
+        manager,
+        appointment: fullAppointment ?? saved,
+      });
+      return toAppointmentResponse(fullAppointment ?? saved);
+    });
+  }
+
+  /**
+   * Rendez-vous du patient connecté, plus récents d'abord (MEDIPLAN-21).
+   *
+   * Le filtre porte sur `patient_id = jeton` : un patient ne peut voir que ses
+   * propres rendez-vous, y compris ceux pris pour lui par la réception.
+   */
+  async findMine(currentUser: AuthenticatedUser): Promise<AppointmentResponse[]> {
+    const appointments = await this.dataSource
+      .getRepository(Appointment)
+      .createQueryBuilder('appointment')
+      .innerJoinAndSelect('appointment.slot', 'slot')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.doctor', 'doctor')
+      .where('appointment.patient_id = :patientId', { patientId: currentUser.id })
+      .orderBy('slot.start_at', 'DESC')
+      .getMany();
+
+    return appointments.map(toAppointmentResponse);
   }
 
   private async findExistingPatient(

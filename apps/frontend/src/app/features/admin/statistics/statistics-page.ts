@@ -90,7 +90,7 @@ export class StatisticsPage {
         icon: 'event_available',
         label: 'Volume RDV',
         value: String(summary.totalAppointments),
-        hint: `${summary.completedAppointments} termines, ${summary.cancelledAppointments} annules`,
+        hint: `${summary.completedAppointments} terminés, ${summary.cancelledAppointments} annulés`,
       },
       {
         icon: 'person_off',
@@ -102,7 +102,7 @@ export class StatisticsPage {
         icon: 'donut_large',
         label: 'Occupation',
         value: `${summary.occupancyRate} %`,
-        hint: `${summary.occupiedSlots}/${summary.totalSlots} creneaux occupes`,
+        hint: `${summary.occupiedSlots}/${summary.totalSlots} créneaux occupés`,
       },
     ];
   });
@@ -139,7 +139,7 @@ export class StatisticsPage {
 
   protected doctorLabel(doctor: PublicUser): string {
     const fullName = [doctor.firstName, doctor.lastName].filter(Boolean).join(' ').trim();
-    return fullName || doctor.email || `Medecin ${doctor.id.slice(0, 8)}`;
+    return fullName || doctor.email || `Médecin ${doctor.id.slice(0, 8)}`;
   }
 
   protected doctorRows(): readonly DoctorStatistics[] {

@@ -6,10 +6,11 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from '../user/user-role.enum';
-import { AppointmentsService } from './appointments.service';
+import { AppointmentsService, OpenSlotResponse } from './appointments.service';
 import { AppointmentResponse } from './dto/appointment-response.dto';
 import { CancelAppointmentDto } from './dto/cancel-appointment.dto';
 import { CreateReceptionAppointmentDto } from './dto/create-reception-appointment.dto';
+import { CreateSelfAppointmentDto } from './dto/create-self-appointment.dto';
 import { UpdateAppointmentStatusDto } from './dto/update-appointment-status.dto';
 
 @Controller('appointments')
@@ -24,6 +25,38 @@ export class AppointmentsController {
     @Body() dto: CreateReceptionAppointmentDto,
   ): Promise<AppointmentResponse> {
     return this.appointmentsService.createByReception(user, dto);
+  }
+
+  /**
+   * Réservation par le patient lui-même (MEDIPLAN-21).
+   *
+   * Le rôle `patient` est le seul admis : la réception passe par
+   * `POST /appointments/reception`, qui sait désigner un tiers.
+   */
+  @Post('self')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PATIENT)
+  createBySelf(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateSelfAppointmentDto,
+  ): Promise<AppointmentResponse> {
+    return this.appointmentsService.createBySelf(user, dto);
+  }
+
+  /** Créneaux encore réservables dans la clinique du patient (MEDIPLAN-21). */
+  @Get('open-slots')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PATIENT)
+  findOpenSlots(@CurrentUser() user: AuthenticatedUser): Promise<OpenSlotResponse[]> {
+    return this.appointmentsService.findOpenSlots(user);
+  }
+
+  /** Rendez-vous du patient connecté, tous canaux de réservation confondus. */
+  @Get('mine')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PATIENT)
+  findMine(@CurrentUser() user: AuthenticatedUser): Promise<AppointmentResponse[]> {
+    return this.appointmentsService.findMine(user);
   }
 
   @Get('today')

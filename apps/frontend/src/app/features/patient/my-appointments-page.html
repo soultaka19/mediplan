@@ -1,0 +1,82 @@
+<section class="mine">
+  <header class="mine__header">
+    <div>
+      <h1 class="mine__title">Mes rendez-vous</h1>
+      <p class="mine__subtitle">
+        Consultez vos rendez-vous et prenez-en un nouveau, sans appeler la clinique.
+      </p>
+    </div>
+    <button
+      matButton="filled"
+      type="button"
+      (click)="openBooking()"
+      data-testid="mine-book"
+    >
+      <mat-icon aria-hidden="true">add</mat-icon>
+      <span>Prendre un rendez-vous</span>
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="mp-skel-stack" aria-busy="true" data-testid="mine-skeleton">
+      @for (row of skeletonRows; track $index) {
+        <span class="mp-skel mp-skel--field"></span>
+      }
+    </div>
+  } @else if (error(); as message) {
+    <app-alert variant="error" [message]="message" data-testid="mine-error" />
+  } @else if (isEmpty()) {
+    <app-empty-state
+      icon="event_available"
+      title="Aucun rendez-vous"
+      description="Vous n'avez pas encore de rendez-vous. Utilisez « Prendre un rendez-vous » pour en réserver un."
+      data-testid="mine-empty"
+    />
+  } @else {
+    @if (upcoming().length > 0) {
+      <h2 class="mine__section">À venir</h2>
+      <ul class="mine__list" data-testid="mine-upcoming">
+        @for (row of upcoming(); track row.id) {
+          <li class="mine-card mine-card--next">
+            <div class="mine-card__when">
+              <span class="mine-card__date">{{ row.date }}</span>
+              <span class="mine-card__time">{{ row.time }}</span>
+            </div>
+            <div class="mine-card__what">
+              <span class="mine-card__doctor">{{ row.doctor }}</span>
+              <span class="mine-card__reason" [class.mine-card__reason--muted]="row.reasonMuted">
+                {{ row.reason }}
+              </span>
+            </div>
+            <app-status-chip [model]="row.chip" size="md" />
+          </li>
+        }
+      </ul>
+    }
+
+    @if (past().length > 0) {
+      <h2 class="mine__section">Passés</h2>
+      <ul class="mine__list" data-testid="mine-past">
+        @for (row of past(); track row.id) {
+          <li class="mine-card mine-card--past">
+            <div class="mine-card__when">
+              <span class="mine-card__date">{{ row.date }}</span>
+              <span class="mine-card__time">{{ row.time }}</span>
+            </div>
+            <div class="mine-card__what">
+              <span class="mine-card__doctor">{{ row.doctor }}</span>
+              @if (row.cancellationReason) {
+                <span class="mine-card__reason">{{ row.cancellationReason }}</span>
+              } @else {
+                <span class="mine-card__reason" [class.mine-card__reason--muted]="row.reasonMuted">
+                  {{ row.reason }}
+                </span>
+              }
+            </div>
+            <app-status-chip [model]="row.chip" />
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

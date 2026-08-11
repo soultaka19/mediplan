@@ -1,0 +1,106 @@
+<div class="self-head">
+  <div>
+    <h2 mat-dialog-title class="self-head__title">Prendre un rendez-vous</h2>
+    <p class="self-head__subtitle">Un médecin, une heure — c'est tout.</p>
+  </div>
+  <button type="button" class="mp-panel__close" (click)="cancel()" aria-label="Fermer">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+@if (saving()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Réservation en cours" />
+}
+
+<mat-dialog-content>
+  @if (error()) {
+    <div class="mp-banner mp-banner--error" role="alert" data-testid="self-error">
+      <span class="mp-banner__mark" aria-hidden="true">!</span>
+      <span class="mp-banner__text">{{ error() }}</span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="mp-skel-stack" aria-busy="true" data-testid="self-skeleton">
+      <span class="mp-skel mp-skel--field"></span>
+      <span class="mp-skel mp-skel--field"></span>
+      <span class="mp-skel mp-skel--field"></span>
+    </div>
+  } @else if (loadError(); as message) {
+    <app-error-state
+      [message]="message"
+      title="Impossible de charger les créneaux"
+      (retry)="load()"
+      data-testid="self-load-error"
+    />
+  } @else if (noSlots()) {
+    <app-empty-state
+      icon="event_busy"
+      title="Aucun créneau disponible"
+      description="Votre clinique n'a pas de créneau libre pour le moment. Réessayez plus tard ou appelez la réception."
+      data-testid="self-empty"
+    />
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="self-form" id="book-self-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Médecin</mat-label>
+        <mat-select
+          formControlName="doctorId"
+          (selectionChange)="onDoctorChange($event.value)"
+          data-testid="self-doctor"
+        >
+          @for (doctor of doctors(); track doctor.id) {
+            <mat-option [value]="doctor.id">{{ doctorLabel(doctor) }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.doctorId.touched && form.controls.doctorId.invalid) {
+          <mat-error>Choisissez un médecin.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date et heure</mat-label>
+        <mat-select formControlName="slotId" data-testid="self-slot">
+          @for (day of slotDays(); track day.label) {
+            <mat-optgroup [label]="day.label">
+              @for (slot of day.slots; track slot.id) {
+                <mat-option [value]="slot.id">{{ slotLabel(slot) }}</mat-option>
+              }
+            </mat-optgroup>
+          }
+        </mat-select>
+        @if (!form.controls.doctorId.value) {
+          <mat-hint>Choisissez d'abord un médecin.</mat-hint>
+        } @else if (form.controls.slotId.touched && form.controls.slotId.invalid) {
+          <mat-error>Choisissez une heure.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Motif (optionnel)</mat-label>
+        <input
+          matInput
+          formControlName="reason"
+          maxlength="500"
+          autocomplete="off"
+          data-testid="self-reason"
+        />
+        <mat-hint>Aide le médecin à préparer votre visite.</mat-hint>
+      </mat-form-field>
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton type="button" (click)="cancel()" data-testid="self-cancel">Annuler</button>
+  <button
+    matButton="filled"
+    type="submit"
+    form="book-self-form"
+    [disabled]="saving() || form.invalid || loading() || !!loadError() || noSlots()"
+    data-testid="self-submit"
+  >
+    <mat-icon aria-hidden="true">{{ saving() ? 'hourglass_top' : 'event_available' }}</mat-icon>
+    <span>{{ saving() ? 'Réservation…' : 'Confirmer' }}</span>
+  </button>
+</mat-dialog-actions>

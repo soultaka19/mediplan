@@ -49,7 +49,56 @@ export class AvailabilityService {
       note: dto.note?.trim() || null,
     });
 
-    return toAvailabilityResponse(await this.availabilityRepository.save(availability));
+    const saved = await this.availabilityRepository.save(availability);
+
+    // Les créneaux sont matérialisés DÈS la publication de la plage, et non
+    // lors du premier accès de la réception (MEDIPLAN-21).
+    //
+    // Tant qu'ils n'existent pas en base, ils n'ont pas d'identifiant — donc
+    // rien à réserver. La réception ne s'en apercevait pas : ouvrir son
+    // dialogue de réservation les créait au passage. Un patient en
+    // libre-service, lui, ne déclenche jamais cette matérialisation : une plage
+    // fraîchement publiée lui serait restée invisible jusqu'à ce qu'un
+    // réceptionniste l'ouvre par hasard.
+    await this.insertSlotsFor(saved);
+
+    return toAvailabilityResponse(saved);
+  }
+
+  /**
+   * Insère les créneaux d'une plage réservable, sans jamais écraser l'existant.
+   *
+   * `orIgnore()` rend l'opération idempotente : la contrainte d'unicité
+   * (clinique, médecin, début) absorbe les rejouages, et un créneau déjà
+   * réservé n'est pas retouché. C'est ce qui permet de l'appeler aussi bien à
+   * la création qu'à chaque matérialisation ultérieure.
+   *
+   * Une plage de congé ne génère rien, par définition.
+   */
+  private async insertSlotsFor(availability: Availability): Promise<void> {
+    if (availability.type !== AvailabilityType.AVAILABLE) {
+      return;
+    }
+
+    const durationMs = availability.slotDurationMin * 60_000;
+    const end = availability.endAt.getTime();
+    const rows: Array<Partial<AppointmentSlot>> = [];
+    for (
+      let cursor = availability.startAt.getTime();
+      cursor + durationMs <= end;
+      cursor += durationMs
+    ) {
+      rows.push({
+        clinicId: availability.clinicId,
+        doctorId: availability.doctorId,
+        startAt: new Date(cursor),
+        endAt: new Date(cursor + durationMs),
+      });
+    }
+
+    if (rows.length > 0) {
+      await this.slotRepository.createQueryBuilder().insert().values(rows).orIgnore().execute();
+    }
   }
 
   async findAllScoped(currentUser: AuthenticatedUser) {
@@ -152,25 +201,9 @@ export class AvailabilityService {
       return [];
     }
 
-    const durationMs = availability.slotDurationMin * 60_000;
-    const end = availability.endAt.getTime();
-    const rows: Array<Partial<AppointmentSlot>> = [];
-    for (
-      let cursor = availability.startAt.getTime();
-      cursor + durationMs <= end;
-      cursor += durationMs
-    ) {
-      rows.push({
-        clinicId: availability.clinicId,
-        doctorId: availability.doctorId,
-        startAt: new Date(cursor),
-        endAt: new Date(cursor + durationMs),
-      });
-    }
-
-    if (rows.length > 0) {
-      await this.slotRepository.createQueryBuilder().insert().values(rows).orIgnore().execute();
-    }
+    // Rattrape les plages créées avant que la matérialisation soit faite dès la
+    // publication ; sans effet sur les autres (insertion idempotente).
+    await this.insertSlotsFor(availability);
 
     const slots = await this.slotRepository.find({
       where: {
