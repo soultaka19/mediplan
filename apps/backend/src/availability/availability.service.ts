@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -151,10 +152,68 @@ export class AvailabilityService {
     return toAvailabilityResponse(await this.availabilityRepository.save(availability));
   }
 
+  /**
+   * Supprime une plage **et les créneaux qu'elle avait publiés**.
+   *
+   * Les créneaux sont des lignes indépendantes de la plage : rien, en base, ne
+   * les rattache à elle. Supprimer la plage sans les supprimer laissait donc des
+   * créneaux réservables pour une matinée qui n'existe plus — invisible tant que
+   * seule la réception réservait, mais directement exposé au patient depuis
+   * MEDIPLAN-21.
+   *
+   * Si un créneau de la plage est **déjà réservé**, la suppression est refusée :
+   * effacer la matinée d'un médecin ne doit pas faire disparaître en silence les
+   * rendez-vous de ses patients. Il faut d'abord les annuler — geste explicite,
+   * tracé, avec un motif.
+   */
   async remove(currentUser: AuthenticatedUser, id: string): Promise<void> {
     const availability = await this.getScopedAvailability(currentUser, id);
     this.ensureWritableAvailability(currentUser, availability);
+
+    // Une plage de congé n'a jamais publié de créneau : rien à nettoyer.
+    if (availability.type === AvailabilityType.AVAILABLE) {
+      const booked = await this.slotsOfRange(availability)
+        .andWhere('slot.is_booked = true')
+        .getCount();
+
+      if (booked > 0) {
+        throw new ConflictException(
+          'Des rendez-vous sont réservés sur cette plage. Annulez-les avant de la supprimer.',
+        );
+      }
+
+      await this.slotRepository
+        .createQueryBuilder()
+        .delete()
+        .from(AppointmentSlot)
+        .where('clinic_id = :clinicId', { clinicId: availability.clinicId })
+        .andWhere('doctor_id = :doctorId', { doctorId: availability.doctorId })
+        .andWhere('start_at >= :start AND start_at < :end', {
+          start: availability.startAt,
+          end: availability.endAt,
+        })
+        .andWhere('is_booked = false')
+        .execute();
+    }
+
     await this.availabilityRepository.remove(availability);
+  }
+
+  /**
+   * Créneaux couverts par une plage.
+   *
+   * Borne haute **exclue** : un créneau qui commence exactement à la fin de la
+   * plage appartient à la plage suivante, pas à celle-ci.
+   */
+  private slotsOfRange(availability: Availability) {
+    return this.slotRepository
+      .createQueryBuilder('slot')
+      .where('slot.clinic_id = :clinicId', { clinicId: availability.clinicId })
+      .andWhere('slot.doctor_id = :doctorId', { doctorId: availability.doctorId })
+      .andWhere('slot.start_at >= :start AND slot.start_at < :end', {
+        start: availability.startAt,
+        end: availability.endAt,
+      });
   }
 
   async generateSlots(currentUser: AuthenticatedUser, id: string): Promise<AvailabilitySlotDto[]> {
