@@ -1,0 +1,94 @@
+<template>
+  <div
+    id="ch1-reception"
+    data-composition-id="ch1-reception"
+    data-width="1920"
+    data-height="1080"
+    data-start="0"
+    data-duration="19.22"
+    style="position: absolute; inset: 0; overflow: hidden"
+  >
+    <style>
+      /* Polices du produit — redéclarées ici : une sous-composition est validée
+         comme un fichier autonome. */
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+    </style>
+
+    <div class="chaphead" id="ch1-head" style="opacity: 0">
+      <b>Avant tout</b><span>Se connecter</span>
+    </div>
+
+    <div class="win" id="ch1-win">
+      <div class="shot">
+        <video
+          id="ch1-v1"
+          class="clip"
+          src="media/soul-clean.mp4"
+          data-start="0"
+          data-duration="12.34"
+          data-media-start="37.30"
+          data-track-index="0"
+          muted
+          playsinline
+        ></video>
+      </div>
+      <div class="shot">
+        <video
+          id="ch1-v2"
+          class="clip"
+          src="media/soul-clean.mp4"
+          data-start="12.34"
+          data-duration="6.88"
+          data-media-start="50.45"
+          data-track-index="0"
+          muted
+          playsinline
+        ></video>
+      </div>
+    </div>
+
+    <div class="note r" id="ch1-n1" style="top: 300px">
+      <span class="rule"></span>Le rôle vient du serveur
+      <em>L'application redemande qui vous êtes à chaque démarrage — le jeton ne décide de rien.</em>
+    </div>
+
+    <div class="figs" id="ch1-figs">
+      <div class="fig" id="ch1-f1"><b>10</b><i>rendez-vous aujourd'hui</i></div>
+      <div class="fig" id="ch1-f2"><b>2</b><i>médecins actifs</i></div>
+      <div class="fig" id="ch1-f3"><b>53 %</b><i>de remplissage</i></div>
+    </div>
+
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // La fenêtre s'ouvre : le film passe du graphique au produit.
+        tl.fromTo(
+          "#ch1-win",
+          { scale: 0.955, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.72, ease: "power3.out" },
+          0,
+        );
+        tl.fromTo("#ch1-head", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.3);
+
+        // « l'application identifie qui je suis et le rôle » — media 44.34
+        tl.fromTo("#ch1-n1", { x: 18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 7.04);
+        tl.to("#ch1-n1", { opacity: 0, duration: 0.4, ease: "power2.in" }, 11.7);
+
+        // Le tableau de bord : les trois tuiles, une par une.
+        tl.fromTo("#ch1-f1", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, 13.3);
+        tl.fromTo("#ch1-f2", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, 13.62);
+        tl.fromTo("#ch1-f3", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, 13.94);
+        tl.to(["#ch1-f1", "#ch1-f2", "#ch1-f3"], { opacity: 0, duration: 0.4, ease: "power2.in" }, 18.5);
+
+        window.__timelines["ch1-reception"] = tl;
+      })();
+    </script>
+  </div>
+</template>

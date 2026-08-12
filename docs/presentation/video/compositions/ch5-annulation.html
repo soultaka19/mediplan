@@ -1,0 +1,140 @@
+<template>
+  <div
+    id="ch5-annulation"
+    data-composition-id="ch5-annulation"
+    data-width="1920"
+    data-height="1080"
+    data-start="0"
+    data-duration="9.59"
+    style="position: absolute; inset: 0; overflow: hidden"
+  >
+    <style>
+      /* Polices du produit — redéclarées ici : une sous-composition est validée
+         comme un fichier autonome. */
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+
+      /* Le seul chapitre qui sort de la fenêtre : il n'a pas de captation vidéo,
+         il examine une capture. La rupture de cadre est assumée. */
+      #ch5-annulation #ch5-shot {
+        position: absolute;
+        left: 232px;
+        top: 214px;
+        width: 802px;
+        height: 546px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #2a384f;
+        box-shadow: 0 30px 76px rgba(0, 0, 0, 0.55);
+        opacity: 0;
+      }
+      #ch5-annulation #ch5-shot img {
+        display: block;
+        width: 802px;
+        height: 546px;
+        object-fit: cover;
+      }
+      #ch5-annulation .mark {
+        position: absolute;
+        border: 2px solid #f0707a;
+        border-radius: 8px;
+        opacity: 0;
+      }
+      #ch5-annulation .lbl {
+        position: absolute;
+        left: 1096px;
+        width: 700px;
+        opacity: 0;
+      }
+      #ch5-annulation .lbl b {
+        display: block;
+        font-size: 40px;
+        font-weight: 600;
+        color: #e6eaf2;
+        line-height: 1.2;
+      }
+      #ch5-annulation .lbl em {
+        display: block;
+        font-style: normal;
+        font-size: 26px;
+        font-weight: 400;
+        color: #a9b4c6;
+        line-height: 1.4;
+        margin-top: 12px;
+      }
+      #ch5-annulation .lbl .rule {
+        display: block;
+        width: 54px;
+        height: 3px;
+        background: #f0707a;
+        border-radius: 2px;
+        margin-bottom: 16px;
+      }
+    </style>
+
+    <div class="chaphead" id="ch5-head" style="opacity: 0"><b>Chapitre 04</b><span>L'annulation</span></div>
+
+    <!-- Temps 1 — le geste, filmé : le menu de la ligne du rendez-vous. -->
+    <div class="win" id="ch5-win">
+      <div class="shot">
+        <video
+          id="ch5-v1"
+          class="clip"
+          src="media/zak-clean.mp4"
+          data-start="0"
+          data-duration="2.99"
+          data-media-start="75.30"
+          data-track-index="0"
+          muted
+          playsinline
+        ></video>
+      </div>
+    </div>
+
+    <!-- Temps 2 — la règle, capturée sur l'application : le motif est obligatoire. -->
+    <div id="ch5-shot">
+      <img src="assets/annulation-dialogue.png" alt="Dialogue d'annulation : motif obligatoire" />
+    </div>
+    <div class="mark" id="ch5-m1" style="left: 300px; top: 394px; width: 630px; height: 165px"></div>
+    <div class="mark" id="ch5-m2" style="left: 591px; top: 636px; width: 343px; height: 67px"></div>
+
+    <div class="lbl" id="ch5-l1" style="top: 300px">
+      <span class="rule"></span>
+      <b>Le motif est obligatoire</b>
+      <em>On n'annule pas un rendez-vous sans dire pourquoi.</em>
+    </div>
+    <div class="lbl" id="ch5-l2" style="top: 486px">
+      <span class="rule"></span>
+      <b>Tant qu'il est vide, la confirmation reste inactive</b>
+      <em>C'est une règle métier, appliquée par l'application — pas une politesse d'interface.</em>
+    </div>
+
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        tl.fromTo("#ch5-head", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+
+        // Le cadre de la fenêtre s'efface : ce chapitre examine une capture,
+        // il ne rejoue pas une session.
+        tl.to("#ch5-win", { opacity: 0, duration: 0.45, ease: "power2.in" }, 2.6);
+        tl.fromTo("#ch5-shot", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 3.05);
+
+        // Le champ vide, puis le bouton qu'il verrouille.
+        tl.fromTo("#ch5-m1", { opacity: 0 }, { opacity: 1, duration: 0.35 }, 4.0);
+        tl.fromTo("#ch5-l1", { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 4.1);
+        tl.fromTo("#ch5-m2", { opacity: 0 }, { opacity: 1, duration: 0.35 }, 6.1);
+        tl.fromTo("#ch5-l2", { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 6.2);
+
+        tl.to(["#ch5-shot", "#ch5-m1", "#ch5-m2", "#ch5-l1", "#ch5-l2"], { opacity: 0, duration: 0.5, ease: "power2.in" }, 9.0);
+
+        window.__timelines["ch5-annulation"] = tl;
+      })();
+    </script>
+  </div>
+</template>

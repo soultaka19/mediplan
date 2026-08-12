@@ -1,0 +1,150 @@
+<template>
+  <div
+    id="ch6-piloter"
+    data-composition-id="ch6-piloter"
+    data-width="1920"
+    data-height="1080"
+    data-start="0"
+    data-duration="46.88"
+    style="position: absolute; inset: 0; overflow: hidden"
+  >
+    <style>
+      /* Polices du produit — redéclarées ici : une sous-composition est validée
+         comme un fichier autonome. */
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      #ch6-piloter #ch6-rbac {
+        position: absolute;
+        left: 356px;
+        right: 356px;
+        bottom: 200px;
+        display: flex;
+        gap: 20px;
+        z-index: 40;
+        opacity: 0;
+      }
+      #ch6-piloter .col {
+        flex: 1;
+        padding: 20px 26px;
+        border-radius: 12px;
+        background: rgba(15, 23, 34, 0.94);
+        border: 1px solid #2a384f;
+      }
+      #ch6-piloter .col h4 {
+        font-family: "PlexMono", monospace;
+        font-size: 18px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #3fc9b7;
+        margin-bottom: 12px;
+      }
+      #ch6-piloter .col ul {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 14px;
+      }
+      #ch6-piloter .col li {
+        font-size: 22px;
+        font-weight: 500;
+        color: #e6eaf2;
+      }
+      #ch6-piloter .col li.off {
+        color: #5e6a80;
+        text-decoration: line-through;
+      }
+    </style>
+
+    <div class="chaphead" id="ch6-head" style="opacity: 0"><b>Pour le gestionnaire</b><span>Statistiques et rôles</span></div>
+
+    <div class="win">
+      <div class="shot"><video id="ch6-v1" class="clip" src="media/larbi-clean.mp4" data-start="0" data-duration="3.60" data-media-start="53.42" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch6-v2" class="clip" src="media/larbi-clean.mp4" data-start="3.60" data-duration="16.72" data-media-start="59.06" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch6-v3" class="clip" src="media/larbi-clean.mp4" data-start="20.32" data-duration="8.44" data-media-start="77.08" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch6-v4" class="clip" src="media/larbi-clean.mp4" data-start="28.76" data-duration="18.12" data-media-start="108.93" data-track-index="0" muted playsinline></video></div>
+    </div>
+
+    <!-- La capture de Larbi est en 720p : ses chiffres sont redonnés en net,
+         jamais agrandis. -->
+    <div class="figs" id="ch6-figs">
+      <div class="fig" id="ch6-f1"><b id="ch6-n1">0</b><i>rendez-vous sur 30 jours</i></div>
+      <div class="fig" id="ch6-f2"><b id="ch6-n2">0 %</b><i>de patients absents</i></div>
+      <div class="fig" id="ch6-f3"><b id="ch6-n3">0 %</b><i>de créneaux occupés</i></div>
+    </div>
+
+    <div class="note l" id="ch6-note" style="top: 300px">
+      <span class="rule"></span>Ce que ça change
+      <em>Le taux d'absence, c'est du temps médecin payé et non facturé. L'occupation dit s'il faut ouvrir plus de plages.</em>
+    </div>
+
+    <!-- Le contrôle d'accès, montré plutôt qu'affirmé. -->
+    <div id="ch6-rbac">
+      <div class="col">
+        <h4>Administrateur — 6 entrées</h4>
+        <ul>
+          <li>Tableau de bord</li>
+          <li>Disponibilités</li>
+          <li>Rendez-vous</li>
+          <li>Flux du jour</li>
+          <li>Statistiques</li>
+          <li>Utilisateurs</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Médecin — 3 entrées</h4>
+        <ul>
+          <li>Tableau de bord</li>
+          <li>Disponibilités</li>
+          <li class="off">Rendez-vous</li>
+          <li>Flux du jour</li>
+          <li class="off">Statistiques</li>
+          <li class="off">Utilisateurs</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const root = document.querySelector("#ch6-piloter");
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Compteur seek-safe : la valeur finale est verrouillée juste après le tween.
+        function countUp(sel, to, at, suffix, decimals) {
+          const el = root.querySelector(sel);
+          const proxy = { v: 0 };
+          const fmt = (v) =>
+            (decimals ? v.toFixed(decimals).replace(".", ",") : Math.round(v).toString()) + (suffix || "");
+          tl.to(proxy, { v: to, duration: 0.9, ease: "power2.out", onUpdate: () => (el.textContent = fmt(proxy.v)) }, at);
+          tl.set(el, { onComplete: () => (el.textContent = fmt(to)) }, at + 0.9);
+        }
+
+        tl.fromTo("#ch6-head", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+
+        // Chaque chiffre apparaît quand il est nommé — « volume », « absence », « occupation ».
+        tl.fromTo("#ch6-f1", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 14.82);
+        countUp("#ch6-n1", 186, 14.9, "", 0);
+        tl.fromTo("#ch6-f2", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 16.44);
+        countUp("#ch6-n2", 7.5, 16.5, " %", 1);
+        tl.fromTo("#ch6-f3", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 18.64);
+        countUp("#ch6-n3", 66, 18.7, " %", 0);
+        tl.to("#ch6-figs", { opacity: 0, duration: 0.45, ease: "power2.in" }, 27.9);
+
+        // « Ces informations aident l'administration à évaluer l'efficacité »
+        tl.fromTo("#ch6-note", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 20.7);
+        tl.to("#ch6-note", { opacity: 0, duration: 0.4, ease: "power2.in" }, 27.9);
+
+        // Le rôle médecin : le menu a fondu, et ce n'est pas qu'un affichage.
+        tl.fromTo("#ch6-rbac", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 31.4);
+        tl.to("#ch6-rbac", { opacity: 0, duration: 0.45, ease: "power2.in" }, 45.9);
+
+        window.__timelines["ch6-piloter"] = tl;
+      })();
+    </script>
+  </div>
+</template>

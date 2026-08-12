@@ -1,0 +1,320 @@
+[
+ {
+  "start": 2.82,
+  "end": 7.52,
+  "text": "Dans une petite clinique médicale, les rendez-vous se prennent souvent au téléphone,",
+  "plan": "s-probl"
+ },
+ {
+  "start": 8.46,
+  "end": 12.68,
+  "text": "avec un agenda partagé. Cela peut occasionner plusieurs erreurs,",
+  "plan": "s-probl"
+ },
+ {
+  "start": 12.82,
+  "end": 17.08,
+  "text": "notamment une double réservation d'un créneau pour deux patients différents.",
+  "plan": "s-probl"
+ },
+ {
+  "start": 17.89,
+  "end": 22.17,
+  "text": "MediPlan est l'outil conçu pour ce type de clinique. Dans cette petite démonstration,",
+  "plan": "s-somm"
+ },
+ {
+  "start": 22.37,
+  "end": 27.65,
+  "text": "je vous montre la journée type d'une clinique,",
+  "plan": "s-somm"
+ },
+ {
+  "start": 28.07,
+  "end": 32.63,
+  "text": "de la définition des disponibilités des médecins, la prise de rendez-vous chez un patient,",
+  "plan": "s-somm"
+ },
+ {
+  "start": 33.21,
+  "end": 38.43,
+  "text": "la gestion du flux de la clinique et aussi l'annulation des rendez-vous.",
+  "plan": "s-somm"
+ },
+ {
+  "start": 39.23,
+  "end": 42.99,
+  "text": "Donc sur cette interface, j'ai les accès pour la réception,",
+  "plan": "s-conn"
+ },
+ {
+  "start": 43.86,
+  "end": 49.62,
+  "text": "je me connecte, l'application identifie qui je suis et le rôle",
+  "plan": "s-conn"
+ },
+ {
+  "start": 49.62,
+  "end": 50.74,
+  "text": "qui est le mien.",
+  "plan": "s-conn"
+ },
+ {
+  "start": 51.57,
+  "end": 57.61,
+  "text": "J'ai ici l'ensemble des patients attendus pour ce jour et le prochain rendez-vous.",
+  "plan": "s-tdb"
+ },
+ {
+  "start": 58.42,
+  "end": 63.78,
+  "text": "Je vais aller directement ajouter la disponibilité des médecins.",
+  "plan": "s-dispo"
+ },
+ {
+  "start": 64.57,
+  "end": 67.93,
+  "text": "Donc je définis une plage horaire pour Sophie",
+  "plan": "s-plage1"
+ },
+ {
+  "start": 68.61,
+  "end": 70.07,
+  "text": "du 27,",
+  "plan": "s-plage2"
+ },
+ {
+  "start": 70.85,
+  "end": 72.05,
+  "text": "9 h à 18 h.",
+  "plan": "s-plage3"
+ },
+ {
+  "start": 72.81,
+  "end": 78.07,
+  "text": "Donc ici, je renseigne une seule fois cette disponibilité et l'ensemble des créneaux qui",
+  "plan": "s-gener"
+ },
+ {
+  "start": 78.07,
+  "end": 80.87,
+  "text": "sont réservables seront automatiquement générés.",
+  "plan": "s-gener"
+ },
+ {
+  "start": 81.69,
+  "end": 86.49,
+  "text": "Voilà une disponibilité qui a été définie pour Sophie Bergeron du 27 août,",
+  "plan": "s-conf"
+ },
+ {
+  "start": 86.67,
+  "end": 87.51,
+  "text": "9 h à 18 h.",
+  "plan": "s-conf"
+ },
+ {
+  "start": 88.22,
+  "end": 94.18,
+  "text": "Je joue le rôle de la réception, le cas typique : c'est",
+  "plan": "z-recep"
+ },
+ {
+  "start": 94.18,
+  "end": 98.52,
+  "text": "un patient qui appelle la clinique pour prendre un rendez-vous,",
+  "plan": "z-recep"
+ },
+ {
+  "start": 99.31,
+  "end": 102.51,
+  "text": "on choisit un médecin, on fait par exemple",
+  "plan": "z-res1"
+ },
+ {
+  "start": 103.09,
+  "end": 107.38,
+  "text": "disponibilité, on clique par exemple sur vendredi,",
+  "plan": "z-res2"
+ },
+ {
+  "start": 107.52,
+  "end": 108.96,
+  "text": "créneau,",
+  "plan": "z-res2"
+ },
+ {
+  "start": 109.62,
+  "end": 111.74,
+  "text": "14 août, un nom par",
+  "plan": "z-res3"
+ },
+ {
+  "start": 112.39,
+  "end": 113.55,
+  "text": "exemple Sarah,",
+  "plan": "z-res4"
+ },
+ {
+  "start": 114.21,
+  "end": 118.25,
+  "text": "on fait juste comme ça, c'est un exemple, e-mail c'est optionnel,",
+  "plan": "z-opt"
+ },
+ {
+  "start": 118.31,
+  "end": 120.21,
+  "text": "motif c'est optionnel aussi",
+  "plan": "z-opt"
+ },
+ {
+  "start": 120.64,
+  "end": 125,
+  "text": "on clique sur Réserver, alors on voit que le rendez-vous est réservé,",
+  "plan": "z-valid"
+ },
+ {
+  "start": 125.65,
+  "end": 130.65,
+  "text": "on peut voir tous les patients qui sont déjà sur la liste,",
+  "plan": "z-liste"
+ },
+ {
+  "start": 130.89,
+  "end": 134.93,
+  "text": "voilà ici, et leur statut ici,",
+  "plan": "z-liste"
+ },
+ {
+  "start": 135.57,
+  "end": 140.37,
+  "text": "au flux du jour, on peut marquer comme arrivé,",
+  "plan": "z-cyc1"
+ },
+ {
+  "start": 140.91,
+  "end": 142.17,
+  "text": "par exemple on peut ici marquer",
+  "plan": "z-cyc2"
+ },
+ {
+  "start": 142.78,
+  "end": 144.34,
+  "text": "démarrer la consultation,",
+  "plan": "z-cyc3"
+ },
+ {
+  "start": 145.01,
+  "end": 147.79,
+  "text": "par exemple, on peut terminer la consultation aussi,",
+  "plan": "z-cyc4"
+ },
+ {
+  "start": 148.21,
+  "end": 153.39,
+  "text": "si on revient à ce rendez-vous on trouve tous les statuts qui sont ici,",
+  "plan": "z-cyc4"
+ },
+ {
+  "start": 154.05,
+  "end": 158.07,
+  "text": "même chose pour les autres, par exemple terminer la consultation : on va trouver ici,",
+  "plan": "z-hist"
+ },
+ {
+  "start": 158.27,
+  "end": 160.51,
+  "text": "absent, annulé,",
+  "plan": "z-hist"
+ },
+ {
+  "start": 161.19,
+  "end": 163.51,
+  "text": "marquer comme absent, annuler un rendez-vous,",
+  "plan": "z-annul"
+ },
+ {
+  "start": 170.6,
+  "end": 173.86,
+  "text": "Concernant la page Statistiques,",
+  "plan": "l-stat1"
+ },
+ {
+  "start": 174.2,
+  "end": 179.22,
+  "text": "elle complète cette vue avec une analyse plus détaillée. Elle permet de filtrer les taux",
+  "plan": "l-stat2"
+ },
+ {
+  "start": 179.98,
+  "end": 185.86,
+  "text": "par période et par médecin, puis d'afficher le volume de",
+  "plan": "l-stat2"
+ },
+ {
+  "start": 185.86,
+  "end": 190.58,
+  "text": "rendez-vous, le taux d'absence et le taux d'occupation.",
+  "plan": "l-stat2"
+ },
+ {
+  "start": 190.92,
+  "end": 196.72,
+  "text": "Ces informations aident l'administration à évaluer l'efficacité de la clinique et mieux",
+  "plan": "l-stat3"
+ },
+ {
+  "start": 196.72,
+  "end": 199.02,
+  "text": "organiser les ressources médicales.",
+  "plan": "l-stat3"
+ },
+ {
+  "start": 199.36,
+  "end": 204.66,
+  "text": "Le tableau de bord médecin résume la journée du médecin. Il affiche le nombre total des",
+  "plan": "l-med"
+ },
+ {
+  "start": 204.66,
+  "end": 210.46,
+  "text": "rendez-vous, les consultations déjà terminées et les patients restants et le",
+  "plan": "l-med"
+ },
+ {
+  "start": 210.46,
+  "end": 216.28,
+  "text": "prochain rendez-vous. Cela permet au médecin de comprendre rapidement sa charge de",
+  "plan": "l-med"
+ },
+ {
+  "start": 216.28,
+  "end": 217.14,
+  "text": "travail.",
+  "plan": "l-med"
+ },
+ {
+  "start": 217.63,
+  "end": 223.27,
+  "text": "En gros, ma partie montre donc comment la réception peut",
+  "plan": "z-concl"
+ },
+ {
+  "start": 223.27,
+  "end": 228.89,
+  "text": "gérer concrètement une journée de clinique, créer un rendez-vous pour un patient au",
+  "plan": "z-concl"
+ },
+ {
+  "start": 228.89,
+  "end": 232.89,
+  "text": "téléphone, suivre son évolution dans le flux du jour,",
+  "plan": "z-concl"
+ },
+ {
+  "start": 233.52,
+  "end": 239.02,
+  "text": "et gérer une annulation proprement avec un motif, voilà, et merci.",
+  "plan": "z-fin"
+ }
+]

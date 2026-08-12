@@ -2,7 +2,7 @@
 
 > ## ⚠️ Piste abandonnée — conservée pour mémoire
 >
-> **Le déploiement retenu est Azure** : voir [`azure.md`](azure.md). L'application
+> **Le déploiement retenu est Azure** : voir [`azure.md`](../../deployment/azure.md). L'application
 > y est en ligne et fonctionnelle, pour **~0 $/mois**.
 >
 > Railway a été écarté sur le coût : pas d'offre gratuite durable (crédit d'essai

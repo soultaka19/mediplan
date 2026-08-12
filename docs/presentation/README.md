@@ -1,45 +1,49 @@
-# Présentation d'avancement — Sprint 1
+# Présentation finale — jeudi 13 août 2026
 
-Support de la **première présentation d'avancement** du projet MediPlan (Sprint 1 —
-analyse & conception), à présenter le **mercredi 10 juin 2026**.
+Tout ce qui sert à présenter MediPlan devant le jury. Les supports des revues de
+sprint précédentes sont dans [`../archives/presentations-intermediaires/`](../archives/presentations-intermediaires/).
 
-- **Fichier** : [`MediPlan-Sprint1-Presentation.pptx`](MediPlan-Sprint1-Presentation.pptx)
-  (11 diapositives, format 16:9, éditable dans PowerPoint / Google Slides / LibreOffice).
-- **Notes de l'orateur** : chaque diapositive contient le texte à dire dans la zone
-  _Commentaires / Notes_ (mode Présentateur).
-- **Régénération** : `python build_pptx.py` (nécessite `python-pptx`).
+---
 
-## Format imposé
+## Les cinq pièces
 
-Environ **10 minutes** de présentation + **5 minutes** de questions. Présence obligatoire
-des trois membres ; chacun explique sa contribution.
+| Fichier | Rôle |
+|---|---|
+| [`PLAN-FINALISATION.md`](PLAN-FINALISATION.md) | **Le document de pilotage.** Minutage, répartition de la parole, plan horaire, couverture de la grille d'évaluation, plan de repli |
+| [`MediPlan-Presentation-Finale.pptx`](MediPlan-Presentation-Finale.pptx) | Le support — 16 diapositives, orateur et minutage portés sur chacune |
+| [`SCENARIO-DEMO-Finale.md`](SCENARIO-DEMO-Finale.md) | Le parcours de démonstration, **écrit en le jouant sur l'application en ligne** : chaque libellé cité a été observé |
+| [`CONTRIBUTIONS.md`](CONTRIBUTIONS.md) | Qui a fait quoi, retracé commit par commit — et la liste de questions que chacun doit savoir traiter |
+| [`video/`](video/) | Le projet de montage de la vidéo de démonstration |
 
-## Découpage et minutage (≈ 10 min)
+`build_presentation_finale_pptx.py` régénère le support (`pip install python-pptx`).
 
-| #   | Diapositive                              | Orateur                              | Durée |
-| --- | ---------------------------------------- | ------------------------------------ | ----- |
-| 1   | Page de titre                            | Souleymane                           | 0:30  |
-| 2   | Rappel du projet                         | Souleymane                           | 1:30  |
-| 3   | Objectif du Sprint 1                     | Souleymane                           | 1:00  |
-| 4   | Organisation & démarche                  | Souleymane                           | 1:00  |
-| 5   | Avancement dans Jira                     | Souleymane                           | 1:30  |
-| 6   | Conception (1/2) — cas d'utilisation     | Souleymane                           | 1:00  |
-| 7   | Conception (2/2) — classes & séquence    | Zakaria (classes) · Larbi (séquence) | 1:30  |
-| 8   | Dépôt GitHub                             | Zakaria                              | 1:00  |
-| 9   | Travail réalisé / en cours / à clarifier | Larbi                                | 1:00  |
-| 10  | Prochaines étapes                        | Larbi                                | 0:30  |
-| 11  | Conclusion / Questions                   | les trois                            | —     |
+---
 
-## Contributions présentées
+## La vidéo
 
-- **Souleymane DIALLO** — pilotage, mise en place Jira & GitHub, cahier des charges,
-  7 diagrammes de cas d'utilisation.
-- **Zakaria Lahouiri** — diagramme de classes et son explication écrite.
-- **Larbi Saib** — diagramme de séquence et son explication écrite.
+**4 min 05**, 1920 × 1080, les trois voix, sous-titres incrustés. Elle sert deux
+usages : livrable de la remise, et **solution de repli** si l'application ou le
+réseau font défaut le jour J — la professeure l'a explicitement prévue comme
+telle.
 
-## Couverture des consignes
+Le master est produit dans `video/out/mediplan-demo.mp4`. Il **n'est pas
+versionné** : 58 Mo de rendu et 380 Mo de rushes n'ont pas leur place dans le
+dépôt (voir `.gitignore`). La chaîne de fabrication, elle, l'est —
+[`video/PLAN-MONTAGE.md`](video/PLAN-MONTAGE.md) documente l'analyse des rushes
+et le conducteur, et le montage se régénère à partir des sources.
 
-Rappel du projet · Objectif du Sprint 1 · Avancement Jira (Epics / user stories / tâches /
-responsables / progression) · Dossier de conception (diagrammes + liens au projet) ·
-GitHub (structure, `docs/conception/`, accès) · Travail réalisé, en cours, bloquant et
-prochaines étapes — ainsi que la **démarche** de l'équipe (organisation, Jira, GitHub).
+> ⚠️ Le jour de la présentation, la vidéo doit être **sur le disque du portable**.
+> Une copie dans le cloud ne sert à rien au moment précis où le réseau tombe.
+
+---
+
+## Le geste indispensable avant de passer
+
+**Réveiller l'application** : ouvrir l'URL et se connecter une fois. Les
+conteneurs dorment (scale-to-zero) et le premier accès prend 10 à 15 secondes.
+Ensuite la navigation est instantanée.
+
+Application :
+`https://ca-mediplan-frontend.ashytree-9ad5012f.canadacentral.azurecontainerapps.io`
+
+Les comptes de démonstration sont dans [`SCENARIO-DEMO-Finale.md`](SCENARIO-DEMO-Finale.md).

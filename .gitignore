@@ -39,14 +39,21 @@ Thumbs.db
 ~$*.xlsx
 ~$*.pptx
 
-# Dossier personnel (brouillons, non versionné)
-creation-diagramme-cas-d'utilisation/
-
 # Companion visuel de brainstorming (local)
 .superpowers/
 
-# Captures d'audit à la racine (locales, non versionnées)
+# MediPlan-Demo.mp4 à la racine EST versionné : la consigne de remise exige que
+# la vidéo démonstrative soit dans le dépôt. C'est un ré-encodage à 9,8 Mo
+# (CRF 23), visuellement identique — le master de 58 Mo reste local, dans
+# docs/presentation/video/out/, et se régénère depuis les sources.
+
+# Captures de travail de l'application : 7 Mo qu'aucun document ne référence.
+# Les captures qui SERVENT un livrable sont versionnées là où il les utilise
+# (docs/guide-utilisation/captures/, docs/conception/images/,
+# docs/reflexion-ux-ui/audit-after/). D'où la barre oblique initiale : elle
+# limite la règle au dossier racine, sinon elle attrape aussi ceux-là.
 /*.png
+/captures/
 
 # Fichiers de sauvegarde (jamais versionnés, où qu'ils soient), y compris les
 # sauvegardes de .env (secrets) telles que .env.backup-avant-seed

@@ -1,0 +1,116 @@
+<template>
+  <div
+    id="ch3-reserver"
+    data-composition-id="ch3-reserver"
+    data-width="1920"
+    data-height="1080"
+    data-start="0"
+    data-duration="47.37"
+    style="position: absolute; inset: 0; overflow: hidden"
+  >
+    <style>
+      /* Polices du produit — redéclarées ici : une sous-composition est validée
+         comme un fichier autonome. */
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      #ch3-reserver .step {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        opacity: 0;
+      }
+      #ch3-reserver .step b {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        background: rgba(91, 155, 232, 0.16);
+        border: 1px solid rgba(91, 155, 232, 0.6);
+        color: #5b9be8;
+        font-family: "PlexMono", monospace;
+        font-size: 20px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+      }
+      #ch3-reserver .step span {
+        font-size: 27px;
+        font-weight: 600;
+        color: #e6eaf2;
+      }
+    </style>
+
+    <div class="chaphead" id="ch3-head" style="opacity: 0"><b>Chapitre 02</b><span>La prise de rendez-vous</span></div>
+
+    <div class="win">
+      <div class="shot"><video id="ch3-v1" class="clip" src="media/zak-clean.mp4" data-start="0" data-duration="11.09" data-media-start="3.10" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch3-v2" class="clip" src="media/zak-clean.mp4" data-start="11.09" data-duration="3.79" data-media-start="14.50" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch3-v3" class="clip" src="media/zak-clean.mp4" data-start="14.88" data-duration="6.49" data-media-start="19.05" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch3-v4" class="clip" src="media/zak-clean.mp4" data-start="21.37" data-duration="2.79" data-media-start="24.60" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch3-v5" class="clip" src="media/zak-clean.mp4" data-start="24.16" data-duration="1.84" data-media-start="33.40" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch3-v6" class="clip" src="media/zak-clean.mp4" data-start="26.00" data-duration="6.44" data-media-start="40.50" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch3-v7" class="clip" src="media/zak-clean.mp4" data-start="32.44" data-duration="4.99" data-media-start="50.30" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch3-v8" class="clip" src="media/zak-clean.mp4" data-start="37.43" data-duration="9.94" data-media-start="56.10" data-track-index="0" muted playsinline></video></div>
+    </div>
+
+    <div class="note l" id="ch3-n1" style="top: 266px">
+      <span class="rule"></span>Le téléphone sonne
+      <em>Une patiente veut un rendez-vous. Tout part du comptoir.</em>
+    </div>
+
+    <!-- Les trois gestes que le dialogue annonce lui-même. -->
+    <div style="position: absolute; right: 40px; top: 252px; width: 268px; display: flex; flex-direction: column; gap: 26px">
+      <div class="step" id="ch3-s1"><b>1</b><span>Médecin</span></div>
+      <div class="step" id="ch3-s2"><b>2</b><span>Créneau</span></div>
+      <div class="step" id="ch3-s3"><b>3</b><span>Patient</span></div>
+    </div>
+
+    <div class="note r" id="ch3-n2" style="top: 452px">
+      <span class="rule"></span>Le patient léger
+      <em>Créé au comptoir, sans compte. E-mail et motif facultatifs.</em>
+    </div>
+
+    <div class="pill" id="ch3-pill" style="left: 1470px; top: 690px; background: #eef2f7; color: #4a5568">Réservé</div>
+
+    <div class="note l" id="ch3-n3" style="top: 560px">
+      <span class="rule"></span>Un statut par rendez-vous
+      <em>Et il vaut pour tout le monde en même temps.</em>
+    </div>
+
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        tl.fromTo("#ch3-head", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+        tl.fromTo("#ch3-n1", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 1.1);
+        tl.to("#ch3-n1", { opacity: 0, duration: 0.4, ease: "power2.in" }, 9.8);
+
+        // Les trois gestes s'allument au fur et à mesure qu'il les accomplit.
+        tl.fromTo("#ch3-s1", { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, 11.4);
+        tl.fromTo("#ch3-s2", { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, 15.3);
+        tl.fromTo("#ch3-s3", { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.42, ease: "power3.out" }, 21.7);
+        tl.to(["#ch3-s1", "#ch3-s2", "#ch3-s3"], { opacity: 0, duration: 0.4, ease: "power2.in" }, 31.6);
+
+        // « e-mail c'est optionnel, motif c'est optionnel aussi »
+        tl.fromTo("#ch3-n2", { x: 18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 26.4);
+        tl.to("#ch3-n2", { opacity: 0, duration: 0.4, ease: "power2.in" }, 31.6);
+
+        // « on voit que le rendez-vous est réservé »
+        tl.fromTo("#ch3-pill", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "back.out(2)" }, 34.0);
+        tl.to("#ch3-pill", { opacity: 0, duration: 0.4, ease: "power2.in" }, 45.9);
+
+        // La liste : chaque ligne porte son statut.
+        tl.fromTo("#ch3-n3", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 39.2);
+        tl.to("#ch3-n3", { opacity: 0, duration: 0.4, ease: "power2.in" }, 45.9);
+
+        window.__timelines["ch3-reserver"] = tl;
+      })();
+    </script>
+  </div>
+</template>

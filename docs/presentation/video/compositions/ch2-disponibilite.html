@@ -1,0 +1,120 @@
+<template>
+  <div
+    id="ch2-disponibilite"
+    data-composition-id="ch2-disponibilite"
+    data-width="1920"
+    data-height="1080"
+    data-start="0"
+    data-duration="29.90"
+    style="position: absolute; inset: 0; overflow: hidden"
+  >
+    <style>
+      /* Polices du produit — redéclarées ici : une sous-composition est validée
+         comme un fichier autonome. */
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      #ch2-disponibilite #ch2-slots {
+        position: absolute;
+        left: 356px;
+        right: 356px;
+        bottom: 214px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        justify-content: center;
+        z-index: 40;
+      }
+      #ch2-disponibilite .slot {
+        width: 108px;
+        height: 40px;
+        border-radius: 7px;
+        background: rgba(63, 201, 183, 0.16);
+        border: 1px solid rgba(63, 201, 183, 0.55);
+        font-family: "PlexMono", monospace;
+        font-size: 17px;
+        font-weight: 500;
+        color: #7fe3d4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+      }
+    </style>
+
+    <div class="chaphead" id="ch2-head" style="opacity: 0"><b>Chapitre 01</b><span>Les disponibilités</span></div>
+
+    <div class="win">
+      <div class="shot"><video id="ch2-v1" class="clip" src="media/soul-clean.mp4" data-start="0" data-duration="6.17" data-media-start="57.45" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch2-v2" class="clip" src="media/soul-clean.mp4" data-start="6.17" data-duration="4.10" data-media-start="63.90" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch2-v3" class="clip" src="media/soul-clean.mp4" data-start="10.27" data-duration="2.19" data-media-start="69.85" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch2-v4" class="clip" src="media/soul-clean.mp4" data-start="12.46" data-duration="1.94" data-media-start="82.40" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch2-v5" class="clip" src="media/soul-clean.mp4" data-start="14.40" data-duration="8.84" data-media-start="84.65" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch2-v6" class="clip" src="media/soul-clean.mp4" data-start="23.24" data-duration="6.66" data-media-start="97.60" data-track-index="0" muted playsinline></video></div>
+    </div>
+
+    <div class="note l" id="ch2-n1" style="top: 292px">
+      <span class="rule"></span>Une plage, pas des créneaux
+      <em>On décrit une amplitude et une durée. Rien de plus.</em>
+    </div>
+
+    <div class="note r" id="ch2-n2" style="top: 268px">
+      <span class="rule"></span>Saisi une seule fois
+      <em>Les créneaux réservables sont générés par le système.</em>
+    </div>
+
+    <!-- Les créneaux qui se dessinent : ce que la phrase affirme, rendu visible. -->
+    <div id="ch2-slots"></div>
+
+    <script>
+      (function () {
+        const root = document.querySelector("#ch2-disponibilite");
+
+        // 18 créneaux de 30 min entre 9 h et 18 h — exactement ce que l'aperçu annonce.
+        const box = root.querySelector("#ch2-slots");
+        const labels = [];
+        for (let i = 0; i < 18; i++) {
+          const h = 9 + Math.floor(i / 2);
+          const m = i % 2 ? "30" : "00";
+          labels.push(h + " h " + m);
+        }
+        labels.forEach((txt, i) => {
+          const d = document.createElement("div");
+          d.className = "slot";
+          d.id = "ch2-slot-" + i;
+          d.textContent = txt;
+          box.appendChild(d);
+        });
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        tl.fromTo("#ch2-head", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+
+        // « Je définis une plage horaire pour Sophie » — le geste métier.
+        tl.fromTo("#ch2-n1", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 6.5);
+        tl.to("#ch2-n1", { opacity: 0, duration: 0.4, ease: "power2.in" }, 13.2);
+
+        // ★ « l'ensemble des créneaux réservables seront automatiquement générés »
+        tl.fromTo("#ch2-n2", { x: 18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 15.1);
+
+        // Les 18 créneaux apparaissent en cascade pendant qu'il prononce la phrase.
+        for (let i = 0; i < 18; i++) {
+          tl.fromTo(
+            "#ch2-slot-" + i,
+            { y: 10, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" },
+            17.4 + i * 0.16,
+          );
+        }
+        tl.to("#ch2-slots", { opacity: 0, duration: 0.45, ease: "power2.in" }, 22.6);
+        tl.to("#ch2-n2", { opacity: 0, duration: 0.4, ease: "power2.in" }, 22.6);
+
+        window.__timelines["ch2-disponibilite"] = tl;
+      })();
+    </script>
+  </div>
+</template>

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* Polices réelles du produit, embarquées — aucun appel réseau. */
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0f1722; }
+      body { font-family: "Plex", system-ui, sans-serif; }
+
+      /* --- jetons repris de apps/frontend/src/styles/_theme.scss ------------ */
+      :root {
+        --bg: #0f1722;      --surface: #172234;   --line: #2a384f;
+        --ink: #e6eaf2;     --ink-2: #a9b4c6;
+        --primary: #5b9be8; --accent: #3fc9b7;    --ok: #5dd27a;  --err: #f0707a;
+      }
+
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      #stage-ground { position: absolute; inset: 0; background: var(--bg); z-index: 0; }
+      #root > div[data-composition-src] { position: absolute; inset: 0; z-index: 10; }
+
+      /* --- la fenêtre : géométrie fixe, identique dans tous les chapitres --- */
+      /* Déclarée ici une seule fois : le contenu des sous-compositions est cloné
+         dans cette page, les styles de l'hôte s'y appliquent donc. */
+      .win {
+        position: absolute; left: 320px; top: 168px; width: 1280px; height: 660px;
+        border-radius: 14px; overflow: hidden; background: var(--bg);
+        border: 1px solid var(--line); box-shadow: 0 34px 90px rgba(0, 0, 0, 0.55);
+      }
+      .shot { position: absolute; inset: 0; }
+      .shot video {
+        position: absolute; inset: 0; width: 100%; height: 100%;
+        object-fit: contain; background: var(--bg);
+      }
+
+      /* --- bandeau de chapitre --------------------------------------------- */
+      .chaphead { position: absolute; left: 320px; top: 76px; display: flex; align-items: baseline; gap: 22px; }
+      .chaphead b {
+        font-family: "PlexMono", monospace; font-size: 20px; font-weight: 500;
+        letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+      }
+      .chaphead span { font-size: 46px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+
+      /* --- annotations en marge -------------------------------------------- */
+      .note {
+        position: absolute; width: 286px; font-size: 27px; font-weight: 600;
+        line-height: 1.28; color: var(--ink); opacity: 0;
+      }
+      .note em {
+        display: block; font-style: normal; font-weight: 400; font-size: 22px;
+        color: var(--ink-2); margin-top: 9px; line-height: 1.36; font-size: 23px;
+      }
+      .note.l { left: 40px; text-align: right; }
+      .note.r { right: 40px; text-align: left; }
+      .note .rule { display: block; height: 3px; background: var(--accent); border-radius: 2px; margin-bottom: 14px; }
+      .note.l .rule { margin-left: auto; width: 54px; }
+      .note.r .rule { width: 54px; }
+
+      /* --- cartouche de chiffres (posé sur la fenêtre) ---------------------- */
+      .figs {
+        position: absolute; left: 356px; right: 356px; bottom: 262px;
+        display: flex; gap: 18px; justify-content: center; z-index: 40;
+      }
+      .fig {
+        flex: 1; max-width: 300px; padding: 18px 22px; border-radius: 12px;
+        background: rgba(15, 23, 34, 0.93); border: 1px solid var(--line); opacity: 0;
+      }
+      .fig b {
+        display: block; font-family: "PlexMono", monospace; font-size: 62px;
+        font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1;
+      }
+      .fig i {
+        display: block; font-style: normal; font-size: 21px; font-weight: 500;
+        color: var(--ink-2); margin-top: 8px;
+      }
+
+      /* --- pastille de statut (posée sur la fenêtre) ------------------------ */
+      .pill {
+        position: absolute; padding: 9px 20px; border-radius: 999px;
+        font-size: 25px; font-weight: 600; white-space: nowrap; opacity: 0; z-index: 40;
+      }
+
+      /* --- sous-titres ------------------------------------------------------ */
+      .cap {
+        position: absolute; left: 210px; right: 210px; top: 884px;
+        display: flex; justify-content: center; z-index: 60; pointer-events: none;
+      }
+      .cap > span {
+        display: inline-block; max-width: 1300px;
+        background: rgba(15, 23, 34, 0.82);
+        border: 1px solid rgba(42, 56, 79, 0.9);
+        border-radius: 10px; padding: 16px 28px;
+        font-size: 42px; font-weight: 500; line-height: 1.28;
+        color: var(--ink); text-align: center; text-wrap: balance;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="245.56" data-width="1920" data-height="1080">
+      <div id="stage-ground"></div>
+
+      <!-- Chapitres -->
+      <div id="el-ch0-ouverture" data-composition-id="ch0-ouverture" data-composition-src="compositions/ch0-ouverture.html" data-start="0" data-duration="38.98" data-track-index="1"></div>
+      <div id="el-ch1-reception" data-composition-id="ch1-reception" data-composition-src="compositions/ch1-reception.html" data-start="38.98" data-duration="19.22" data-track-index="1"></div>
+      <div id="el-ch2-disponibilite" data-composition-id="ch2-disponibilite" data-composition-src="compositions/ch2-disponibilite.html" data-start="58.2" data-duration="29.9" data-track-index="1"></div>
+      <div id="el-ch3-reserver" data-composition-id="ch3-reserver" data-composition-src="compositions/ch3-reserver.html" data-start="88.1" data-duration="47.37" data-track-index="1"></div>
+      <div id="el-ch4-cycle" data-composition-id="ch4-cycle" data-composition-src="compositions/ch4-cycle.html" data-start="135.47" data-duration="25.54" data-track-index="1"></div>
+      <div id="el-ch5-annulation" data-composition-id="ch5-annulation" data-composition-src="compositions/ch5-annulation.html" data-start="161.01" data-duration="9.59" data-track-index="1"></div>
+      <div id="el-ch6-piloter" data-composition-id="ch6-piloter" data-composition-src="compositions/ch6-piloter.html" data-start="170.6" data-duration="46.88" data-track-index="1"></div>
+      <div id="el-ch7-conclusion" data-composition-id="ch7-conclusion" data-composition-src="compositions/ch7-conclusion.html" data-start="217.48" data-duration="28.08" data-track-index="1"></div>
+
+      <!-- Sous-titres (générés depuis tools/captions.json) -->
+      <div class="clip cap" id="cap-0" data-start="2.82" data-duration="4.700" data-track-index="5"><span>Dans une petite clinique médicale, les rendez-vous se prennent souvent au téléphone,</span></div>
+      <div class="clip cap" id="cap-1" data-start="8.46" data-duration="4.220" data-track-index="5"><span>avec un agenda partagé. Cela peut occasionner plusieurs erreurs,</span></div>
+      <div class="clip cap" id="cap-2" data-start="12.82" data-duration="4.260" data-track-index="5"><span>notamment une double réservation d'un créneau pour deux patients différents.</span></div>
+      <div class="clip cap" id="cap-3" data-start="17.89" data-duration="4.280" data-track-index="5"><span>MediPlan est l'outil conçu pour ce type de clinique. Dans cette petite démonstration,</span></div>
+      <div class="clip cap" id="cap-4" data-start="22.37" data-duration="5.280" data-track-index="5"><span>je vous montre la journée type d'une clinique,</span></div>
+      <div class="clip cap" id="cap-5" data-start="28.07" data-duration="4.560" data-track-index="5"><span>de la définition des disponibilités des médecins, la prise de rendez-vous chez un patient,</span></div>
+      <div class="clip cap" id="cap-6" data-start="33.21" data-duration="5.220" data-track-index="5"><span>la gestion du flux de la clinique et aussi l'annulation des rendez-vous.</span></div>
+      <div class="clip cap" id="cap-7" data-start="39.23" data-duration="3.760" data-track-index="5"><span>Donc sur cette interface, j'ai les accès pour la réception,</span></div>
+      <div class="clip cap" id="cap-8" data-start="43.86" data-duration="5.720" data-track-index="5"><span>je me connecte, l'application identifie qui je suis et le rôle</span></div>
+      <div class="clip cap" id="cap-9" data-start="49.62" data-duration="1.120" data-track-index="5"><span>qui est le mien.</span></div>
+      <div class="clip cap" id="cap-10" data-start="51.57" data-duration="6.040" data-track-index="5"><span>J'ai ici l'ensemble des patients attendus pour ce jour et le prochain rendez-vous.</span></div>
+      <div class="clip cap" id="cap-11" data-start="58.42" data-duration="5.360" data-track-index="5"><span>Je vais aller directement ajouter la disponibilité des médecins.</span></div>
+      <div class="clip cap" id="cap-12" data-start="64.57" data-duration="3.360" data-track-index="5"><span>Donc je définis une plage horaire pour Sophie</span></div>
+      <div class="clip cap" id="cap-13" data-start="68.61" data-duration="1.460" data-track-index="5"><span>du 27,</span></div>
+      <div class="clip cap" id="cap-14" data-start="70.85" data-duration="1.200" data-track-index="5"><span>9 h à 18 h.</span></div>
+      <div class="clip cap" id="cap-15" data-start="72.81" data-duration="5.220" data-track-index="5"><span>Donc ici, je renseigne une seule fois cette disponibilité et l'ensemble des créneaux qui</span></div>
+      <div class="clip cap" id="cap-16" data-start="78.07" data-duration="2.800" data-track-index="5"><span>sont réservables seront automatiquement générés.</span></div>
+      <div class="clip cap" id="cap-17" data-start="81.69" data-duration="4.800" data-track-index="5"><span>Voilà une disponibilité qui a été définie pour Sophie Bergeron du 27 août,</span></div>
+      <div class="clip cap" id="cap-18" data-start="86.67" data-duration="0.840" data-track-index="5"><span>9 h à 18 h.</span></div>
+      <div class="clip cap" id="cap-19" data-start="88.22" data-duration="5.920" data-track-index="5"><span>Je joue le rôle de la réception, le cas typique : c'est</span></div>
+      <div class="clip cap" id="cap-20" data-start="94.18" data-duration="4.340" data-track-index="5"><span>un patient qui appelle la clinique pour prendre un rendez-vous,</span></div>
+      <div class="clip cap" id="cap-21" data-start="99.31" data-duration="3.200" data-track-index="5"><span>on choisit un médecin, on fait par exemple</span></div>
+      <div class="clip cap" id="cap-22" data-start="103.09" data-duration="4.290" data-track-index="5"><span>disponibilité, on clique par exemple sur vendredi,</span></div>
+      <div class="clip cap" id="cap-23" data-start="107.52" data-duration="1.440" data-track-index="5"><span>créneau,</span></div>
+      <div class="clip cap" id="cap-24" data-start="109.62" data-duration="2.120" data-track-index="5"><span>14 août, un nom par</span></div>
+      <div class="clip cap" id="cap-25" data-start="112.39" data-duration="1.160" data-track-index="5"><span>exemple Sarah,</span></div>
+      <div class="clip cap" id="cap-26" data-start="114.21" data-duration="4.040" data-track-index="5"><span>on fait juste comme ça, c'est un exemple, e-mail c'est optionnel,</span></div>
+      <div class="clip cap" id="cap-27" data-start="118.31" data-duration="1.900" data-track-index="5"><span>motif c'est optionnel aussi</span></div>
+      <div class="clip cap" id="cap-28" data-start="120.64" data-duration="4.360" data-track-index="5"><span>on clique sur Réserver, alors on voit que le rendez-vous est réservé,</span></div>
+      <div class="clip cap" id="cap-29" data-start="125.65" data-duration="5.000" data-track-index="5"><span>on peut voir tous les patients qui sont déjà sur la liste,</span></div>
+      <div class="clip cap" id="cap-30" data-start="130.89" data-duration="4.040" data-track-index="5"><span>voilà ici, et leur statut ici,</span></div>
+      <div class="clip cap" id="cap-31" data-start="135.57" data-duration="4.800" data-track-index="5"><span>au flux du jour, on peut marquer comme arrivé,</span></div>
+      <div class="clip cap" id="cap-32" data-start="140.91" data-duration="1.260" data-track-index="5"><span>par exemple on peut ici marquer</span></div>
+      <div class="clip cap" id="cap-33" data-start="142.78" data-duration="1.560" data-track-index="5"><span>démarrer la consultation,</span></div>
+      <div class="clip cap" id="cap-34" data-start="145.01" data-duration="2.780" data-track-index="5"><span>par exemple, on peut terminer la consultation aussi,</span></div>
+      <div class="clip cap" id="cap-35" data-start="148.21" data-duration="5.180" data-track-index="5"><span>si on revient à ce rendez-vous on trouve tous les statuts qui sont ici,</span></div>
+      <div class="clip cap" id="cap-36" data-start="154.05" data-duration="4.020" data-track-index="5"><span>même chose pour les autres, par exemple terminer la consultation : on va trouver ici,</span></div>
+      <div class="clip cap" id="cap-37" data-start="158.27" data-duration="2.240" data-track-index="5"><span>absent, annulé,</span></div>
+      <div class="clip cap" id="cap-38" data-start="161.19" data-duration="2.320" data-track-index="5"><span>marquer comme absent, annuler un rendez-vous,</span></div>
+      <div class="clip cap" id="cap-39" data-start="170.6" data-duration="3.260" data-track-index="5"><span>Concernant la page Statistiques,</span></div>
+      <div class="clip cap" id="cap-40" data-start="174.2" data-duration="5.020" data-track-index="5"><span>elle complète cette vue avec une analyse plus détaillée. Elle permet de filtrer les taux</span></div>
+      <div class="clip cap" id="cap-41" data-start="179.98" data-duration="5.840" data-track-index="5"><span>par période et par médecin, puis d'afficher le volume de</span></div>
+      <div class="clip cap" id="cap-42" data-start="185.86" data-duration="4.720" data-track-index="5"><span>rendez-vous, le taux d'absence et le taux d'occupation.</span></div>
+      <div class="clip cap" id="cap-43" data-start="190.92" data-duration="5.760" data-track-index="5"><span>Ces informations aident l'administration à évaluer l'efficacité de la clinique et mieux</span></div>
+      <div class="clip cap" id="cap-44" data-start="196.72" data-duration="2.300" data-track-index="5"><span>organiser les ressources médicales.</span></div>
+      <div class="clip cap" id="cap-45" data-start="199.36" data-duration="5.260" data-track-index="5"><span>Le tableau de bord médecin résume la journée du médecin. Il affiche le nombre total des</span></div>
+      <div class="clip cap" id="cap-46" data-start="204.66" data-duration="5.760" data-track-index="5"><span>rendez-vous, les consultations déjà terminées et les patients restants et le</span></div>
+      <div class="clip cap" id="cap-47" data-start="210.46" data-duration="5.780" data-track-index="5"><span>prochain rendez-vous. Cela permet au médecin de comprendre rapidement sa charge de</span></div>
+      <div class="clip cap" id="cap-48" data-start="216.28" data-duration="0.860" data-track-index="5"><span>travail.</span></div>
+      <div class="clip cap" id="cap-49" data-start="217.63" data-duration="5.600" data-track-index="5"><span>En gros, ma partie montre donc comment la réception peut</span></div>
+      <div class="clip cap" id="cap-50" data-start="223.27" data-duration="5.580" data-track-index="5"><span>gérer concrètement une journée de clinique, créer un rendez-vous pour un patient au</span></div>
+      <div class="clip cap" id="cap-51" data-start="228.89" data-duration="4.000" data-track-index="5"><span>téléphone, suivre son évolution dans le flux du jour,</span></div>
+      <div class="clip cap" id="cap-52" data-start="233.52" data-duration="5.500" data-track-index="5"><span>et gérer une annulation proprement avec un motif, voilà, et merci.</span></div>
+
+      <!-- Bande son continue : voix des trois orateurs, calées à -16 LUFS -->
+      <audio id="spine" src="media/voix-spine.m4a" data-start="0" data-duration="245.56" data-track-index="10" data-volume="1"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>
