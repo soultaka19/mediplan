@@ -4,51 +4,49 @@
 
 | | |
 |---|---|
-| Cadre | Projet intégrateur 030747 — Programmation informatique, Collège La Cité |
+| Cadre | Projet intégrateur 030747 — Collège La Cité |
 | Session | Printemps 2026 |
-| **Version** | **2.0 — révision de fin de projet** |
+| **Version** | **2.0 — version finale** |
 | Date | 12 août 2026 |
-| Remplace | v1.0 du 28 mai 2026 (`Cahier_des_charges_MediPlan.docx`, conservée telle quelle) |
+| Remplace | v1.0 du 28 mai 2026 (conservée) |
 | Équipe | Souleymane DIALLO · Zakaria Lahouiri · Larbi Saib |
 
 ---
 
 ## Note de révision
 
-La version 1.0 se terminait par cet engagement :
+La v1.0 annonçait qu'elle serait révisée si le périmètre évoluait. Il a évolué.
+Cette version dit ce que nous avons livré et où nous nous sommes écartés du plan.
+La v1.0 n'est pas modifiée : elle reste la trace de ce que nous avions prévu.
 
-> « Le présent cahier des charges fixe le cadre du travail à réaliser […]. Il sera
-> maintenu vivant tout au long du projet : toute évolution du périmètre ou des
-> exigences entraînera une nouvelle révision documentée. »
+Le document est **plus court que la v1.0** : la rétroaction de l'ébauche nous
+demandait un cahier des charges plus direct. Nous avons retiré les développements
+qui n'ajoutaient rien et gardé ce qui informe.
 
-C'est cette révision. Elle a été écrite **après** le développement, en confrontant
-chaque exigence de la v1.0 au produit réellement livré et au code réellement
-écrit. Elle n'a pas pour but de faire coïncider le document avec le résultat :
-elle a pour but de **dire où le résultat s'écarte du document, et pourquoi**.
+### Réponses à la rétroaction de l'ébauche #1
 
-La v1.0 n'est pas corrigée ni détruite. Elle reste la référence de ce que nous
-avions prévu ; ce document est la référence de ce que nous avons fait.
+| Remarque | Ce que nous avons fait |
+|---|---|
+| Identifier les fonctionnalités livrées en **version minimale** | § 1.3 — le noyau minimal est nommé, et il est livré |
+| Notifications, statistiques, flux du jour, rappels : peut-être de trop | Trois sont livrés, les rappels non. § 2.2 |
+| **Une seule clinique ou vrai multi-cliniques ?** | § 1.3 — **une clinique fonctionnelle**. Le multi-cliniques est dans le modèle, pas dans l'interface |
+| **Rappels par courriel : prévus ou amélioration ?** | **Amélioration possible seulement.** Reclassés hors périmètre, § 2.2 |
+| Vérifier que wireframes, UML et schéma d'architecture sont dans la remise | § 4.2 — vérifié, avec un manque assumé sur les wireframes |
+| **Être clair sur la répartition du travail** | § 4.3, nouvelle section |
+| Sections trop détaillées | Document ramené de 13 à environ 7 pages |
 
-**Structure.** Le document suit le gabarit fourni — les six sections et leurs
-sous-sections, dans l'ordre. Deux ajouts, tous deux permis par la mention
-« largement adapté en fonction des particularités de vos projets » : la présente
-note de révision, et quatre annexes (hypothèses, risques survenus, pistes
-d'évolution, références). Chaque section indique en outre **l'état atteint**, ce
-qu'un cahier des charges rédigé en amont ne peut pas contenir.
+### Les six écarts avec la v1.0
 
-### Les six écarts structurants
+| v1.0 prévoyait | La réalité |
+|---|---|
+| Déploiement local seulement | Application **en ligne** sur Azure, infrastructure décrite en Bicep, ~0 $/mois |
+| Le patient réserve, comme sur Doctolib | La réception réserve pour lui **et** il peut réserver seul |
+| Disponibilités récurrentes | Plages **datées**, plus les congés |
+| Modification d'un rendez-vous | Réservation et annulation seulement |
+| Gestion des médecins et des cliniques par l'interface | Non livrée |
+| Tests E2E, tests de charge, audits Lighthouse | 203 tests unitaires. Rien d'automatisé de bout en bout |
 
-| # | v1.0 prévoyait | La réalité | Nature |
-|---|---|---|---|
-| 1 | Déploiement **local** via Docker Compose ; « aucun hébergement cloud requis » | Application **en ligne** sur Azure Container Apps, base PostgreSQL infogérée, infrastructure décrite en Bicep, ~0 $/mois | **Dépassement** |
-| 2 | Le **patient** est l'acteur central de la réservation | Deux canaux : le **patient léger** créé au comptoir (canal principal, calqué sur le téléphone) *et* la réservation en libre-service par un patient inscrit | **Réorientation** |
-| 3 | Disponibilités en **plages récurrentes** avec exceptions | Plages **datées**, plus congés. La récurrence n'est pas implémentée | **Réduction** |
-| 4 | **Modification / replanification** d'un rendez-vous | Réservation et annulation seulement. L'annulation exige un **motif** ; le créneau est libéré | **Réduction** |
-| 5 | Gestion des **médecins et des cliniques par l'interface** (deux exigences *Must*) | Non livrées. Les données existent, l'écran d'administration n'existe pas | **Non tenu** |
-| 6 | Validation par tests **E2E, tests de charge et audits Lighthouse** | 203 tests unitaires et d'intégration verts. Aucun test de bout en bout, de charge ni d'audit automatisé | **Non tenu** |
-
-Les écarts 1 et 2 sont des décisions assumées et défendues ci-dessous. Les écarts
-3 à 6 sont des renoncements dictés par le temps.
+Les deux premiers sont des dépassements, les quatre autres des renoncements.
 
 ---
 
@@ -56,91 +54,90 @@ Les écarts 1 et 2 sont des décisions assumées et défendues ci-dessous. Les �
 
 ### 1.1 Contexte
 
-*(inchangé par rapport à la v1.0 — le constat de départ n'a pas bougé)*
+Dans beaucoup de cliniques de proximité, les rendez-vous sont gérés au téléphone,
+sur un agenda papier ou dans un fichier partagé. Il en résulte des doubles
+réservations, des créneaux perdus quand un patient annule, aucune vue commune sur
+la journée en cours, et aucune donnée pour piloter l'activité.
 
-Dans une partie des cliniques de proximité du Québec, la prise et le suivi des
-rendez-vous restent organisés à l'aide d'outils hétérogènes : appels
-téléphoniques, agendas papier, fichiers de calcul non partagés. Cette
-fragmentation engendre des doubles réservations, des rendez-vous manqués
-(« no-shows », 10 % à 30 % selon les contextes), une surcharge administrative et
-une absence de données pour piloter l'activité.
+**Une précision est apparue en cours de projet.** La v1.0 plaçait le patient au
+centre. En travaillant le besoin, nous avons retenu que **dans une petite
+clinique, le patient appelle — il ne s'inscrit pas**. L'utilisateur qui vit le
+problème est la réception. Ce déplacement a réorganisé le reste du projet.
 
-**Ce que le projet a précisé en cours de route.** La v1.0 posait le patient comme
-utilisateur principal, sur le modèle des plateformes grand public (Doctolib,
-Clic Santé). En travaillant le besoin, nous avons retenu un constat plus
-resserré : **dans une petite clinique, le patient appelle — il ne s'inscrit
-pas.** L'utilisateur qui vit le problème n'est pas le patient, c'est la personne
-qui décroche.
+### 1.2 Objectifs
 
-Cela n'a pas supprimé le canal patient, mais l'a fait passer du premier au second
-plan. C'est l'écart n° 2, et c'est le choix produit le plus structurant du
-projet.
-
-### 1.2 Objectifs — et le résultat atteint
-
-#### Objectifs métiers
-
-| ID | Objectif v1.0 | Résultat |
+| ID | Objectif | Résultat |
 |---|---|---|
-| **OM-01** | Réserver, modifier ou annuler en moins de 90 s sans téléphoner | ⚠️ **Partiel.** Réservation et annulation livrées ; **modification non livrée**. Le délai n'a pas été chronométré formellement |
-| **OM-02** | Le médecin consulte son horaire du jour et de la semaine en une vue | ✅ **Atteint** — le flux du jour, partagé avec la réception |
-| **OM-03** | Réduire la charge administrative en automatisant prise, confirmation, annulation | ✅ **Atteint** — et renforcé : une plage saisie une fois génère ses créneaux |
-| **OM-04** | Éviter les doubles réservations par contrôle serveur **et** base | ✅ **Atteint et dépassé.** La garantie est un **index unique partiel** en base : ce n'est plus le code applicatif qui arbitre |
-| **OM-05** | Centraliser en garantissant la séparation logique par clinique | ✅ **Atteint** — chaque requête est bornée par la clinique portée par le jeton |
-| **OM-06** | Sécuriser les accès selon le rôle | ✅ **Atteint** — RBAC à 4 rôles, gardes sur chaque route protégée |
-| **OM-07** | Statistiques d'activité (volumes, no-show, occupation) | ✅ **Atteint** — sur données réelles, filtrables par période et par médecin |
+| OM-01 | Réserver, modifier ou annuler sans téléphoner | ⚠️ Réservation et annulation livrées ; **modification non livrée** |
+| OM-02 | Le médecin voit sa journée en une vue | ✅ Le flux du jour |
+| OM-03 | Réduire la charge administrative | ✅ Une plage saisie une fois génère ses créneaux |
+| OM-04 | Empêcher les doubles réservations | ✅ Garantie posée **dans la base**, pas dans le code |
+| OM-05 | Séparer les données par clinique | ✅ Chaque requête est bornée par le rôle de l'appelant |
+| OM-06 | Sécuriser les accès selon le rôle | ✅ RBAC à 4 rôles |
+| OM-07 | Fournir des statistiques d'activité | ✅ Volumes, absences, occupation |
 
-**6 objectifs métiers sur 7 atteints**, le septième partiellement.
+Six objectifs sur sept atteints.
 
-#### Objectifs pédagogiques
+Les objectifs pédagogiques (architecture client-serveur, qualité de code,
+sécurité, base relationnelle, conteneurisation) sont atteints, avec deux réserves :
+la dette de formatage n'a pas été résorbée, et la sécurité est incomplète sur les
+couches secondaires (§ 3.3).
 
-| ID | Objectif v1.0 | Résultat |
-|---|---|---|
-| **OP-01** | Architecture client-serveur complète | ✅ Atteint, et déployée en ligne |
-| **OP-02** | Qualité de code : typage, linting, revues, tests | ⚠️ **Partiel.** Typage strict ✅, 203 tests ✅, 21 revues de PR ✅ — mais **dette de formatage assumée** : 233 fichiers jamais passés au formateur, 9 avertissements d'accessibilité |
-| **OP-03** | Stratégie de sécurité conforme OWASP | ⚠️ **Partiel** — voir §3.3, où chaque écart est nommé |
-| **OP-04** | Schéma relationnel normalisé et performant | ✅ Atteint — 7 migrations versionnées, contraintes et index posés en base |
-| **OP-05** | Déploiement local industrialisé via Docker Compose | ✅ **Atteint et dépassé** — Docker Compose fonctionne, *et* l'application est en ligne |
+### 1.3 Périmètre du projet
 
-### 1.3 Périmètre réel
+#### Le noyau minimal — livré en entier
 
-#### Livré
+La rétroaction demandait d'identifier ce qui serait livré coûte que coûte. Voici
+ce noyau, tel que nous l'avions arrêté, et il est **entièrement livré** :
 
-- l'authentification (inscription, connexion, déconnexion, réinitialisation du
-  mot de passe, verrouillage après échecs) et le RBAC à 4 rôles ;
-- la gestion des utilisateurs, bornée à la clinique de l'appelant ;
-- la gestion des disponibilités par **plages datées**, avec génération
-  automatique des créneaux réservables, et les congés ;
-- la réservation par la réception pour un **patient léger** créé au comptoir ;
-- la réservation en **libre-service par un patient inscrit** — annuaire public
-  des cliniques, choix de sa clinique, créneaux réellement libres, « Mes
-  rendez-vous » ;
-- l'annulation avec **motif obligatoire**, qui libère le créneau ;
-- le flux clinique du jour et les transitions de statut ;
-- les notifications internes sur les trois événements du cycle de vie ;
-- l'export CSV des rendez-vous sur une période ;
-- les tableaux de bord et statistiques ;
-- la base PostgreSQL pilotée uniquement par migrations versionnées ;
-- le déploiement local Docker Compose **et** la mise en ligne sur Azure.
+1. Se connecter, avec des droits qui dépendent du rôle ;
+2. Publier une plage de disponibilité, et obtenir ses créneaux automatiquement ;
+3. Réserver un créneau pour un patient, sans qu'une double réservation soit
+   possible ;
+4. Suivre le rendez-vous dans la journée : arrivé, en consultation, terminé ;
+5. Annuler, et récupérer le créneau.
 
-#### Prévu mais non livré
+Tout le reste est venu par-dessus.
 
-| Élément | Raison |
-|---|---|
-| Gestion des médecins et des spécialités par l'interface (EF-03, *Must*) | Non commencé. L'accès rapide « Médecins » est visible mais **grisé** : l'emplacement est réservé et l'absence est assumée plutôt que masquée |
-| Configuration d'une clinique par l'interface (EF-02, *Must*) | Codée sur une branche (MEDIPLAN-18), **non intégrée** — voir §4.3 |
-| Modification / replanification d'un rendez-vous (EF-05, *Must*) | Non commencée |
-| Décalage en bloc des rendez-vous d'un médecin | Codé et testé sur une branche (MEDIPLAN-24), **non intégré** |
-| Disponibilités **récurrentes** (EF-04, *Must*) | Remplacées par des plages datées, plus simples et suffisantes pour le besoin démontré |
-| Rappels par courriel (EF-11, *Should*) | Non commencés. Aucune notification ne sort de l'application |
-| Annulation par le patient lui-même | Suppose une règle de délai minimum, non implémentée. Nous avons préféré ne pas livrer l'une sans l'autre |
-| Wireframes des écrans clés (LIV-07) | Remplacés par un **design system documenté** et un audit UX/UI — voir §4.2 |
-| Documentation OpenAPI / Swagger (LIV-10) | Non produite. La dépendance n'est pas installée |
+#### Livré en plus du noyau
 
-#### Exclu dès l'origine, et toujours exclu
+Notifications internes, statistiques et tableaux de bord, export CSV, réservation
+en libre-service par le patient, mode sombre, mise en ligne sur Azure.
 
-Dossier médical (DSE/DSQ), prescriptions, paiement en ligne, application mobile
-native, synchronisation d'agenda externe, IA médicale, intégration hospitalière.
+> La rétroaction signalait que les notifications, les statistiques et le flux du
+> jour pourraient être de trop. Les trois sont livrés. Les rappels par courriel,
+> quatrième élément signalé, ne le sont pas — et nous les avons retirés du
+> périmètre plutôt que de les promettre.
+
+#### Une clinique, pas un réseau de cliniques
+
+**Question posée dans la rétroaction, tranchée ici : MediPlan vise une seule
+clinique fonctionnelle.**
+
+Le multi-cliniques existe dans le modèle de données et dans la sécurité — chaque
+compte porte une clinique, chaque requête est filtrée dessus, et un annuaire
+public liste les cliniques à l'inscription. Mais **aucun écran ne permet de créer
+ou de configurer une clinique**. Ouvrir une seconde clinique demande aujourd'hui
+une intervention en base.
+
+C'était l'ambiguïté principale de la v1.0. Elle est levée.
+
+#### Non livré, bien que prévu
+
+- gestion des médecins et des spécialités par l'interface *(l'accès rapide est
+  visible mais grisé, plutôt que masqué)* ;
+- configuration d'une clinique par l'interface ;
+- modification ou déplacement d'un rendez-vous ;
+- décalage en bloc des rendez-vous d'un médecin *(codé, testé, non intégré)* ;
+- disponibilités récurrentes *(remplacées par des plages datées)* ;
+- **rappels par courriel — reclassés en amélioration possible, § 2.2** ;
+- annulation par le patient *(elle suppose une règle de délai minimum que nous
+  n'avons pas écrite ; nous préférons ne pas livrer l'une sans l'autre)*.
+
+#### Exclu dès l'origine
+
+Dossier médical, prescriptions, paiement en ligne, application mobile native,
+synchronisation d'agenda externe, IA médicale, intégration hospitalière.
 
 ---
 
@@ -148,606 +145,408 @@ native, synchronisation d'agenda externe, IA médicale, intégration hospitaliè
 
 ### 2.1 Besoins et exigences métiers
 
-#### Problématique à résoudre
+#### Problématique
 
-Centraliser la gestion des rendez-vous et le flux clinique quotidien d'une
-clinique de petite ou moyenne taille, aujourd'hui éclaté entre appels
-téléphoniques, agendas papier et fichiers de calcul. La solution doit **supprimer
-les doubles réservations**, réduire le temps administratif consacré aux appels, et
-ne perdre aucun créneau libéré par une annulation.
-
-**Ce que la v1.0 formulait autrement.** Elle ajoutait « offrir aux patients un
-canal de réservation autonome accessible 24 h/24 » comme exigence de premier rang.
-Ce canal existe, mais il est **second** : le besoin premier est celui de la
-réception. Voir § 1.1.
+Centraliser les rendez-vous et le flux quotidien d'une clinique de petite taille :
+supprimer les doubles réservations, réduire le temps passé au téléphone, et ne
+perdre aucun créneau libéré par une annulation.
 
 #### Utilisateurs cibles
 
-| Rôle | Profil | Besoins réellement couverts |
-|---|---|---|
-| **Administrateur de clinique** *(la réception)* | Coordonne l'accueil et la planification, supervise plusieurs médecins. **C'est l'utilisateur principal — celui qui vit le problème.** | Publier des plages, réserver au téléphone, suivre la journée, annuler avec motif, mesurer l'activité, gérer les comptes |
-| **Médecin** | Peu de temps pour des outils complexes ; consulte entre deux patients | Voir sa journée d'un coup d'œil, publier ses disponibilités, faire avancer les statuts, être notifié sans rien demander |
-| **Patient** | Appelle la clinique ; parfois réserve lui-même | Exister sans compte (**patient léger**, créé au comptoir), ou réserver en libre-service et consulter ses rendez-vous |
-| **Super administrateur** | Configuration multi-cliniques | ⚠️ **Rôle appliqué côté sécurité, mais sans écran dédié** — voir SC-04 |
-
-> ⚠️ **Écart avec la v1.0.** Celle-ci décrivait quatre personas d'égale
-> importance, patient en tête. La hiérarchie réelle place la réception en premier
-> et le super administrateur en dernier — sans interface.
+| Rôle | Ce qu'il fait dans MediPlan |
+|---|---|
+| **Administrateur de clinique** *(la réception)* | L'utilisateur principal. Plages, réservations, flux du jour, annulations, statistiques, comptes |
+| **Médecin** | Consulte sa journée, publie ses disponibilités, fait avancer les statuts, reçoit les notifications |
+| **Patient** | Existe sans compte (*patient léger*, créé au comptoir), ou réserve lui-même et consulte ses rendez-vous |
+| **Super administrateur** | Rôle appliqué côté sécurité, **sans écran dédié** |
 
 #### Scénarios d'utilisation
 
-Les scénarios SC-01 à SC-05 de la v1.0 sont réécrits ci-dessous pour décrire ce
-que l'application fait réellement. Les écarts sont signalés.
+Les diagrammes de cas d'utilisation sont dans
+[`docs/conception/cas-utilisation/`](../conception/cas-utilisation/) : une vue
+d'ensemble et six diagrammes détaillés.
 
-> 📐 **Diagramme de cas d'utilisation** : la vue d'ensemble des acteurs et de leurs
-> cas est dans [`docs/conception/cas-utilisation/uc-01-global.md`](../conception/cas-utilisation/uc-01-global.md)
-> ([image](../conception/images/uc-01-global.png)), accompagnée de six diagrammes
-> détaillés — un par domaine fonctionnel.
+**SC-01 — Réserver.** Deux canaux. *À la réception* : médecin, créneau, patient —
+le patient est créé au comptoir sans compte. *En libre-service* : le patient
+inscrit choisit un médecin, un créneau et un motif. Les deux passent par la même
+transaction et le même index en base, donc la garantie ne dépend pas du canal.
+Seuls les créneaux réellement libres sont proposés.
+*Écart : pas de recherche par spécialité, on choisit un médecin.*
 
-#### SC-01 — Réserver un rendez-vous · **deux canaux**
+**SC-02 — Annuler.** Le motif est obligatoire : tant qu'il est vide, la
+confirmation reste inactive. Le créneau redevient réservable immédiatement.
+*Écarts : pas de modification ni de replanification, pas de délai minimum, et le
+patient ne peut pas annuler lui-même.*
 
-**Canal A — la réception, pour un patient au téléphone** *(canal principal)*
+**SC-03 — Suivre la journée.** Vue partagée entre la réception et le médecin.
+Chaque rendez-vous suit : Réservé → Arrivé → En consultation → Terminé, ou Annulé.
+Les statuts terminaux demandent une confirmation. Une notification interne est
+émise à chaque changement.
+*Écart : le décalage en bloc en cas de retard n'est pas intégré.*
 
-> Acteur : administrateur de clinique · Précondition : au moins une plage publiée
+**SC-04 — Configurer une clinique.** *Non livré par l'interface* (§ 1.3).
 
-1. La réception ouvre « Nouveau rendez-vous » et choisit le médecin.
-2. Elle choisit une plage de disponibilité, puis un créneau **parmi ceux qui
-   sont réellement libres** — un créneau pris n'apparaît plus.
-3. Elle saisit le patient (prénom, nom, motif) : un **patient léger** est créé,
-   sans compte ni mot de passe.
-4. La base refuse toute seconde écriture sur le même créneau.
+**SC-05 — Consulter les statistiques.** Volume de rendez-vous, taux d'absence,
+taux d'occupation, détail par médecin, filtrables par période. Calculés en base,
+bornés à la clinique.
+*Écart : les motifs d'annulation ne sont pas agrégés.*
 
-**Canal B — le patient, en libre-service**
-
-> Acteur : patient inscrit et rattaché à une clinique
-
-1. Le patient consulte les créneaux libres de sa clinique.
-2. Il réserve. **L'identité vient du jeton**, jamais du corps de la requête : un
-   patient ne peut pas réserver au nom d'un autre.
-3. Le rendez-vous apparaît dans « Mes rendez-vous ».
-
-> ⚠️ **Écart avec la v1.0.** Celle-ci décrivait une recherche par spécialité sur
-> 30 jours. La recherche par spécialité n'existe pas : on choisit un médecin.
->
-> ✅ **Point non prévu par la v1.0, et tenu.** Les deux canaux empruntent **la
-> même transaction, le même verrou et le même index**. La garantie
-> anti-double-réservation ne dépend pas du canal.
-
-#### SC-02 — Annuler un rendez-vous
-
-> Acteur : administrateur de clinique
-
-1. Il ouvre le menu de la ligne du rendez-vous et choisit « Annuler ».
-2. **Le bouton de confirmation reste inactif tant que le motif est vide.** C'est
-   une règle métier, pas une politesse d'interface.
-3. Le rendez-vous passe au statut « annulé » et **le créneau redevient
-   réservable** — rendu possible par l'index unique *partiel*, qui exclut les
-   rendez-vous annulés.
-
-> ⚠️ **Écarts avec la v1.0** : pas de modification/replanification ; pas de délai
-> minimum de 24 h ; le patient ne peut pas annuler lui-même.
-
-#### SC-03 — Gérer le flux clinique du jour
-
-> Acteur : administrateur de clinique ou médecin
-
-Vue partagée de la journée. Chaque rendez-vous suit : **Réservé → Arrivé → En
-consultation → Terminé**, ou **Annulé**. Les statuts terminaux demandent une
-confirmation. Une notification interne est émise à chaque changement.
-
-> ⚠️ **Écart** : le décalage en bloc en cas de retard n'est pas intégré.
-
-#### SC-04 — Configurer une clinique
-
-> **Non livré par l'interface.** Les cliniques existent en base, alimentent
-> l'annuaire public et bornent toutes les requêtes ; mais aucun écran ne permet
-> de les créer ou de les configurer. Le rôle super administrateur existe et est
-> appliqué côté sécurité.
-
-#### SC-05 — Consulter les statistiques
-
-> Acteur : administrateur de clinique
-
-Volume de rendez-vous, taux d'absence, taux d'occupation, détail par médecin,
-filtrables par période. Calculés en base sur les données réelles, bornés à la
-clinique de l'appelant.
-
-> ⚠️ **Écart** : les motifs d'annulation ne sont pas agrégés. L'export CSV existe,
-> mais séparément (EF-10).
-
-### 2.2 Fonctionnalités — état de livraison
+### 2.2 Fonctionnalités principales
 
 | ID | Fonctionnalité | Priorité v1.0 | État |
 |---|---|---|---|
-| EF-01 | Authentification et gestion des comptes | Must | ✅ **Livré** — et dépassé (verrouillage, réinitialisation) |
-| EF-02 | Gestion des cliniques | Must | ⚠️ **Partiel** — en base et à l'inscription ; pas d'écran de configuration |
-| EF-03 | Gestion des médecins et des spécialités | Must | ❌ **Non livré** |
-| EF-04 | Gestion des disponibilités | Must | ⚠️ **Partiel** — plages **datées** + congés ; pas de récurrence |
-| EF-05 | Réservation, modification, annulation | Must | ⚠️ **Partiel** — réservation (2 canaux) et annulation ✅ ; **modification ❌** |
-| EF-06 | Flux clinique du jour | Must | ✅ **Livré** |
-| EF-07 | Notifications internes | Must | ✅ **Livré** |
-| EF-08 | Tableaux de bord et statistiques | Should | ✅ **Livré** |
-| EF-09 | Gestion des rôles et permissions (RBAC) | Must | ✅ **Livré** |
-| EF-10 | Export CSV | Could | ✅ **Livré** |
-| EF-11 | Rappels par courriel | Should | ❌ **Non livré** |
+| EF-01 | Authentification et comptes | Must | ✅ Livré |
+| EF-02 | Gestion des cliniques | Must | ⚠️ En base et à l'inscription ; pas d'écran |
+| EF-03 | Gestion des médecins et spécialités | Must | ❌ Non livré |
+| EF-04 | Gestion des disponibilités | Must | ⚠️ Plages datées et congés ; pas de récurrence |
+| EF-05 | Réservation, modification, annulation | Must | ⚠️ Réservation et annulation ✅ ; modification ❌ |
+| EF-06 | Flux clinique du jour | Must | ✅ Livré |
+| EF-07 | Notifications internes | Must | ✅ Livré |
+| EF-08 | Tableaux de bord et statistiques | Should | ✅ Livré |
+| EF-09 | Rôles et permissions (RBAC) | Must | ✅ Livré |
+| EF-10 | Export CSV | Could | ✅ Livré |
+| EF-11 | **Rappels par courriel** | ~~Should~~ | ❌ **Retiré du périmètre** — amélioration possible |
 
-**Bilan MoSCoW** — 8 *Must* : 4 livrés, 3 partiels, 1 absent. 2 *Should* : 1 livré.
-1 *Could* : livré.
+Sur 8 exigences *Must* : 4 livrées, 3 partielles, 1 absente.
 
-> **Un *Could* est livré pendant qu'un *Must* ne l'est pas.** C'est le symptôme le
-> plus net de notre défaut de méthode : l'export CSV était rapide et bien cerné,
-> la gestion des médecins était longue et floue. Nous avons suivi la facilité au
-> lieu de la priorité. C'est exactement ce que MoSCoW sert à empêcher, et nous ne
-> l'avons pas relu en cours de projet.
+**EF-11, rappels par courriel.** La rétroaction demandait si ces rappels étaient
+réellement prévus. Réponse : non. Aucune notification ne sort de l'application. Ils
+passent en amélioration possible (§ 6). Nous préférons le dire que le laisser
+croire.
+
+**Un point que nous devons signaler.** L'export CSV était classé *Could* et il est
+livré ; la gestion des médecins était classée *Must* et elle ne l'est pas.
+L'explication est simple : l'export était court et bien défini, la gestion des
+médecins était longue et floue. Nous avons suivi le plus facile au lieu du plus
+important, et nous n'avons pas relu notre priorisation en cours de route.
 
 ### 2.3 Interface utilisateur
 
-Les exigences ergonomiques de la v1.0 sont **tenues** :
-
 | Exigence v1.0 | Résultat |
 |---|---|
-| Moins de trois clics pour réserver depuis l'accueil | ✅ Deux clics jusqu'au formulaire |
-| Navigation adaptée au rôle, retours systématiques | ✅ Le menu change visiblement selon le rôle — le RBAC se voit à l'écran |
-| Responsive à partir de 360 px | ✅ Vérifié en captures mobile |
-| WCAG 2.1 AA | ⚠️ **Travaillé, non certifié** — lien d'évitement, focus visible, ARIA, cibles 44 px, contrastes vérifiés ; **9 avertissements d'accessibilité clavier restent** |
+| Moins de trois clics pour réserver | ✅ Deux clics jusqu'au formulaire |
+| Navigation adaptée au rôle | ✅ Le menu change visiblement selon le rôle |
+| Responsive à partir de 360 px | ✅ Vérifié |
+| WCAG 2.1 AA | ⚠️ Travaillé, non certifié — 9 avertissements d'accessibilité restent |
 
-**Ajouts non prévus par la v1.0** : un design system tokenisé
-(`docs/frontend/design-system.md`), une refonte complète de l'interface et un
-**mode sombre**.
+**Ajouts non prévus** : un design system tokenisé
+([`docs/frontend/design-system.md`](../frontend/design-system.md)), une refonte
+complète de l'interface, et un mode sombre.
 
-**Retrait** : les wireframes annoncés (LIV-07) n'ont pas été produits comme tels.
-Ils ont été remplacés en cours de route par un design system documenté et un
-audit UX/UI — ce qui est plus utile en aval, mais ne remplace pas un wireframe en
-amont. Nous avons donc conçu l'interface en la codant.
-
-**Ce qui tient lieu de référence graphique aujourd'hui** : les écrans réels, tous
-capturés et commentés dans le
-[manuel d'utilisation](../guide-utilisation/README.md) — connexion, inscription,
-tableau de bord, disponibilités, prise de rendez-vous, flux du jour, statistiques,
-mode sombre et déclinaison mobile.
+**Wireframes.** Ils n'ont pas été produits en amont. Nous avons conçu l'interface
+en la codant, puis documenté le résultat. Ce qui en tient lieu aujourd'hui : les
+écrans réels, tous capturés et commentés dans le
+[manuel d'utilisation](../guide-utilisation/README.md). C'est un manque assumé,
+pas un oubli déguisé.
 
 ### 2.4 Conditions d'utilisation
 
-#### Environnements
+**Environnements.** Ordinateur (Windows, macOS, Linux), tablette à partir de
+768 px, téléphone à partir de 360 px via navigateur. Aucune application native.
+L'application s'utilise sans rien installer.
 
-| Environnement | État |
-|---|---|
-| Ordinateur de bureau ou portable (Windows, macOS, Linux) | ✅ Cible principale, développée et vérifiée |
-| Tablette, à partir de 768 px | ✅ Supporté par la mise en page adaptative |
-| Téléphone, à partir de 360 px, via navigateur | ✅ Vérifié en captures — le menu devient un tiroir |
-| Application native iOS / Android | ❌ Hors périmètre, dès l'origine |
+**Navigateurs.** Développé et vérifié sur **Chrome et Edge**. Firefox et Safari
+étaient annoncés dans la v1.0 mais **n'ont pas été testés**.
 
-L'application s'utilise **dans un navigateur, sans rien installer**.
+**Limites d'usage.**
 
-#### Navigateurs
-
-| Navigateur | État |
-|---|---|
-| Google Chrome, Microsoft Edge | ✅ **Développé et vérifié dessus** |
-| Mozilla Firefox, Apple Safari | ⚠️ **Non testés.** La v1.0 les annonçait ; nous ne pouvons pas l'affirmer |
-
-#### Limites et contraintes
-
-- **Connexion Internet requise** — aucun mode hors ligne.
-- **Démarrage à froid de 10 à 15 secondes** au premier accès après une période
-  d'inactivité. C'est la contrepartie du *scale-to-zero* qui maintient le coût
-  d'hébergement à ~0 $/mois. Les accès suivants sont instantanés.
-- **Session de 60 minutes**, sans rafraîchissement automatique : au-delà, il faut
-  se reconnecter.
-- **Verrouillage du compte** après cinq tentatives de connexion échouées.
-- **Aucune pagination serveur** : le volume académique le permet, une clinique
-  réelle à fort volume non.
-- **Données de démonstration entièrement fictives.** Aucune donnée réelle de
-  patient n'a jamais été manipulée, et la plateforme n'est pas destinée à en
-  recevoir en l'état — voir les limites de sécurité au § 3.3.
+- connexion Internet requise, aucun mode hors ligne ;
+- démarrage à froid de 10 à 15 secondes après une période d'inactivité —
+  contrepartie du *scale-to-zero* qui maintient le coût à ~0 $/mois ;
+- session de 60 minutes, sans rafraîchissement automatique ;
+- verrouillage du compte après cinq échecs de connexion ;
+- pas de pagination serveur : le volume académique le permet, une clinique à fort
+  volume non ;
+- données de démonstration entièrement fictives. Aucune donnée réelle de patient
+  n'a été manipulée, et la plateforme n'est pas prête à en recevoir (§ 3.3).
 
 ---
 
 ## 3. Description technique
 
-### 3.1 Technologies retenues
+### 3.1 Technologies à utiliser
 
-| Couche | v1.0 annonçait | Réellement utilisé |
+| Couche | v1.0 annonçait | Utilisé |
 |---|---|---|
-| Frontend | Angular + Angular Material | **Angular 22** standalone + Signals, **Angular Material 3**, **Tailwind CSS 4** |
-| Backend | NestJS | **NestJS 11**, préfixe `api/v1` |
-| ORM | « TypeORM **ou** Prisma » | **TypeORM**, migrations versionnées |
-| Base | PostgreSQL | **PostgreSQL** — infogéré chez Neon en ligne |
-| Tests | Jest + Cypress/Playwright | **Jest** seul |
-| Conteneurs | Docker + Docker Compose | ✅ **+ Azure Container Apps** |
-| CI | GitHub Actions | ✅ |
-| Suivi | « kanban GitHub Projects » | **Jira** (projet MEDIPLAN) |
-| Non installés | Helmet, Swagger, Artillery/k6, Cypress | ❌ aucune de ces quatre |
+| Frontend | Angular + Material | Angular 22 standalone, Material 3, Tailwind 4 |
+| Backend | NestJS | NestJS 11, API préfixée `api/v1` |
+| ORM | TypeORM **ou** Prisma | TypeORM, migrations versionnées |
+| Base | PostgreSQL | PostgreSQL, infogéré chez Neon |
+| Tests | Jest + Cypress/Playwright | **Jest seul** |
+| Conteneurs | Docker Compose | Docker Compose **+ Azure Container Apps** |
+| Suivi | GitHub Projects | **Jira** |
 
-### 3.2 Architecture réelle
+Quatre outils annoncés n'ont pas été installés : Helmet, Swagger, Cypress et
+Artillery/k6. Les conséquences sont aux § 3.3, 3.4 et 4.2.
 
-La v1.0 décrivait trois tiers orchestrés par Docker Compose, en local. C'est
-toujours vrai en développement. **En ligne, l'architecture est allée plus loin :**
+### 3.2 Architecture du système
+
+Architecture client-serveur en trois tiers. En développement, les trois services
+tournent sous Docker Compose. En ligne :
 
 ```
 Navigateur
     │  HTTPS
-    ▼
-Frontend Angular servi par nginx        ── Azure Container Apps (ingress public)
-    │  proxy /api/  ──►  Host: $proxy_host
-    ▼
-API REST NestJS                          ── Azure Container Apps (ingress INTERNE)
+Frontend Angular servi par nginx     ── Azure Container Apps (ingress public)
+    │  proxy /api/
+API REST NestJS                       ── Azure Container Apps (ingress interne)
     │
-    ▼
-PostgreSQL infogéré                      ── Neon
+PostgreSQL infogéré                   ── Neon
 ```
 
-Trois décisions structurantes, aucune n'était dans la v1.0 :
+Trois décisions n'étaient pas dans la v1.0 :
 
-1. **Le backend n'a aucune adresse publique.** Ingress interne : il n'est
-   joignable que par le frontend. C'est ce qui **supprime tout besoin de CORS** —
-   il n'y a jamais de requête inter-origines.
-2. **Toute l'infrastructure naît d'un template Bicep.** Aucune ressource n'a été
-   créée à la main ; chaque déploiement est précédé d'un `what-if`.
-3. **Scale-to-zero partout où c'est possible.** Coût maintenu à **~0 $/mois**,
-   contrainte d'un crédit étudiant non renouvelable. Le prix payé est un
-   démarrage à froid de 10 à 15 secondes, assumé et expliqué en démonstration.
+1. **Le backend n'a aucune adresse publique.** Il n'est joignable que par le
+   frontend. Cela le met hors d'atteinte depuis Internet et supprime tout besoin
+   de CORS, puisqu'il n'y a jamais de requête inter-origines.
+2. **L'infrastructure est décrite en Bicep** ([`infra/`](../../infra/)). Aucune
+   ressource n'a été créée à la main.
+3. **Le schéma de base est piloté uniquement par des migrations versionnées.**
+   Aucune synchronisation automatique : n'importe qui reconstruit le même schéma.
 
-**Conventions de schéma.** `synchronize: false`, `migrationsRun: false` : le
-schéma est piloté **uniquement** par des migrations versionnées, et chaque entité
-est déclarée explicitement, jamais par recherche de répertoire. N'importe qui
-reconstruit exactement le même schéma.
+Aucun système externe n'est intégré, conformément au périmètre.
 
-### 3.3 Sécurité — ce qui est en place, et ce qui manque
+### 3.3 Sécurité
 
-C'est la section où la v1.0 promettait le plus. Voici l'état exact.
+**En place :** hachage bcrypt à coût 12 ; verrouillage après cinq échecs ; RBAC à
+4 rôles avec gardes sur chaque route protégée ; séparation des données par
+clinique appliquée côté serveur ; validation stricte des entrées, qui **rejette**
+tout champ non déclaré au lieu de l'ignorer ; requêtes paramétrées via l'ORM ;
+HTTPS ; erreurs normalisées sans fuite d'information ; aucun secret dans le dépôt.
 
-#### Tenu
+**Absent, alors que la v1.0 s'y engageait :**
 
-| Exigence v1.0 | État |
+| Manque | Conséquence |
 |---|---|
-| Hachage des mots de passe, jamais en clair | ✅ **bcrypt, coût 12** (la v1.0 autorisait bcrypt à coût adapté) |
-| Verrouillage après tentatives échouées | ✅ configurable |
-| RBAC à 4 rôles, gardes sur chaque route protégée | ✅ |
-| Séparation stricte des données par clinique | ✅ chaque requête bornée par le jeton |
-| Moindre privilège dès la conception | ✅ |
-| Validation systématique des entrées | ✅ `ValidationPipe` global en `whitelist` + `forbidNonWhitelisted` : tout champ non déclaré est **rejeté**, pas ignoré |
-| Requêtes paramétrées contre l'injection SQL | ✅ via l'ORM, exclusivement |
-| HTTPS en production | ✅ terminaison TLS par Container Apps |
-| Pas de fuite d'information dans les erreurs | ✅ filtre d'exception global qui normalise toutes les réponses |
-| Aucun secret dans le dépôt | ✅ paramètres Bicep `@secure()` puis secrets natifs Container Apps |
+| Pas de jeton de rafraîchissement ni de rotation | Un seul JWT de 60 minutes, non révocable avant expiration |
+| Pas de déconnexion côté serveur | Le jeton reste valide jusqu'à son expiration |
+| **Aucun en-tête HTTP de sécurité** | Ni CSP, ni HSTS, ni X-Frame-Options. Helmet n'est pas installé |
+| Aucune journalisation d'audit | Aucune traçabilité des accès |
+| Aucune limitation de débit | Le verrouillage protège un compte, pas l'API |
 
-#### Non tenu — nommé sans détour
+La protection CSRF est sans objet : l'authentification passe par un en-tête
+`Authorization`, pas par un cookie de session.
 
-| Exigence v1.0 | État | Portée réelle du risque |
-|---|---|---|
-| **Refresh token avec rotation** | ❌ **Absent.** Un seul JWT HS256, durée 60 min | Pas de révocation possible avant expiration |
-| **Déconnexion serveur par invalidation** | ❌ **Absente.** La déconnexion est côté client : le jeton reste valide jusqu'à son expiration | Conséquence directe du point ci-dessus |
-| **En-têtes HTTP de sécurité (Helmet)** | ❌ **Absents.** Ni Helmet côté API, ni `add_header` côté nginx : pas de CSP, X-Frame-Options, HSTS ni X-Content-Type-Options | C'est l'écart le plus facile à combler — quelques lignes |
-| **Journalisation des actions sensibles** | ❌ **Absente.** Aucun journal d'audit applicatif | Aucune traçabilité des accès |
-| Protection CSRF | ➖ **Sans objet** — aucun cookie de session : l'authentification passe par un en-tête `Authorization: Bearer` |
-| Limitation de débit (anti-force brute réseau) | ❌ Absente. Le verrouillage de compte protège un compte donné, pas l'API dans son ensemble |
-
-> **Notre lecture.** Le socle est correct : hachage, validation stricte, RBAC
-> réellement appliqué, séparation par clinique, aucun secret versionné. Ce qui
-> manque relève de la **défense en profondeur** — les couches qu'on ajoute quand
-> le principal tient. Les en-têtes de sécurité et la journalisation sont les deux
-> premiers éléments que nous ajouterions, et ils demandent moins d'une journée.
->
-> La v1.0 s'engageait sur l'ASVS niveau 1. Nous ne pouvons pas prétendre l'avoir
-> atteint : nous ne l'avons pas vérifié point par point.
-
-#### Cadre légal
-
-Inchangé et sans objet pratique : **aucune donnée réelle de patient n'a jamais
-été manipulée**. Le jeu de démonstration est entièrement fictif et généré. Les
-principes de la Loi 25 et de la LPRPDE ont guidé la conception (minimisation,
-séparation, moindre privilège) sans faire l'objet d'une mise en conformité.
+Le socle tient. Ce qui manque relève de la défense en profondeur, et les en-têtes
+de sécurité comme la journalisation demandent moins d'une journée. La v1.0
+s'engageait sur l'OWASP ASVS niveau 1 ; nous ne pouvons pas prétendre l'avoir
+atteint, faute de l'avoir vérifié point par point.
 
 ### 3.4 Performance et scalabilité
 
-#### Performance
+**Performance.** Sur les cinq exigences chiffrées de la v1.0, une seule a été
+vérifiée — mais c'est la seule qui porte une garantie d'intégrité plutôt qu'un
+confort :
 
-Les cinq exigences ENF-PERF de la v1.0 supposaient des outils qui n'ont pas été
-installés. État réel :
-
-| ID | Exigence v1.0 | État |
-|---|---|---|
-| ENF-PERF-01 | API < 300 ms au 95ᵉ percentile | ❌ **Non mesuré.** Observé le 12 août sur l'application en ligne : sonde `/health` **0,44 s**, connexion **0,99 s** — mesures ponctuelles, pas un percentile |
-| ENF-PERF-02 | Frontend < 2 s en 4G | ❌ Non mesuré. Premier accès à froid observé : **9,9 s**, dû au scale-to-zero, pas au poids de la page |
-| ENF-PERF-03 | Tableau de bord de 100 RDV < 1 s | ❌ Non mesuré |
-| ENF-PERF-04 | 50 utilisateurs concurrents | ❌ Non testé |
-| ENF-PERF-05 | **Aucune double réservation en accès concurrent** | ✅ **Vérifié** sur l'application déployée : deux réservations simultanées sur le même créneau → une **201**, une **409**. Non rejoué à 1000 itérations |
-
-**Un seul des cinq est vérifié — mais c'est celui qui compte.** ENF-PERF-05 est
-la seule exigence de performance qui porte une garantie d'intégrité ; les quatre
-autres portent un confort. Nous avons vérifié la garantie et laissé le confort.
-
-#### Scalabilité
-
-La v1.0 annonçait une capacité d'évolution horizontale « théorique dans le
-périmètre académique ». Elle l'est restée — mais l'architecture réelle l'a
-rapprochée d'un cran, sans que ce soit l'objectif :
-
-| Ce qui est en place | Ce qui manquerait pour monter en charge |
+| Exigence | État |
 |---|---|
-| **Le backend est sans état** — l'authentification passe par un jeton, aucune session n'est stockée en mémoire. Plusieurs instances peuvent donc coexister | Un test de charge : nous n'en avons fait aucun |
-| **Container Apps sait répliquer** — la montée en réplicas est une valeur de configuration, pas une réécriture | Le réglage est actuellement calibré pour le coût (`minReplicas 0`), pas pour la charge |
-| **L'intégrité ne dépend pas du nombre d'instances** — la garantie anti-double-réservation est posée dans la base, pas dans le code applicatif. Dix instances ne la fragilisent pas | — |
-| Base PostgreSQL infogérée, capable de réplicas en lecture | **La pagination serveur**, absente : c'est le premier mur qu'une clinique à fort volume rencontrerait, bien avant la capacité serveur |
+| API sous 300 ms au 95ᵉ percentile | ❌ Non mesuré. Observé : sonde 0,44 s, connexion 0,99 s |
+| Frontend sous 2 s | ❌ Non mesuré. Premier accès 9,9 s, dû au réveil des conteneurs |
+| Tableau de bord de 100 RDV sous 1 s | ❌ Non mesuré |
+| 50 utilisateurs simultanés | ❌ Non testé |
+| **Aucune double réservation en accès concurrent** | ✅ **Vérifié en ligne** : deux requêtes simultanées, une 201 et une 409 |
 
-> **Notre lecture.** Le point de rupture n'est pas la capacité d'hébergement, c'est
-> une décision d'implémentation : sans pagination, une liste de rendez-vous se
-> charge entièrement. C'est ce qui casserait en premier, et c'est ce que nous
-> corrigerions en premier.
+**Scalabilité.** Le backend est sans état — l'authentification passe par un jeton,
+aucune session n'est gardée en mémoire — donc plusieurs instances peuvent
+coexister, et Container Apps sait les répliquer par configuration. L'intégrité ne
+dépend pas du nombre d'instances, puisque la garantie est dans la base.
+
+Mais rien de tout cela n'a été testé sous charge. Et le premier mur ne serait pas
+la capacité serveur : c'est **l'absence de pagination**, qui fait charger une liste
+de rendez-vous en entier.
 
 ---
 
 ## 4. Planification et livrables
 
-### 4.1 Phases — prévues et réelles
+### 4.1 Phases du projet
 
-La v1.0 prévoyait cinq phases séquentielles sur 14 semaines. Le projet a été
-mené en **sprints**, suivis dans Jira, avec un découpage **par tranche
-verticale** : chacun mène sa fonctionnalité de la migration jusqu'à l'écran,
-plutôt qu'une séparation « un front / un back ».
+La v1.0 prévoyait cinq phases successives. Nous avons travaillé en sprints, avec
+un découpage **par tranche verticale** : chacun mène sa fonctionnalité de la
+migration jusqu'à l'écran, plutôt qu'une séparation « un front / un back ». Le
+développement frontend et backend s'est donc fait en parallèle, et la mise en
+ligne pendant le dernier sprint plutôt qu'à la fin.
 
-| Phase v1.0 | Réalité |
+Dates relevées dans l'historique du dépôt :
+
+| Date | Jalon |
 |---|---|
-| 1 — Analyse et conception | ✅ **Sprint 0** — cahier des charges, 7 cas d'utilisation, diagramme de classes, 3 diagrammes de séquence, ERD |
-| 2 — Développement backend | ✅ **Sprint 1** — socle monorepo, Docker, CI, puis authentification et RBAC |
-| 3 — Développement frontend | ✅ mené **en parallèle**, pas après : la tranche verticale l'impose |
-| 4 — Tests, sécurité, qualité | ⚠️ **Partiel** — tests unitaires oui, sécurité partielle, audits absents |
-| 5 — Déploiement et présentation | ✅ **Dépassé** — mise en ligne réelle, faite **en parallèle** du dernier sprint, pas à la fin |
+| 28 mai 2026 | Cahier des charges v1.0 |
+| 3 juin 2026 | Dossier de conception déposé |
+| 17 juin 2026 | Socle technique et authentification complets *(PR #1 à #12)* |
+| 8 juillet 2026 | Patient léger, disponibilités, prise de rendez-vous |
+| 21-22 juillet 2026 | Refonte UX/UI, KPI réels du tableau de bord |
+| 29 juillet 2026 | **Mise en ligne sur Azure** *(PR #16 à #18)* |
+| 10 août 2026 | Statistiques, export CSV, notifications *(PR #19 à #24)* |
+| 11 août 2026 | Réservation patient en libre-service *(PR #25 à #31)* |
+| 13 août 2026 | Présentation finale |
 
-#### Le calendrier réel
+Notre rythme a été irrégulier : deux semaines à deux commits, deux autres à
+trente-neuf. Nous avons produit à l'approche des échéances plutôt que
+régulièrement, et c'est la même cause qui explique le problème d'intégration
+décrit au § 4.3.
 
-Les dates ci-dessous sont **relevées dans l'historique du dépôt**, pas
-reconstituées de mémoire. Un jalon = une intégration dans `main`.
+### 4.2 Livrables attendus
 
-| Date | Jalon | Traces |
+| ID | Livrable | État |
 |---|---|---|
-| **28 mai 2026** | Cahier des charges v1.0 | `Cahier_des_charges_MediPlan.docx` |
-| **3 juin 2026** | Dossier de conception déposé — 7 cas d'utilisation, classes, séquence, ERD | premiers commits du dépôt |
-| **17 juin 2026** | **Socle et authentification complets** — monorepo, Docker, CI, JWT, verrouillage, réinitialisation, RBAC, coquille applicative | PR #1 à #12 |
-| **8 juillet 2026** | **Le rendez-vous** — patient léger, disponibilités et génération des créneaux, prise de RDV par la réception | 3 intégrations |
-| **21–22 juillet 2026** | Refonte UX/UI complète et KPI réels du tableau de bord | PR #15 |
-| **29 juillet 2026** | **Mise en ligne sur Azure** — infrastructure Bicep, correctif du routage `Host` | PR #16, #17, #18 |
-| **10 août 2026** | Statistiques, export CSV, notifications internes, jeu de démonstration | PR #19 à #24 |
-| **11 août 2026** | **Réservation patient en libre-service** — le second canal | PR #25 à #31 |
-| **12 août 2026** | Documentation de remise : cahier des charges v2, rapport final, manuel d'utilisation | ce document |
-| **13 août 2026** | Présentation finale | — |
+| LIV-01 | Code frontend + tests | ✅ `apps/frontend` — 133 tests |
+| LIV-02 | Code backend + tests | ✅ `apps/backend` — 70 tests |
+| LIV-03 | Schéma versionné par migrations | ✅ 7 migrations |
+| LIV-04 | Documentation technique | ✅ README, CONTRIBUTING, `docs/` |
+| LIV-05 | Cahier des charges final | ✅ ce document |
+| LIV-06 | **Diagrammes UML et ERD** | ✅ [`docs/conception/`](../conception/) — 7 cas d'utilisation, classes, 3 séquences, ERD, avec une explication écrite chacun |
+| LIV-07 | **Wireframes** | ❌ **Non produits.** Remplacés par le design system et le manuel d'utilisation (§ 2.3) |
+| LIV-08 | Application démontrable | ✅ En ligne, plus une vidéo de 4 min |
+| LIV-09 | Docker Compose et Dockerfiles | ✅ Démarrage en une commande |
+| LIV-10 | Documentation OpenAPI | ❌ Non produite — Swagger n'est pas installé |
+| LIV-11 | Support de présentation | ✅ 16 diapositives |
 
-#### Le rythme, tel qu'il a été
+**Vérification demandée par la rétroaction** — les annexes sont-elles présentes ?
 
-Le nombre de commits par semaine dessine un profil très irrégulier :
+- **Diagrammes UML** : oui, 11 diagrammes dans `docs/conception/`, en Mermaid et
+  exportés en images.
+- **Schéma d'architecture** : oui, § 3.2 de ce document, et détaillé dans
+  [`infra/README.md`](../../infra/README.md).
+- **Wireframes** : **non**, et c'est le seul manque. Voir § 2.3.
 
-```
-S23  ███████ 7          (3 juin — conception)
-S25  ███████████████████████████████████████ 39   (17 juin — socle + auth)
-S26  ████ 4
-S27  █ 1
-S28  █████████████ 13    (8 juillet — le rendez-vous)
-S29  ██ 2
-S30  ████████████████ 16 (21-22 juillet — refonte UI)
-S31  ███████████████████ 19  (29 juillet — mise en ligne)
-S32  ██ 2
-S33  ███████████████████████████████████████ 39   (10-12 août — la fin)
-```
+**Produits en plus** : infrastructure Azure en Bicep, rapport final de projet,
+manuel d'utilisation, document de tests et résultats, contributions individuelles,
+vidéo de démonstration.
 
-**Deux semaines à deux commits, deux semaines à trente-neuf.** Ce n'est pas un
-rythme de sprint, c'est un rythme d'échéances : nous avons produit à l'approche
-des rendus, pas de façon régulière. C'est la même cause qui produit la dérive
-d'intégration décrite au § 4.3 — on ne fusionne pas ce sur quoi on ne travaille
-pas cette semaine-là.
+### 4.3 Répartition du travail
 
-> ⚠️ **Les sprints ont été renumérotés en cours de projet** : Sprint 0 =
-> conception, Sprint 1 = authentification, Sprint 2 = rendez-vous. Certains
-> documents archivés portent encore l'ancienne numérotation, décalée de +1.
+*Section ajoutée à la demande de la rétroaction.*
 
-**Ce que le découpage en phases nous a coûté.** Il supposait qu'on finisse le
-backend avant d'attaquer le frontend. Nous ne l'avons pas fait, et c'était le bon
-choix — mais nous avons gardé du modèle en phases l'idée qu'on peut travailler
-longtemps sans intégrer. C'est de là que vient l'écart n° 5.
+Le découpage est par domaine fonctionnel, chacun menant sa partie de la base de
+données jusqu'à l'écran.
 
-### 4.2 Livrables
+| | Souleymane DIALLO | Zakaria Lahouiri | Larbi Saib |
+|---|---|---|---|
+| **Domaine** | Socle, sécurité, mise en ligne, espace patient | Le temps du médecin | Le rendez-vous et sa mesure |
+| **Conception** | Cahier des charges, 7 cas d'utilisation, ERD | Diagramme de classes | Diagrammes de séquence |
+| **Développement** | Monorepo, Docker, CI, authentification, JWT, RBAC, design system, refonte UI, index unique partiel, annulation, réservation patient, déploiement Azure | Disponibilités et génération des créneaux, congés, flux du jour, notifications internes, export CSV | Patient léger, socle du rendez-vous, contrainte anti-double-réservation, statistiques et tableaux de bord |
+| **Épiques Jira** | E1, E2, E4, E7 | E3, E5, E6 | — |
+| **Commits sur `main`** | 72 | 8 | 4 |
 
-| ID | Livrable v1.0 | État |
-|---|---|---|
-| LIV-01 | Code source frontend Angular + tests + README | ✅ `apps/frontend` — 133 tests |
-| LIV-02 | Code source backend NestJS + tests + README | ✅ `apps/backend` — 70 tests |
-| LIV-03 | Schéma PostgreSQL versionné par migrations | ✅ 7 migrations |
-| LIV-04 | Documentation technique | ✅ `README.md`, `CONTRIBUTING.md`, `docs/` |
-| LIV-05 | **Cahier des charges en version finale** | ✅ **le présent document** |
-| LIV-06 | Diagrammes UML + MCD/ERD | ✅ `docs/conception/` — 7 UC, classes, 3 séquences, ERD |
-| LIV-07 | Wireframes des écrans clés | ❌ **Remplacés** par `docs/frontend/design-system.md` et l'audit UX/UI |
-| LIV-08 | Application démontrable de bout en bout | ✅ **en ligne**, plus une vidéo de démonstration de 4 min 05 |
-| LIV-09 | `docker-compose.yml` et Dockerfiles | ✅ démarrage en une commande |
-| LIV-10 | Documentation OpenAPI (Swagger) | ❌ **Non produite** |
-| LIV-11 | Support de présentation finale | ✅ 16 diapositives |
+Le volume de commits est très inégal et nous l'assumons : Souleymane a porté le
+socle et l'intégration, ce qui produit mécaniquement beaucoup de commits, tandis
+que Zakaria et Larbi ont livré des fonctionnalités complètes en peu de commits. Ce
+chiffre mesure une façon de travailler, pas une contribution.
 
-**9 livrables sur 11.**
+Le détail par personne — réalisations, difficulté rencontrée, solution apportée —
+est dans [`docs/presentation/CONTRIBUTIONS.md`](../presentation/CONTRIBUTIONS.md),
+retracé commit par commit.
 
-**Livrables produits en plus de la v1.0** : infrastructure Azure en Bicep
-(`infra/`), document de tests et résultats, contributions individuelles
-tracées commit par commit, scénario de démonstration vérifié en ligne, réflexion
-UX/UI, vidéo de démonstration.
-
-### 4.3 Suivi
-
-**Jira, projet MEDIPLAN** — 51 tickets, 7 épiques. **GitHub** — 21 pull requests,
-3 contributeurs sur `main`. Le flux : un ticket → une branche → une pull request
-→ une revue → la CI. **La CI bloque la fusion** si la compilation ou les tests
-échouent ; le formatage et le lint sont rapportés sans bloquer, dette assumée.
-
-> **La difficulté qui a le plus coûté : la dérive d'intégration.** Des branches
-> sont restées non fusionnées pendant des semaines — jusqu'à **56 commits de
-> retard**, dont une refonte complète de l'interface. Cinq tickets étaient marqués
-> « Terminé » sans exister dans le produit.
->
-> Correction appliquée en fin de projet : trois branches réintégrées par pull
-> requests revues, les autres repassées « À faire » **avec la raison écrite**, et
-> une définition de « terminé » resserrée — **terminé = fusionné dans `main`, CI
-> verte**. C'est ce qui explique les écarts n° 5 et n° 6 de ce document.
+**Le problème d'intégration.** Des branches sont restées non fusionnées pendant des
+semaines, jusqu'à 56 commits de retard sur `main`. Cinq tickets étaient marqués
+« Terminé » sans exister dans le produit. Nous avons réintégré trois branches par
+pull requests revues, repassé les autres en « À faire » avec la raison écrite, et
+resserré notre définition de « terminé » : **terminé = fusionné dans `main`, CI
+verte**.
 
 ---
 
-## 5. Modalités de validation
+## 5. Modalité de validation
 
-### 5.1 Ce qui a réellement été testé
+### Ce que nous avons testé
 
-**203 tests automatisés, tous verts** au 12 août 2026 : **70 backend** (11
-suites) et **133 frontend** (28 suites).
+Nous n'avons pas visé une couverture uniforme. Nous avons testé **ce qui casse
+sans prévenir** : les règles métier, la sécurité, et le comportement des
+formulaires. L'apparence est hors périmètre — un test qui vérifie une couleur casse
+à chaque retouche et n'attrape aucun défaut réel.
 
-Nous n'avons pas cherché une couverture uniforme. Nous avons testé **ce qui casse
-silencieusement** : les règles métier (une transition de statut invalide, un
-créneau réservé deux fois), la sécurité (un défaut de contrôle d'accès ne se voit
-jamais à l'usage), et le comportement des écrans. L'apparence est explicitement
-hors périmètre : un test qui vérifie une couleur casse à chaque retouche et
-n'attrape aucun défaut réel.
+**203 tests automatisés, tous verts** au 12 août 2026 : 70 côté backend, 133 côté
+frontend. Détail dans
+[`docs/tests/plan-et-resultats.md`](../tests/plan-et-resultats.md).
 
-**Validation manuelle** : le parcours complet est rejoué avant chaque
-démonstration, selon `docs/presentation/SCENARIO-DEMO-Finale.md`, écrit **en
-jouant le parcours sur l'application en ligne** — chaque libellé et chaque
-message cité a été observé, pas supposé.
+**Validation manuelle.** Le parcours complet est rejoué avant chaque démonstration,
+selon un scénario écrit en le jouant sur l'application en ligne. Le passage du
+10 août a vérifié 14 points, sans aucune erreur dans la console du navigateur.
 
-### 5.2 Ce qui n'a pas été testé — et l'écart avec la v1.0
+**Test de concurrence.** Deux réservations simultanées sur le même créneau, sur
+l'application déployée : une requête en 201, l'autre en 409.
 
-| Prévu v1.0 | État |
+### Ce que nous n'avons pas testé
+
+Aucun test de bout en bout automatisé. Aucun test de charge. Aucun audit
+Lighthouse. Aucun rapport de couverture, alors que la v1.0 visait 70 % sur les
+modules métier. Aucun critère d'acceptation au format Gherkin, aucune enquête de
+satisfaction.
+
+### Indicateurs
+
+Les sept indicateurs chiffrés de la v1.0 supposaient un outillage que nous n'avons
+pas installé. **Aucun n'a été mesuré selon la méthode annoncée.** Plutôt que de les
+maquiller, voici ce qui a réellement été vérifié le 12 août 2026 :
+
+| Indicateur | Résultat |
 |---|---|
-| Tests E2E Cypress ou Playwright | ❌ **Aucun.** Le parcours complet est validé à la main |
-| Tests d'intégration API avec base dédiée (Supertest) | ❌ Absents. Les contrôleurs sont testés unitairement, avec doublures |
-| Tests de charge (Artillery / k6) | ❌ Aucun |
-| Audits Lighthouse | ❌ Aucun |
-| Couverture ≥ 70 % sur les modules métier | ❌ **Non mesurée** — aucun rapport de couverture n'a été produit |
-| Critères d'acceptation au format Gherkin | ❌ Non rédigés |
-| Enquête de satisfaction (3 à 5 utilisateurs) | ❌ Non réalisée |
+| Tests automatisés verts | 203 / 203 |
+| Double réservation en accès concurrent | Impossible — vérifié en ligne |
+| Application en ligne | Sonde 200 en 0,44 s ; connexion 200 en 0,99 s |
+| Parcours complet rejoué | 14 points vérifiés |
+| Erreurs dans la console | Aucune |
+| Fonctionnalités livrées | 9 |
+| Coût d'hébergement | ~0 $/mois |
 
-### 5.3 Indicateurs de succès — révisés
+### Definition of Done
 
-Les sept KPI de la v1.0 supposaient un outillage de mesure que nous n'avons pas
-mis en place. Aucun n'a été mesuré selon la méthode annoncée. Plutôt que de les
-maquiller, nous les remplaçons par ce qui a **effectivement** été vérifié.
+La v1.0 en proposait une de six critères. Elle n'a pas tenu : trop longue à
+vérifier, personne ne la relisait. Elle a été remplacée par une règle que nous
+avons réellement appliquée — **terminé = fusionné dans `main`, CI verte** — parce
+que c'est celle que l'outillage vérifie tout seul.
 
-| KPI v1.0 | Cible | Mesuré ? |
-|---|---|---|
-| KPI-01 Temps de réservation | < 90 s | ❌ non chronométré |
-| KPI-02 Doubles réservations / 1000 | 0 % | ⚠️ vérifié en concurrence réelle, pas à 1000 itérations |
-| KPI-03 API p95 | < 300 ms | ❌ non mesuré |
-| KPI-04 Lighthouse performance | ≥ 90 | ❌ non mesuré |
-| KPI-05 Lighthouse accessibilité | ≥ 90 | ❌ non mesuré |
-| KPI-06 Couverture backend | ≥ 70 % | ❌ non mesurée |
-| KPI-07 Satisfaction utilisateurs | ≥ 4/5 | ❌ non réalisée |
-
-**Indicateurs réellement vérifiés, au 12 août 2026 :**
-
-| ID | Indicateur | Valeur | Comment |
-|---|---|---|---|
-| **IV-01** | Tests automatisés verts | **203 / 203** | `pnpm test` |
-| **IV-02** | Double réservation en accès concurrent | **impossible** | Deux requêtes simultanées → 201 et 409, sur l'application déployée |
-| **IV-03** | Disponibilité de l'application en ligne | **opérationnelle** | Sonde `/health` 200 en 0,44 s ; connexion 200 en 0,99 s |
-| **IV-04** | Parcours complet rejoué de bout en bout | **14 points ✅** | Scénario du 10 août, sur l'application en ligne |
-| **IV-05** | Erreurs dans la console du navigateur | **aucune** | Parcours complet du 10 août |
-| **IV-06** | Fonctionnalités livrées | **9** | |
-| **IV-07** | Coût d'hébergement mensuel | **~0 $** | Scale-to-zero + crédit étudiant |
-
-### 5.4 Definition of Done — ce qu'elle est devenue
-
-La v1.0 en proposait une de six critères. Elle n'a pas tenu : elle était trop
-longue à vérifier et personne ne la relisait. Elle a été remplacée en cours de
-projet par une règle en une ligne, que nous avons réellement appliquée :
-
-> **Terminé = fusionné dans `main`, CI verte.**
-
-Ce qui reste des six critères d'origine est ce que la CI vérifie toute seule : la
-compilation et les tests. Le reste — revue de code, documentation à jour, lint
-sans avertissement — dépendait de la discipline, et la discipline a cédé.
-
-> **Ce que nous en retenons.** Une définition de « terminé » que l'outillage ne
-> vérifie pas n'est pas une définition, c'est une intention.
+Une définition de « terminé » que rien ne vérifie n'est pas une définition.
 
 ---
 
 ## 6. Conclusion
 
-MediPlan est livré : une application **réellement déployée**, testée, et
-démontrable de bout en bout, qui traite le problème posé — la double
-réservation devient techniquement impossible, la journée de clinique est visible
-d'un seul écran, et un créneau annulé n'est plus un créneau perdu.
+MediPlan est livré : une application déployée, testée, et démontrable de bout en
+bout. La double réservation est devenue techniquement impossible, la journée de
+clinique tient dans un écran partagé, et un créneau annulé repart à la
+réservation.
 
-Le produit est en deçà du cahier des charges initial sur trois points, tous
-nommés dans ce document : **la gestion des médecins et des cliniques par
-l'interface**, **la modification d'un rendez-vous**, et **la validation
-automatisée de bout en bout**. Il le dépasse sur deux autres : **la mise en ligne
-réelle**, jamais exigée, et **le second canal de réservation en libre-service**.
+Le produit est en deçà du plan initial sur trois points : la gestion des médecins
+et des cliniques par l'interface, la modification d'un rendez-vous, et la
+validation automatisée de bout en bout. Il le dépasse sur deux autres : la mise en
+ligne réelle, jamais exigée, et le second canal de réservation.
 
-La cause des manques n'est pas technique. Elle est de méthode : nous avons
+La cause des manques n'est pas technique, elle est de méthode. Nous avons
 travaillé longtemps sans intégrer, et notre définition de « terminé » a laissé du
-code exister sans être dans le produit. Le correctif est déjà appliqué — et c'est
+code exister sans être dans le produit. Le correctif est appliqué, et c'est
 probablement ce que nous retenons le plus de ce projet.
+
+### Ce que nous ferions ensuite
+
+**D'abord finir ce qui est écrit** : intégrer le décalage en bloc, livrer la
+configuration de clinique et la gestion des médecins, passer le formateur sur tout
+le dépôt.
+
+**Puis fiabiliser** : poser les en-têtes de sécurité et la journalisation d'audit
+(moins d'une journée pour notre plus grand écart), ajouter un jeton de
+rafraîchissement, écrire les tests de bout en bout, ajouter la pagination serveur.
+
+**Ensuite seulement, étendre** : les **rappels par courriel ou SMS** en premier —
+c'est la fonctionnalité qui attaque directement le taux d'absence, le seul chiffre
+que la clinique voit sur sa facture. Puis une liste d'attente qui proposerait
+automatiquement un créneau libéré. Puis l'annulation par le patient avec son délai
+minimum. Et enfin l'ouverture à un réseau de cliniques, qui demanderait de
+construire l'interface d'administration aujourd'hui absente.
+
+L'ordre n'est pas arbitraire : ajouter sur une base fragile est ce qui nous a coûté
+le plus cher.
 
 ---
 
-## Annexe A — Hypothèses révisées
-
-| Hypothèse v1.0 | Révision |
-|---|---|
-| Déploiement de référence **local** | ❌ **Caduque.** Le déploiement de référence est **Azure Container Apps**. Docker Compose reste l'environnement de développement |
-| Données de démonstration fictives | ✅ **Tenue sans exception** |
-| Clinique unique duplicable | ✅ Tenue — le multi-clinique est dans le modèle et appliqué côté sécurité, mais peu outillé côté interface |
-| Notifications internes, courriel non obligatoire | ✅ Tenue — aucune notification ne sort de l'application |
-| Navigateurs : deux dernières versions majeures | ⚠️ Développé et vérifié sur **Chrome et Edge** uniquement. Firefox et Safari n'ont pas été testés |
-
-## Annexe B — Risques : ce qui s'est réellement produit
-
-| ID | Risque v1.0 | Survenu ? |
-|---|---|---|
-| R-01 | Sous-estimation du frontend | ⚠️ **Partiellement** — absorbé par la tranche verticale |
-| R-02 | Complexité du modèle de disponibilités | ✅ **Survenu**, et mitigé en **supprimant la récurrence** : plages datées |
-| R-03 | Indisponibilité d'un membre | ❌ Non survenu |
-| R-04 | Failles de sécurité non détectées | ⚠️ **Non détectées faute d'avoir cherché** — aucun scan, aucune revue OWASP formelle |
-| R-05 | Problèmes Docker en démonstration | ✅ **Survenu deux fois** : fins de ligne CRLF empêchant le démarrage d'un conteneur, et horaires décalés de 4 h parce que le conteneur tourne en UTC |
-| R-06 | Dérive du périmètre | ❌ **Le contraire s'est produit** — le périmètre s'est réduit |
-
-**Risque non prévu, et le plus coûteux : la dérive d'intégration** (§4.3). Il ne
-figurait pas dans la matrice. Il aurait dû.
-
-**Second risque non prévu : les écarts entre environnements.** Trois incidents,
-tous invisibles en local : un 404 sur toutes les routes en production (l'en-tête
-`Host` transmis au proxy), les fins de ligne, le fuseau horaire. Aucun n'était un
-bogue de code.
-
-## Annexe C — Pistes d'évolution, réordonnées
-
-L'ordre n'est pas arbitraire : finir ce qui est écrit, sécuriser ce qui existe,
-puis seulement ajouter. Ajouter sur une base fragile est ce qui nous a coûté le
-plus cher.
-
-**1 — Solder l'existant.** Intégrer le décalage en bloc (codé, testé) et la
-configuration de clinique. Livrer la gestion des médecins. Passer le formateur
-sur les 233 fichiers en attente.
-
-**2 — Fiabiliser.** En-têtes de sécurité et journalisation d'audit (moins d'une
-journée). Refresh token avec rotation et déconnexion serveur. Tests de bout en
-bout. Pagination serveur. Rendre le lint bloquant une fois la dette résorbée.
-
-**3 — Étendre la valeur.** Rappels par courriel ou SMS — la vraie arme contre
-l'absentéisme, et le seul chiffre que la clinique voit sur sa facture. Liste
-d'attente : proposer automatiquement un créneau libéré par une annulation.
-Annulation par le patient, avec son délai minimum. Puis, seulement ensuite,
-l'ouverture à un réseau de cliniques et une API publique documentée.
-
-## Annexe D — Références
-
-Les sources de la v1.0 restent valables et ne sont pas reproduites ici
-(Cayirli & Veral 2003 ; Dantas et al. 2018 ; OCDE ; Loi 25 ; LPRPDE ; OWASP Top 10
-et ASVS ; ISO/IEC 25010 ; WCAG 2.1 AA). Le benchmark de l'annexe B de la v1.0
-(Bonjour-Santé, Clic Santé, Chronos, Doctolib) et le glossaire n'ont pas eu à
-être révisés.
-
-**Documents du projet qui complètent celui-ci :**
+### Documents liés
 
 | Document | Contenu |
 |---|---|
-| `docs/conception/` | 7 cas d'utilisation, diagramme de classes, 3 diagrammes de séquence, ERD |
-| `docs/tests/plan-et-resultats.md` | Stratégie de test, les 203 tests, ce qui n'est pas couvert |
-| `docs/presentation/CONTRIBUTIONS.md` | Qui a fait quoi, retracé commit par commit |
-| `docs/presentation/SCENARIO-DEMO-Finale.md` | Le parcours de démonstration, vérifié en ligne |
-| `docs/deployment/azure.md` | La mise en ligne, de bout en bout |
-| `docs/frontend/design-system.md` | Les jetons de design — source unique |
-| `infra/README.md` | Choix de SKU et maîtrise des coûts |
+| [Rapport final](../RAPPORT-FINAL.md) | Comment le projet a été conduit, et ce qui a changé |
+| [Dossier de conception](../conception/) | Les 11 diagrammes et leurs explications |
+| [Manuel d'utilisation](../guide-utilisation/README.md) | L'application écran par écran |
+| [Tests et résultats](../tests/plan-et-resultats.md) | Stratégie, résultats, ce qui n'est pas couvert |
+| [Contributions individuelles](../presentation/CONTRIBUTIONS.md) | Qui a fait quoi, commit par commit |
+| [Déploiement Azure](../deployment/azure.md) | La mise en ligne |
