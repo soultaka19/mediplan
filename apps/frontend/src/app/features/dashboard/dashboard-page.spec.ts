@@ -202,7 +202,7 @@ describe('DashboardPage', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.textContent).toContain('Consultations terminées');
-    expect(root.textContent).toContain('Patients à venir');
+    expect(root.textContent).toContain('Patients restants');
     // Le nombre de médecins actifs ne le concerne pas, et l'écran Statistiques
     // lui est fermé côté serveur.
     expect(root.textContent).not.toContain('Médecins actifs');
