@@ -4,7 +4,7 @@
 > Il regroupe l'idée, les objectifs, les utilisateurs cibles, le périmètre fonctionnel,
 > les parcours, l'inventaire des écrans, le design system existant et les axes d'amélioration.
 >
-> **Captures de l'existant** : dossier [`../../captures/`](../../captures/) (20 écrans, clair + sombre + mobile).
+> **Captures de l'existant** : dossier [`../../captures/`](../../../captures/) (20 écrans, clair + sombre + mobile).
 > **Statut** : produit fonctionnel (MVP livré), en phase de refonte UI/UX.
 > **Dernière mise à jour** : 2026-07-27.
 
@@ -331,7 +331,7 @@ Durées sobres : `fast 120ms · base 180ms · slow 240ms`, courbe `cubic-bezier(
 
 ## 14. Références & annexes
 
-- **Captures de l'existant** : [`../../captures/`](../../captures/) — 20 écrans numérotés (clair, sombre, mobile).
+- **Captures de l'existant** : [`../../captures/`](../../../captures/) — 20 écrans numérotés (clair, sombre, mobile).
 - **Design system technique** : `apps/frontend/src/styles/_theme.scss` (source unique des tokens).
 - **Navigation & RBAC** : `apps/frontend/src/app/core/layout/nav-items.ts`.
 - **Comptes de démo** :

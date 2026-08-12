@@ -41,8 +41,16 @@ Monorepo géré avec **Turborepo + pnpm workspaces** :
 │   ├── backend/    ← API NestJS (TypeScript, TypeORM, PostgreSQL)
 │   └── frontend/   ← Application Angular (Angular Material, standalone components)
 ├── packages/       ← Paquets partagés (vide pour l'instant)
-├── docs/
-│   └── conception/ ← Dossier de conception (diagrammes UML, ERD, explications)
+├── docs/           ← Toute la documentation — voir docs/README.md
+│   ├── cahier-des-charges/ ← v1.0 (initiale) et v2.0 (finale, LIV-05)
+│   ├── conception/ ← Diagrammes UML, ERD, explications écrites (LIV-06)
+│   ├── tests/      ← Stratégie de test, résultats, bogues corrigés
+│   ├── deployment/ ← Mise en ligne sur Azure
+│   ├── frontend/   ← Design system et audit UX/UI
+│   ├── presentation/ ← Présentation finale du 13 août 2026
+│   └── archives/   ← Documents périmés, conservés pour l'historique
+├── infra/          ← Infrastructure Azure décrite en Bicep
+├── scripts/        ← deploy.sh, teardown.sh
 ├── package.json    ← Scripts racine (délégués à Turbo)
 ├── pnpm-workspace.yaml
 ├── turbo.json      ← Pipelines de tâches (build/lint/test/dev)

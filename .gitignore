@@ -39,14 +39,14 @@ Thumbs.db
 ~$*.xlsx
 ~$*.pptx
 
-# Dossier personnel (brouillons, non versionné)
-creation-diagramme-cas-d'utilisation/
-
 # Companion visuel de brainstorming (local)
 .superpowers/
 
-# Captures d'audit à la racine (locales, non versionnées)
+# Captures de travail de l'application : 7 Mo qu'aucun document ne référence.
+# Les captures qui SERVENT un livrable sont versionnées là où il les utilise
+# (docs/conception/images/, docs/reflexion-ux-ui/audit-after/).
 /*.png
+captures/
 
 # Fichiers de sauvegarde (jamais versionnés, où qu'ils soient), y compris les
 # sauvegardes de .env (secrets) telles que .env.backup-avant-seed
