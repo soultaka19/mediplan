@@ -1,0 +1,149 @@
+<template>
+  <div
+    id="ch7-conclusion"
+    data-composition-id="ch7-conclusion"
+    data-width="1920"
+    data-height="1080"
+    data-start="0"
+    data-duration="28.08"
+    style="position: absolute; inset: 0; overflow: hidden"
+  >
+    <style>
+      /* Polices du produit — redéclarées ici : une sous-composition est validée
+         comme un fichier autonome. */
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      #ch7-conclusion .recap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        opacity: 0;
+        font-size: 22px;
+        font-weight: 600;
+        color: #e6eaf2;
+        align-items: flex-start;
+      }
+      #ch7-conclusion .recap span { flex: 1; line-height: 1.25; }
+      #ch7-conclusion .recap i {
+        font-style: normal;
+        color: #3fc9b7;
+        font-size: 24px;
+      }
+      #ch7-conclusion #ch7-end {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        opacity: 0;
+      }
+      #ch7-conclusion #ch7-end .lock {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+      #ch7-conclusion #ch7-end .mk {
+        width: 76px;
+        height: 76px;
+        border-radius: 18px;
+        background: linear-gradient(150deg, #3fc9b7, #1e7f8f);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "PlexMono", monospace;
+        font-size: 38px;
+        font-weight: 500;
+        color: #08131b;
+      }
+      #ch7-conclusion #ch7-end .wm {
+        font-size: 68px;
+        font-weight: 700;
+        color: #e6eaf2;
+        letter-spacing: -0.02em;
+      }
+      #ch7-conclusion #ch7-end .url {
+        font-family: "PlexMono", monospace;
+        font-size: 25px;
+        font-weight: 400;
+        color: #3fc9b7;
+        text-align: center;
+        line-height: 1.7;
+      }
+      #ch7-conclusion #ch7-end .team {
+        font-size: 25px;
+        font-weight: 500;
+        color: #a9b4c6;
+        text-align: center;
+        line-height: 1.6;
+      }
+      #ch7-conclusion #ch7-end .team b {
+        display: block;
+        font-family: "PlexMono", monospace;
+        font-size: 17px;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #5e6a80;
+        margin-bottom: 10px;
+      }
+    </style>
+
+    <div class="chaphead" id="ch7-head" style="opacity: 0"><b>En résumé</b><span>Une journée à la réception</span></div>
+
+    <div class="win" id="ch7-win">
+      <div class="shot"><video id="ch7-v1" class="clip" src="media/zak-clean.mp4" data-start="0" data-duration="15.94" data-media-start="115.75" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch7-v2" class="clip" src="media/zak-clean.mp4" data-start="15.94" data-duration="6.14" data-media-start="131.70" data-track-index="0" muted playsinline></video></div>
+    </div>
+
+    <!-- Le récapitulatif s'inscrit au rythme de sa phrase finale. -->
+    <div style="position: absolute; right: 24px; top: 264px; width: 292px; display: flex; flex-direction: column; gap: 24px">
+      <div class="recap" id="ch7-r1"><i>◆</i><span>Créer un rendez-vous</span></div>
+      <div class="recap" id="ch7-r2"><i>◆</i><span>Suivre son évolution</span></div>
+      <div class="recap" id="ch7-r3"><i>◆</i><span>Annuler, avec un motif</span></div>
+    </div>
+
+    <div id="ch7-end">
+      <div class="lock">
+        <div class="mk">M</div>
+        <div class="wm">MediPlan</div>
+      </div>
+      <div class="url">
+        ca-mediplan-frontend.ashytree-9ad5012f.canadacentral.azurecontainerapps.io<br />
+        github.com/soultaka19/mediplan
+      </div>
+      <div class="team">
+        <b>Projet intégrateur · Collège la Cité · printemps 2026</b>
+        Souleymane Diallo · Zakaria Lahouiri · Larbi Saib
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        tl.fromTo("#ch7-head", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+
+        // « créer un rendez-vous… suivre son évolution… gérer une annulation »
+        tl.fromTo("#ch7-r1", { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 7.6);
+        tl.fromTo("#ch7-r2", { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 12.1);
+        tl.fromTo("#ch7-r3", { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 16.4);
+
+        // La fenêtre se referme : le film revient au graphique, comme il a commencé.
+        tl.to(["#ch7-win", "#ch7-head", "#ch7-r1", "#ch7-r2", "#ch7-r3"], { opacity: 0, duration: 0.6, ease: "power2.in" }, 21.4);
+        tl.to("#ch7-win", { scale: 0.965, duration: 0.6, ease: "power2.in" }, 21.4);
+
+        tl.fromTo("#ch7-end", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 22.3);
+        tl.to("#ch7-end", { opacity: 0, duration: 0.6, ease: "power2.in" }, 27.4);
+
+        window.__timelines["ch7-conclusion"] = tl;
+      })();
+    </script>
+  </div>
+</template>

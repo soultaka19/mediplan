@@ -1,0 +1,9 @@
+# Rushes bruts — 380 Mo à eux trois. Ils restent en local ; le dépôt n'a pas
+# vocation à héberger des captures d'écran vidéo.
+demo-*.mp4
+
+# Projet de montage : tout ce qui est dérivé se régénère (cf. video/README.md).
+video/media/
+video/out/
+video/snapshots/
+video/.hyperframes/

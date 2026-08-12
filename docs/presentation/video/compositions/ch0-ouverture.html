@@ -1,0 +1,258 @@
+<template>
+  <div
+    id="ch0-ouverture"
+    data-composition-id="ch0-ouverture"
+    data-width="1920"
+    data-height="1080"
+    data-start="0"
+    data-duration="38.98"
+    style="position: absolute; inset: 0; overflow: hidden"
+  >
+    <style>
+      /* Polices du produit — redéclarées ici : une sous-composition est validée
+         comme un fichier autonome. */
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      #ch0-ouverture .layer {
+        position: absolute;
+        inset: 0;
+      }
+      #ch0-ouverture .mark {
+        width: 96px;
+        height: 96px;
+        border-radius: 22px;
+        background: linear-gradient(150deg, #3fc9b7, #1e7f8f);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 18px 46px rgba(63, 201, 183, 0.22);
+      }
+      #ch0-ouverture .mark span {
+        font-family: "PlexMono", monospace;
+        font-size: 46px;
+        font-weight: 500;
+        color: #08131b;
+      }
+      #ch0-ouverture .wordmark {
+        font-size: 88px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #e6eaf2;
+      }
+      #ch0-ouverture .kicker {
+        font-family: "PlexMono", monospace;
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #3fc9b7;
+      }
+      #ch0-ouverture .lede {
+        font-size: 44px;
+        font-weight: 500;
+        line-height: 1.34;
+        color: #e6eaf2;
+        opacity: 0;
+      }
+      #ch0-ouverture .lede em {
+        font-style: normal;
+        color: #a9b4c6;
+      }
+
+      /* --- la grille d'agenda ------------------------------------------- */
+      #ch0-ouverture #ch0-grid {
+        position: absolute;
+        left: 1010px;
+        top: 268px;
+        width: 786px;
+        padding: 26px;
+        border-radius: 18px;
+        background: #172234;
+        border: 1px solid #2a384f;
+        opacity: 0;
+      }
+      #ch0-ouverture .gridhead {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      #ch0-ouverture .gridhead div {
+        font-family: "PlexMono", monospace;
+        font-size: 18px;
+        font-weight: 500;
+        color: #a9b4c6;
+        text-align: center;
+      }
+      #ch0-ouverture .cells {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+      }
+      #ch0-ouverture .cell {
+        height: 46px;
+        border-radius: 8px;
+        background: #1f2b3e;
+      }
+      #ch0-ouverture .chip {
+        position: absolute;
+        padding: 10px 18px;
+        border-radius: 999px;
+        font-size: 24px;
+        font-weight: 600;
+        white-space: nowrap;
+        background: #1e3149;
+        color: #5b9be8;
+        border: 1px solid #2a4a68;
+        opacity: 0;
+      }
+      #ch0-ouverture #ch0-clash {
+        position: absolute;
+        padding: 12px 22px;
+        border-radius: 10px;
+        background: #3a1a1c;
+        color: #f0707a;
+        border: 1px solid #5e2a2e;
+        font-size: 28px;
+        font-weight: 600;
+        opacity: 0;
+      }
+
+      /* --- le sommaire --------------------------------------------------- */
+      #ch0-ouverture .chap {
+        display: flex;
+        align-items: baseline;
+        gap: 26px;
+        opacity: 0;
+      }
+      #ch0-ouverture .chap b {
+        font-family: "PlexMono", monospace;
+        font-size: 26px;
+        font-weight: 500;
+        color: #3fc9b7;
+        min-width: 44px;
+      }
+      #ch0-ouverture .chap span {
+        font-size: 52px;
+        font-weight: 600;
+        color: #e6eaf2;
+      }
+    </style>
+
+    <!-- ========== A · générique ========== -->
+    <div class="layer" id="ch0-logo" style="display: flex; align-items: center; justify-content: center; gap: 34px">
+      <div class="mark" id="ch0-mark"><span>M</span></div>
+      <div>
+        <div class="wordmark" id="ch0-word">MediPlan</div>
+        <div class="kicker" id="ch0-kick" style="margin-top: 10px">Gestion de rendez-vous médicaux</div>
+      </div>
+    </div>
+
+    <!-- ========== B · le problème ========== -->
+    <div class="layer" id="ch0-problem">
+      <div style="position: absolute; left: 140px; top: 300px; width: 780px">
+        <div class="lede" id="ch0-l1">Une petite clinique.<br /><em>Les rendez-vous se prennent au téléphone.</em></div>
+        <div class="lede" id="ch0-l2" style="margin-top: 44px">Un seul agenda, <em>partagé</em>.</div>
+        <div class="lede" id="ch0-l3" style="margin-top: 44px">Et plusieurs erreurs possibles.</div>
+      </div>
+
+      <div id="ch0-grid">
+        <div class="gridhead">
+          <div>LUN</div>
+          <div>MAR</div>
+          <div>MER</div>
+          <div>JEU</div>
+          <div>VEN</div>
+        </div>
+        <div class="cells" id="ch0-cells"></div>
+      </div>
+
+      <div class="chip" id="ch0-chipA" style="left: 700px; top: 392px">M<sup>me</sup> Nadeau</div>
+      <div class="chip" id="ch0-chipB" style="left: 1560px; top: 552px">M. Leclerc</div>
+      <div id="ch0-clash" style="left: 1010px; top: 716px">Double réservation — le même créneau</div>
+    </div>
+
+    <!-- ========== C · MediPlan + sommaire ========== -->
+    <div class="layer" id="ch0-summary">
+      <div style="position: absolute; left: 200px; top: 232px; display: flex; align-items: center; gap: 26px; opacity: 0" id="ch0-lock">
+        <div class="mark" style="width: 68px; height: 68px; border-radius: 16px"><span style="font-size: 34px">M</span></div>
+        <div class="wordmark" style="font-size: 60px">MediPlan</div>
+      </div>
+      <div class="lede" id="ch0-pitch" style="position: absolute; left: 200px; top: 344px; width: 1180px">
+        L'outil conçu pour ce type de clinique. <em>Une journée type, à la réception.</em>
+      </div>
+
+      <div style="position: absolute; left: 208px; top: 500px; display: flex; flex-direction: column; gap: 34px">
+        <div class="chap" id="ch0-c1"><b>01</b><span>Les disponibilités</span></div>
+        <div class="chap" id="ch0-c2"><b>02</b><span>La prise de rendez-vous</span></div>
+        <div class="chap" id="ch0-c3"><b>03</b><span>Le flux du jour</span></div>
+        <div class="chap" id="ch0-c4"><b>04</b><span>L'annulation</span></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const root = document.querySelector("#ch0-ouverture");
+
+        // Grille : 5 jours × 6 créneaux, construite une fois, de façon déterministe.
+        const cells = root.querySelector("#ch0-cells");
+        for (let i = 0; i < 30; i++) {
+          const c = document.createElement("div");
+          c.className = "cell";
+          c.id = "ch0-cell-" + i;
+          cells.appendChild(c);
+        }
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // --- A · générique -------------------------------------------------
+        tl.fromTo("#ch0-mark", { scale: 0.72, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.62, ease: "power3.out" }, 0.15);
+        tl.fromTo("#ch0-word", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 0.38);
+        tl.fromTo("#ch0-kick", { x: -14, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 0.58);
+        tl.to("#ch0-logo", { opacity: 0, duration: 0.45, ease: "power2.in" }, 2.15);
+
+        // --- B · le problème ----------------------------------------------
+        tl.fromTo("#ch0-l1", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 2.82);
+        tl.fromTo("#ch0-grid", { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 3.6);
+        tl.fromTo("#ch0-l2", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 8.46);
+        tl.fromTo("#ch0-l3", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 10.58);
+
+        // Les deux patients convergent vers le même créneau — mercredi, 3e ligne.
+        tl.fromTo("#ch0-chipA", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 12.82);
+        tl.fromTo("#ch0-chipB", { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 13.06);
+        tl.to("#ch0-chipA", { x: 430, duration: 0.80, ease: "power2.inOut" }, 13.40);
+        tl.to("#ch0-chipB", { x: -430, duration: 0.80, ease: "power2.inOut" }, 13.60);
+
+        // La collision : le créneau vire au rouge.
+        tl.to("#ch0-cell-12", { backgroundColor: "#3a1a1c", duration: 0.18 }, 14.42);
+        tl.fromTo("#ch0-clash", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: "back.out(2)" }, 14.48);
+        tl.to(["#ch0-chipA", "#ch0-chipB"], { opacity: 0.35, duration: 0.3 }, 14.55);
+
+        // Sortie du problème.
+        tl.to("#ch0-problem", { opacity: 0, duration: 0.6, ease: "power2.in" }, 16.85);
+
+        // --- C · MediPlan + le sommaire ------------------------------------
+        tl.fromTo("#ch0-lock", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 17.75);
+        tl.fromTo("#ch0-pitch", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 18.9);
+
+        // Chaque chapitre s'inscrit au moment exact où il est annoncé.
+        const beats = [
+          ["#ch0-c1", 28.07],
+          ["#ch0-c2", 30.99],
+          ["#ch0-c3", 33.21],
+          ["#ch0-c4", 35.97],
+        ];
+        for (const [sel, at] of beats) {
+          tl.fromTo(sel, { x: -22, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, at);
+        }
+
+        window.__timelines["ch0-ouverture"] = tl;
+      })();
+    </script>
+  </div>
+</template>

@@ -1,0 +1,43 @@
+[
+ { "id": "gen",      "scene": "ch0-ouverture",    "silence": 2.6,  "label": "Générique — logo MediPlan" },
+
+ { "id": "s-probl",  "scene": "ch0-ouverture",    "src": "soul-clean.mp4",  "in": 0.85,   "out": 15.55,  "label": "Le problème : agenda partagé, double réservation" },
+ { "id": "s-somm",   "scene": "ch0-ouverture",    "src": "soul-clean.mp4",  "in": 16.15,  "out": 37.15,  "label": "MediPlan + le sommaire des 4 chapitres" },
+
+ { "id": "s-conn",   "scene": "ch1-reception",    "src": "soul-clean.mp4",  "in": 37.30,  "out": 49.30,  "label": "Connexion, le rôle vient du serveur" },
+ { "id": "s-tdb",    "scene": "ch1-reception",    "src": "soul-clean.mp4",  "in": 50.45,  "out": 56.99,  "label": "Le tableau de bord de la journée" },
+
+ { "id": "s-dispo",  "scene": "ch2-disponibilite","src": "soul-clean.mp4",  "in": 57.45,  "out": 63.28,  "label": "Aller aux disponibilités" },
+ { "id": "s-plage1", "scene": "ch2-disponibilite","src": "soul-clean.mp4",  "in": 63.90,  "out": 67.66,  "label": "« Je définis une plage horaire pour Sophie »" },
+ { "id": "s-plage2", "scene": "ch2-disponibilite","src": "soul-clean.mp4",  "in": 69.85,  "out": 71.70,  "label": "« du 27 »" },
+ { "id": "s-plage3", "scene": "ch2-disponibilite","src": "soul-clean.mp4",  "in": 82.40,  "out": 84.00,  "label": "« 9 h à 18 h » — hésitation retirée" },
+ { "id": "s-gener",  "scene": "ch2-disponibilite","src": "soul-clean.mp4",  "in": 84.65,  "out": 93.15,  "label": "★ Les créneaux se génèrent tout seuls" },
+ { "id": "s-conf",   "scene": "ch2-disponibilite","src": "soul-clean.mp4",  "in": 97.60,  "out": 103.92, "label": "Confirmation de la disponibilité" },
+
+ { "id": "z-recep",  "scene": "ch3-reserver",     "src": "zak-clean.mp4", "in": 3.10,   "out": 13.85,  "label": "« Le téléphone sonne » — la réception" },
+ { "id": "z-res1",   "scene": "ch3-reserver",     "src": "zak-clean.mp4", "in": 14.50,  "out": 17.95,  "label": "Choisir le médecin" },
+ { "id": "z-res2",   "scene": "ch3-reserver",     "src": "zak-clean.mp4", "in": 19.05,  "out": 25.20,  "label": "Disponibilité puis créneau" },
+ { "id": "z-res3",   "scene": "ch3-reserver",     "src": "zak-clean.mp4", "in": 26.85,  "out": 29.30,  "videoIn": 24.60, "label": "La date, puis le patient (image tenue : autocomplétion écartée)" },
+ { "id": "z-res4",   "scene": "ch3-reserver",     "src": "zak-clean.mp4", "in": 32.65,  "out": 34.15,  "videoIn": 33.40, "label": "Le nom — vide retiré, autocomplétion écartée" },
+ { "id": "z-opt",    "scene": "ch3-reserver",     "src": "zak-clean.mp4", "in": 40.50,  "out": 46.60,  "label": "E-mail et motif optionnels — le patient léger" },
+ { "id": "z-valid",  "scene": "ch3-reserver",     "src": "zak-clean.mp4", "in": 50.30,  "out": 54.95,  "label": "Réserver — la confirmation" },
+ { "id": "z-liste",  "scene": "ch3-reserver",     "src": "zak-clean.mp4", "in": 56.10,  "out": 65.70,  "label": "La liste des rendez-vous et leurs statuts" },
+
+ { "id": "z-cyc1",   "scene": "ch4-cycle",        "src": "zak-clean.mp4", "in": 68.10,  "out": 73.20,  "label": "★ Flux du jour — marquer arrivé" },
+ { "id": "z-cyc2",   "scene": "ch4-cycle",        "src": "zak-clean.mp4", "in": 77.96,  "out": 79.40,  "label": "« on peut ici marquer… »" },
+ { "id": "z-cyc3",   "scene": "ch4-cycle",        "src": "zak-clean.mp4", "in": 80.15,  "out": 82.00,  "label": "Démarrer la consultation" },
+ { "id": "z-cyc4",   "scene": "ch4-cycle",        "src": "zak-clean.mp4", "in": 83.75,  "out": 92.45,  "label": "Terminer — et le statut suit partout" },
+ { "id": "z-hist",   "scene": "ch4-cycle",        "src": "zak-clean.mp4", "in": 100.55, "out": 107.30, "label": "Les statuts dans l'historique" },
+
+ { "id": "z-annul",  "scene": "ch5-annulation",   "src": "zak-clean.mp4", "in": 75.30,  "out": 77.95,  "label": "★ Où l'annulation se déclenche" },
+ { "id": "regle",    "scene": "ch5-annulation",   "silence": 6.6,  "label": "★ La règle : motif obligatoire (capture audit-12)" },
+
+ { "id": "l-stat1",  "scene": "ch6-piloter",      "src": "larbi-clean.mp4", "in": 53.42,  "out": 56.68,  "label": "La page Statistiques" },
+ { "id": "l-stat2",  "scene": "ch6-piloter",      "src": "larbi-clean.mp4", "in": 59.06,  "out": 75.44,  "label": "Volume, absences, occupation" },
+ { "id": "l-stat3",  "scene": "ch6-piloter",      "src": "larbi-clean.mp4", "in": 77.08,  "out": 85.18,  "label": "À quoi ça sert pour la clinique" },
+ { "id": "l-med",    "scene": "ch6-piloter",      "src": "larbi-clean.mp4", "in": 108.93, "out": 126.71, "label": "Le même code, un autre rôle" },
+
+ { "id": "z-concl",  "scene": "ch7-conclusion",   "src": "zak-clean.mp4", "in": 115.75, "out": 131.35, "label": "Conclusion — une journée de clinique" },
+ { "id": "z-fin",    "scene": "ch7-conclusion",   "src": "zak-clean.mp4", "in": 131.70, "out": 137.50, "label": "« et gérer une annulation proprement »" },
+ { "id": "carton",   "scene": "ch7-conclusion",   "silence": 6.0,  "label": "Carton final — URL, dépôt, équipe" }
+]

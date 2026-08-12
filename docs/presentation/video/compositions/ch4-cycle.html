@@ -1,0 +1,119 @@
+<template>
+  <div
+    id="ch4-cycle"
+    data-composition-id="ch4-cycle"
+    data-width="1920"
+    data-height="1080"
+    data-start="0"
+    data-duration="25.54"
+    style="position: absolute; inset: 0; overflow: hidden"
+  >
+    <style>
+      /* Polices du produit — redéclarées ici : une sous-composition est validée
+         comme un fichier autonome. */
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Plex"; src: url("assets/fonts/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "PlexMono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+
+      #ch4-cycle #ch4-life {
+        position: absolute;
+        right: 40px;
+        top: 262px;
+        width: 268px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+      }
+      #ch4-cycle #ch4-life .st {
+        padding: 11px 22px;
+        border-radius: 999px;
+        font-size: 26px;
+        font-weight: 600;
+        white-space: nowrap;
+        opacity: 0;
+      }
+      #ch4-cycle #ch4-life .arrow {
+        margin-left: 22px;
+        color: #4b5b73;
+        font-size: 22px;
+        line-height: 0.6;
+        opacity: 0;
+      }
+      #ch4-cycle #ch4-lifelabel {
+        position: absolute;
+        right: 40px;
+        top: 210px;
+        width: 268px;
+        font-family: "PlexMono", monospace;
+        font-size: 19px;
+        font-weight: 500;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #3fc9b7;
+        opacity: 0;
+      }
+    </style>
+
+    <div class="chaphead" id="ch4-head" style="opacity: 0"><b>Chapitre 03</b><span>Le flux du jour</span></div>
+
+    <div class="win">
+      <div class="shot"><video id="ch4-v1" class="clip" src="media/zak-clean.mp4" data-start="0" data-duration="5.44" data-media-start="68.10" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch4-v2" class="clip" src="media/zak-clean.mp4" data-start="5.44" data-duration="1.78" data-media-start="77.96" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch4-v3" class="clip" src="media/zak-clean.mp4" data-start="7.22" data-duration="2.19" data-media-start="80.15" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch4-v4" class="clip" src="media/zak-clean.mp4" data-start="9.41" data-duration="9.04" data-media-start="83.75" data-track-index="0" muted playsinline></video></div>
+      <div class="shot"><video id="ch4-v5" class="clip" src="media/zak-clean.mp4" data-start="18.45" data-duration="7.09" data-media-start="100.55" data-track-index="0" muted playsinline></video></div>
+    </div>
+
+    <div id="ch4-lifelabel">Cycle de vie</div>
+    <div id="ch4-life">
+      <div class="st" id="ch4-st1" style="background: #eef2f7; color: #4a5568">Réservé</div>
+      <div class="arrow" id="ch4-a1">↓</div>
+      <div class="st" id="ch4-st2" style="background: #e8f0fb; color: #1e5fa8">Arrivé</div>
+      <div class="arrow" id="ch4-a2">↓</div>
+      <div class="st" id="ch4-st3" style="background: #def3f3; color: #0f766e">En consultation</div>
+      <div class="arrow" id="ch4-a3">↓</div>
+      <div class="st" id="ch4-st4" style="background: #e6f4ec; color: #15803d">Terminé</div>
+    </div>
+
+    <div class="note l" id="ch4-n1" style="top: 300px">
+      <span class="rule"></span>La même vue pour tous
+      <em>La réception et le médecin voient le même état, au même moment.</em>
+    </div>
+
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        tl.fromTo("#ch4-head", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+        tl.fromTo("#ch4-lifelabel", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.5);
+        tl.fromTo("#ch4-st1", { x: 14, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.8);
+
+        // Chaque statut s'inscrit au moment exact du clic à l'écran.
+        const beats = [
+          ["#ch4-a1", "#ch4-st2", 4.4], // « marquer comme arrivé »
+          ["#ch4-a2", "#ch4-st3", 7.35], // « démarrer la consultation »
+          ["#ch4-a3", "#ch4-st4", 11.0], // « terminer la consultation »
+        ];
+        const dim = ["#ch4-st1", "#ch4-st2", "#ch4-st3"];
+        beats.forEach(([arrow, pill, at], i) => {
+          tl.fromTo(arrow, { opacity: 0 }, { opacity: 1, duration: 0.22 }, at - 0.16);
+          tl.fromTo(pill, { x: 14, opacity: 0 }, { x: 0, opacity: 1, duration: 0.42, ease: "back.out(1.7)" }, at);
+          tl.to(dim[i], { opacity: 0.42, duration: 0.35 }, at + 0.1);
+        });
+
+        tl.fromTo("#ch4-n1", { x: -18, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 13.8);
+        tl.to("#ch4-n1", { opacity: 0, duration: 0.4, ease: "power2.in" }, 17.9);
+
+        // L'historique : la liste reprend la main, le rail de statuts s'efface.
+        tl.to(["#ch4-life", "#ch4-lifelabel"], { opacity: 0, duration: 0.45, ease: "power2.in" }, 18.8);
+
+        window.__timelines["ch4-cycle"] = tl;
+      })();
+    </script>
+  </div>
+</template>
