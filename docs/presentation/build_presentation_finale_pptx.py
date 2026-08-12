@@ -602,7 +602,7 @@ notes(s, "ZAKARIA — 45 secondes. Ne PAS lire les six lignes.\n\n"
 s = prs.slides.add_slide(BLANK)
 fond(s)
 bandeau_titre(s, 9, "Tests et validation", "Ce que nous vérifions, et à quel moment")
-chiffre(s, Inches(0.45), Inches(1.6), Inches(2.85), "199", "Tests automatisés verts", SARCELLE)
+chiffre(s, Inches(0.45), Inches(1.6), Inches(2.85), "203", "Tests automatisés verts", SARCELLE)
 chiffre(s, Inches(3.55), Inches(1.6), Inches(2.85), "57", "Tests backend", BLEU)
 chiffre(s, Inches(6.65), Inches(1.6), Inches(2.85), "129", "Tests frontend", BLEU_CLAIR)
 chiffre(s, Inches(9.75), Inches(1.6), Inches(2.85), "0", "Fusion sans CI verte", GRIS)
@@ -621,7 +621,7 @@ carte(s, Inches(0.45), Inches(3.35), Inches(6.1), Inches(3.3),
 carte(s, Inches(6.75), Inches(3.35), Inches(6.1), Inches(3.3),
       "Ce que la CI garantit à chaque push",
       ["Le projet compile — backend et frontend",
-       "Les 199 tests passent",
+       "Les 203 tests passent",
        "Les templates d'infrastructure Bicep sont valides",
        "Une pull request dont la CI est rouge n'est pas fusionnée",
        "Le lint et le formatage sont rapportés sans bloquer :",
@@ -629,7 +629,7 @@ carte(s, Inches(6.75), Inches(3.35), Inches(6.1), Inches(3.3),
        "   permanence, donc ignorée"], SARCELLE)
 pied(s, "Larbi Saib", "1 min")
 notes(s, "LARBI — 1 minute.\n\n"
-         "« Nous avons 199 tests automatisés : 67 côté serveur, 132 côté interface. Ils "
+         "« Nous avons 203 tests automatisés : 70 côté serveur, 133 côté interface. Ils "
          "tournent à chaque push, et une pull request dont la CI est rouge n'est pas "
          "fusionnée.\n\n"
          "La vérification dont je suis le plus content n'est pas dans cette suite, et je "
@@ -900,7 +900,7 @@ tb, tf = zone_texte(s, Inches(1.0), Inches(1.25), Inches(11.3), Inches(1.1))
 para(tf, "MediPlan", taille=46, couleur=BLANC, gras=True, premier=True,
      aligne=PP_ALIGN.CENTER, espace_avant=0)
 chiffre(s, Inches(1.4), Inches(2.85), Inches(2.5), "9", "Fonctionnalités livrées", SARCELLE)
-chiffre(s, Inches(4.15), Inches(2.85), Inches(2.5), "199", "Tests verts", BLEU_CLAIR)
+chiffre(s, Inches(4.15), Inches(2.85), Inches(2.5), "203", "Tests verts", BLEU_CLAIR)
 chiffre(s, Inches(6.9), Inches(2.85), Inches(2.5), "21", "Pull requests", BLEU_CLAIR)
 chiffre(s, Inches(9.65), Inches(2.85), Inches(2.5), "0 $", "Coût mensuel", SARCELLE)
 tb, tf = zone_texte(s, Inches(1.0), Inches(4.75), Inches(11.3), Inches(1.6))
@@ -913,7 +913,7 @@ tb, tf = zone_texte(s, Inches(1.0), Inches(6.35), Inches(11.3), Inches(0.7))
 para(tf, "Merci — nous répondons à vos questions", taille=20, couleur=BLEU_PALE2,
      premier=True, aligne=PP_ALIGN.CENTER, espace_avant=0)
 notes(s, "SOULEYMANE — 20 secondes, puis on ouvre les questions.\n\n"
-         "« Pour résumer : neuf fonctionnalités livrées et intégrées, 199 tests verts, une "
+         "« Pour résumer : neuf fonctionnalités livrées et intégrées, 203 tests verts, une "
          "application en ligne pour environ zéro dollar par mois, et une infrastructure "
          "entièrement décrite en code — n'importe qui peut la redéployer d'une commande.\n\n"
          "Merci de votre attention. Nous répondons à vos questions. »\n\n"
@@ -933,7 +933,7 @@ notes(s, "SOULEYMANE — 20 secondes, puis on ouvre les questions.\n\n"
          "· Pourquoi Azure et pas Railway ? → crédit étudiant non renouvelable, scale-to-zero, "
          "coût ~0 $ (Souleymane)\n"
          "· Le décalage en bloc ? → codé, non intégré, assumé (Zakaria)\n"
-         "· Comment testez-vous ? → 199 tests, CI bloquante sur build et tests (Larbi)")
+         "· Comment testez-vous ? → 203 tests, CI bloquante sur build et tests (Larbi)")
 
 # =========================================================================
 sortie = os.path.join(os.path.dirname(os.path.abspath(__file__)),
