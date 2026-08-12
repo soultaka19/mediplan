@@ -29,6 +29,13 @@ elle a pour but de **dire où le résultat s'écarte du document, et pourquoi**.
 La v1.0 n'est pas corrigée ni détruite. Elle reste la référence de ce que nous
 avions prévu ; ce document est la référence de ce que nous avons fait.
 
+**Structure.** Le document suit le gabarit fourni — les six sections et leurs
+sous-sections, dans l'ordre. Deux ajouts, tous deux permis par la mention
+« largement adapté en fonction des particularités de vos projets » : la présente
+note de révision, et quatre annexes (hypothèses, risques survenus, pistes
+d'évolution, références). Chaque section indique en outre **l'état atteint**, ce
+qu'un cahier des charges rédigé en amont ne peut pas contenir.
+
 ### Les six écarts structurants
 
 | # | v1.0 prévoyait | La réalité | Nature |
@@ -139,10 +146,43 @@ native, synchronisation d'agenda externe, IA médicale, intégration hospitaliè
 
 ## 2. Description fonctionnelle
 
-### 2.1 Scénarios — révisés
+### 2.1 Besoins et exigences métiers
+
+#### Problématique à résoudre
+
+Centraliser la gestion des rendez-vous et le flux clinique quotidien d'une
+clinique de petite ou moyenne taille, aujourd'hui éclaté entre appels
+téléphoniques, agendas papier et fichiers de calcul. La solution doit **supprimer
+les doubles réservations**, réduire le temps administratif consacré aux appels, et
+ne perdre aucun créneau libéré par une annulation.
+
+**Ce que la v1.0 formulait autrement.** Elle ajoutait « offrir aux patients un
+canal de réservation autonome accessible 24 h/24 » comme exigence de premier rang.
+Ce canal existe, mais il est **second** : le besoin premier est celui de la
+réception. Voir § 1.1.
+
+#### Utilisateurs cibles
+
+| Rôle | Profil | Besoins réellement couverts |
+|---|---|---|
+| **Administrateur de clinique** *(la réception)* | Coordonne l'accueil et la planification, supervise plusieurs médecins. **C'est l'utilisateur principal — celui qui vit le problème.** | Publier des plages, réserver au téléphone, suivre la journée, annuler avec motif, mesurer l'activité, gérer les comptes |
+| **Médecin** | Peu de temps pour des outils complexes ; consulte entre deux patients | Voir sa journée d'un coup d'œil, publier ses disponibilités, faire avancer les statuts, être notifié sans rien demander |
+| **Patient** | Appelle la clinique ; parfois réserve lui-même | Exister sans compte (**patient léger**, créé au comptoir), ou réserver en libre-service et consulter ses rendez-vous |
+| **Super administrateur** | Configuration multi-cliniques | ⚠️ **Rôle appliqué côté sécurité, mais sans écran dédié** — voir SC-04 |
+
+> ⚠️ **Écart avec la v1.0.** Celle-ci décrivait quatre personas d'égale
+> importance, patient en tête. La hiérarchie réelle place la réception en premier
+> et le super administrateur en dernier — sans interface.
+
+#### Scénarios d'utilisation
 
 Les scénarios SC-01 à SC-05 de la v1.0 sont réécrits ci-dessous pour décrire ce
 que l'application fait réellement. Les écarts sont signalés.
+
+> 📐 **Diagramme de cas d'utilisation** : la vue d'ensemble des acteurs et de leurs
+> cas est dans [`docs/conception/cas-utilisation/uc-01-global.md`](../conception/cas-utilisation/uc-01-global.md)
+> ([image](../conception/images/uc-01-global.png)), accompagnée de six diagrammes
+> détaillés — un par domaine fonctionnel.
 
 #### SC-01 — Réserver un rendez-vous · **deux canaux**
 
@@ -260,6 +300,47 @@ Ils ont été remplacés en cours de route par un design system documenté et un
 audit UX/UI — ce qui est plus utile en aval, mais ne remplace pas un wireframe en
 amont. Nous avons donc conçu l'interface en la codant.
 
+**Ce qui tient lieu de référence graphique aujourd'hui** : les écrans réels, tous
+capturés et commentés dans le
+[manuel d'utilisation](../guide-utilisation/README.md) — connexion, inscription,
+tableau de bord, disponibilités, prise de rendez-vous, flux du jour, statistiques,
+mode sombre et déclinaison mobile.
+
+### 2.4 Conditions d'utilisation
+
+#### Environnements
+
+| Environnement | État |
+|---|---|
+| Ordinateur de bureau ou portable (Windows, macOS, Linux) | ✅ Cible principale, développée et vérifiée |
+| Tablette, à partir de 768 px | ✅ Supporté par la mise en page adaptative |
+| Téléphone, à partir de 360 px, via navigateur | ✅ Vérifié en captures — le menu devient un tiroir |
+| Application native iOS / Android | ❌ Hors périmètre, dès l'origine |
+
+L'application s'utilise **dans un navigateur, sans rien installer**.
+
+#### Navigateurs
+
+| Navigateur | État |
+|---|---|
+| Google Chrome, Microsoft Edge | ✅ **Développé et vérifié dessus** |
+| Mozilla Firefox, Apple Safari | ⚠️ **Non testés.** La v1.0 les annonçait ; nous ne pouvons pas l'affirmer |
+
+#### Limites et contraintes
+
+- **Connexion Internet requise** — aucun mode hors ligne.
+- **Démarrage à froid de 10 à 15 secondes** au premier accès après une période
+  d'inactivité. C'est la contrepartie du *scale-to-zero* qui maintient le coût
+  d'hébergement à ~0 $/mois. Les accès suivants sont instantanés.
+- **Session de 60 minutes**, sans rafraîchissement automatique : au-delà, il faut
+  se reconnecter.
+- **Verrouillage du compte** après cinq tentatives de connexion échouées.
+- **Aucune pagination serveur** : le volume académique le permet, une clinique
+  réelle à fort volume non.
+- **Données de démonstration entièrement fictives.** Aucune donnée réelle de
+  patient n'a jamais été manipulée, et la plateforme n'est pas destinée à en
+  recevoir en l'état — voir les limites de sécurité au § 3.3.
+
 ---
 
 ## 3. Description technique
@@ -358,7 +439,9 @@ Inchangé et sans objet pratique : **aucune donnée réelle de patient n'a jamai
 principes de la Loi 25 et de la LPRPDE ont guidé la conception (minimisation,
 séparation, moindre privilège) sans faire l'objet d'une mise en conformité.
 
-### 3.4 Performance
+### 3.4 Performance et scalabilité
+
+#### Performance
 
 Les cinq exigences ENF-PERF de la v1.0 supposaient des outils qui n'ont pas été
 installés. État réel :
@@ -374,6 +457,24 @@ installés. État réel :
 **Un seul des cinq est vérifié — mais c'est celui qui compte.** ENF-PERF-05 est
 la seule exigence de performance qui porte une garantie d'intégrité ; les quatre
 autres portent un confort. Nous avons vérifié la garantie et laissé le confort.
+
+#### Scalabilité
+
+La v1.0 annonçait une capacité d'évolution horizontale « théorique dans le
+périmètre académique ». Elle l'est restée — mais l'architecture réelle l'a
+rapprochée d'un cran, sans que ce soit l'objectif :
+
+| Ce qui est en place | Ce qui manquerait pour monter en charge |
+|---|---|
+| **Le backend est sans état** — l'authentification passe par un jeton, aucune session n'est stockée en mémoire. Plusieurs instances peuvent donc coexister | Un test de charge : nous n'en avons fait aucun |
+| **Container Apps sait répliquer** — la montée en réplicas est une valeur de configuration, pas une réécriture | Le réglage est actuellement calibré pour le coût (`minReplicas 0`), pas pour la charge |
+| **L'intégrité ne dépend pas du nombre d'instances** — la garantie anti-double-réservation est posée dans la base, pas dans le code applicatif. Dix instances ne la fragilisent pas | — |
+| Base PostgreSQL infogérée, capable de réplicas en lecture | **La pagination serveur**, absente : c'est le premier mur qu'une clinique à fort volume rencontrerait, bien avant la capacité serveur |
+
+> **Notre lecture.** Le point de rupture n'est pas la capacité d'hébergement, c'est
+> une décision d'implémentation : sans pagination, une liste de rendez-vous se
+> charge entièrement. C'est ce qui casserait en premier, et c'est ce que nous
+> corrigerions en premier.
 
 ---
 
@@ -393,6 +494,47 @@ plutôt qu'une séparation « un front / un back ».
 | 3 — Développement frontend | ✅ mené **en parallèle**, pas après : la tranche verticale l'impose |
 | 4 — Tests, sécurité, qualité | ⚠️ **Partiel** — tests unitaires oui, sécurité partielle, audits absents |
 | 5 — Déploiement et présentation | ✅ **Dépassé** — mise en ligne réelle, faite **en parallèle** du dernier sprint, pas à la fin |
+
+#### Le calendrier réel
+
+Les dates ci-dessous sont **relevées dans l'historique du dépôt**, pas
+reconstituées de mémoire. Un jalon = une intégration dans `main`.
+
+| Date | Jalon | Traces |
+|---|---|---|
+| **28 mai 2026** | Cahier des charges v1.0 | `Cahier_des_charges_MediPlan.docx` |
+| **3 juin 2026** | Dossier de conception déposé — 7 cas d'utilisation, classes, séquence, ERD | premiers commits du dépôt |
+| **17 juin 2026** | **Socle et authentification complets** — monorepo, Docker, CI, JWT, verrouillage, réinitialisation, RBAC, coquille applicative | PR #1 à #12 |
+| **8 juillet 2026** | **Le rendez-vous** — patient léger, disponibilités et génération des créneaux, prise de RDV par la réception | 3 intégrations |
+| **21–22 juillet 2026** | Refonte UX/UI complète et KPI réels du tableau de bord | PR #15 |
+| **29 juillet 2026** | **Mise en ligne sur Azure** — infrastructure Bicep, correctif du routage `Host` | PR #16, #17, #18 |
+| **10 août 2026** | Statistiques, export CSV, notifications internes, jeu de démonstration | PR #19 à #24 |
+| **11 août 2026** | **Réservation patient en libre-service** — le second canal | PR #25 à #31 |
+| **12 août 2026** | Documentation de remise : cahier des charges v2, rapport final, manuel d'utilisation | ce document |
+| **13 août 2026** | Présentation finale | — |
+
+#### Le rythme, tel qu'il a été
+
+Le nombre de commits par semaine dessine un profil très irrégulier :
+
+```
+S23  ███████ 7          (3 juin — conception)
+S25  ███████████████████████████████████████ 39   (17 juin — socle + auth)
+S26  ████ 4
+S27  █ 1
+S28  █████████████ 13    (8 juillet — le rendez-vous)
+S29  ██ 2
+S30  ████████████████ 16 (21-22 juillet — refonte UI)
+S31  ███████████████████ 19  (29 juillet — mise en ligne)
+S32  ██ 2
+S33  ███████████████████████████████████████ 39   (10-12 août — la fin)
+```
+
+**Deux semaines à deux commits, deux semaines à trente-neuf.** Ce n'est pas un
+rythme de sprint, c'est un rythme d'échéances : nous avons produit à l'approche
+des rendus, pas de façon régulière. C'est la même cause qui produit la dérive
+d'intégration décrite au § 4.3 — on ne fusionne pas ce sur quoi on ne travaille
+pas cette semaine-là.
 
 > ⚠️ **Les sprints ont été renumérotés en cours de projet** : Sprint 0 =
 > conception, Sprint 1 = authentification, Sprint 2 = rendez-vous. Certains

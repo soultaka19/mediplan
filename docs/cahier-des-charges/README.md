@@ -21,6 +21,27 @@ la valeur : **l'écart entre l'intention et la livraison**, et ce qu'il apprend.
 La v1.0 reste donc la référence de ce qui était prévu. La v2.0 est la référence
 de ce qui existe.
 
+## Conformité au gabarit fourni
+
+La v2.0 suit le gabarit section par section, dans l'ordre :
+
+| Gabarit | v2.0 |
+|---|---|
+| 1. Présentation du projet — 1.1 Contexte · 1.2 Objectifs · 1.3 Périmètre | § 1.1 · 1.2 · 1.3 |
+| 2. Description fonctionnelle — 2.1 Besoins et exigences métiers *(problématique, utilisateurs cibles, scénarios)* · 2.2 Fonctionnalités · 2.3 Interface · 2.4 Conditions d'utilisation | § 2.1 · 2.2 · 2.3 · 2.4 |
+| 3. Description technique — 3.1 Technologies · 3.2 Architecture · 3.3 Sécurité · 3.4 Performance et scalabilité | § 3.1 · 3.2 · 3.3 · 3.4 |
+| 4. Planification et livrable — 4.1 Phases *(avec dates)* · 4.2 Livrables | § 4.1 · 4.2 *(+ 4.3 Suivi)* |
+| 5. Modalité de validation | § 5 |
+| 6. Conclusion | § 6 |
+
+Deux ajouts, permis par la mention *« largement adapté en fonction des
+particularités de vos projets »* : la **note de révision** en tête, et **quatre
+annexes** (hypothèses, risques survenus, pistes d'évolution, références).
+
+Le gabarit demande un diagramme de cas d'utilisation en § 2.1 et des dates en
+§ 4.1 : les deux y sont — le diagramme par renvoi au dossier de conception, les
+dates **relevées dans l'historique du dépôt**, pas reconstituées.
+
 ## Ce que la v2.0 apporte
 
 - les **six écarts structurants**, chiffrés et qualifiés (dépassement,
