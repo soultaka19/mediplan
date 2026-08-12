@@ -7,6 +7,8 @@ import { AuthFacade, UserRole } from '@core/auth';
 import { appointmentStatusChip } from '@features/clinic-flow/appointment-status-chip';
 import { AppointmentFlowItem } from '@features/clinic-flow/appointment-flow.models';
 import { AppointmentFlowService } from '@features/clinic-flow/appointment-flow.service';
+import { StatisticsResponse } from '@features/admin/statistics/statistics.models';
+import { StatisticsService } from '@features/admin/statistics/statistics.service';
 import { PatientAppointmentsService } from '@features/patient/patient-appointments.service';
 import { Avatar, EmptyState, RoleBadge, StatusChip, StatusChipModel, roleLabel } from '@shared/ui';
 import { resolveDisplayName } from '@shared/user/display-name';
@@ -25,7 +27,14 @@ interface KpiCard {
   readonly route?: string;
   readonly routeLabel?: string;
   readonly accent: 'teal' | 'neutral';
-  readonly live?: 'today' | 'mineUpcoming' | 'minePast';
+  readonly live?:
+    | 'today'
+    | 'mineUpcoming'
+    | 'minePast'
+    | 'doctorsActive'
+    | 'occupancy'
+    | 'doneToday'
+    | 'remainingToday';
   readonly soon?: boolean;
 }
 
@@ -68,7 +77,13 @@ const PATIENT_STATS: readonly KpiCard[] = [
   { icon: 'event_available', label: 'Rendez-vous passés', accent: 'neutral', live: 'minePast' },
 ];
 
-/** KPI de l'administration/médecin. « RDV du jour » réel + cliquable vers le Flux. */
+/**
+ * KPI de l'administration — les trois portent sur **la journée en cours**.
+ *
+ * « Médecins actifs » compte les médecins qui ont réellement des créneaux
+ * aujourd'hui, pas les comptes existants : un médecin en congé n'est pas actif.
+ * « Taux de remplissage » est le taux d'occupation des créneaux du jour.
+ */
 const ADMIN_STATS: readonly KpiCard[] = [
   {
     icon: 'today',
@@ -78,8 +93,35 @@ const ADMIN_STATS: readonly KpiCard[] = [
     route: '/clinic-flow/today',
     routeLabel: 'Flux du jour',
   },
-  { icon: 'stethoscope', label: 'Médecins actifs', accent: 'teal', soon: true },
-  { icon: 'donut_large', label: 'Taux de remplissage', accent: 'neutral', soon: true },
+  { icon: 'stethoscope', label: 'Médecins actifs', accent: 'teal', live: 'doctorsActive' },
+  {
+    icon: 'donut_large',
+    label: 'Taux de remplissage',
+    accent: 'neutral',
+    live: 'occupancy',
+    route: '/admin/statistics',
+    routeLabel: 'Statistiques',
+  },
+];
+
+/**
+ * KPI du médecin, calculés sur **sa** journée.
+ *
+ * Il ne voit pas les indicateurs de clinique : l'écran Statistiques lui est
+ * fermé côté serveur, et le nombre de médecins actifs ne le concerne pas. Ses
+ * trois chiffres viennent de sa propre file du jour.
+ */
+const DOCTOR_STATS: readonly KpiCard[] = [
+  {
+    icon: 'today',
+    label: 'RDV du jour',
+    accent: 'teal',
+    live: 'today',
+    route: '/clinic-flow/today',
+    routeLabel: 'Flux du jour',
+  },
+  { icon: 'task_alt', label: 'Consultations terminées', accent: 'teal', live: 'doneToday' },
+  { icon: 'pending_actions', label: 'Patients à venir', accent: 'neutral', live: 'remainingToday' },
 ];
 
 /**
@@ -101,6 +143,23 @@ const ADMIN_ACTIONS: readonly QuickAction[] = [
   { icon: 'event_note', label: 'Disponibilités', route: '/availabilities' },
   { icon: 'medical_services', label: 'Médecins' },
 ];
+
+/**
+ * Date du jour **à l'heure de la clinique**, au format `AAAA-MM-JJ`.
+ *
+ * Le poste qui consulte n'est pas forcément dans le fuseau de la clinique ; on
+ * ne se fie donc pas à la date locale du navigateur pour borner « aujourd'hui ».
+ */
+const JOUR_CLINIQUE_FMT = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Toronto',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+function clinicToday(): string {
+  return JOUR_CLINIQUE_FMT.format(new Date());
+}
 
 const DATE_FMT = new Intl.DateTimeFormat('fr-CA', { day: '2-digit', month: 'long' });
 
@@ -140,6 +199,7 @@ export class DashboardPage {
   private readonly auth = inject(AuthFacade);
   private readonly appointmentFlow = inject(AppointmentFlowService);
   private readonly patientService = inject(PatientAppointmentsService);
+  private readonly statistics = inject(StatisticsService);
 
   /** Utilisateur connecté (signal en lecture seule). */
   readonly user = this.auth.currentUser;
@@ -149,6 +209,13 @@ export class DashboardPage {
 
   /** Rendez-vous du patient connecté (`null` tant que non chargés). */
   private readonly myItems = signal<readonly AppointmentFlowItem[] | null>(null);
+
+  /**
+   * Activité de la clinique **du jour** (`null` tant que non chargée).
+   *
+   * Réservée aux rôles d'administration : la route serveur leur est limitée.
+   */
+  private readonly todayActivity = signal<StatisticsResponse | null>(null);
 
   constructor() {
     // Deux sources selon le rôle : le patient lit ses propres rendez-vous, la
@@ -165,6 +232,16 @@ export class DashboardPage {
       this.appointmentFlow.listToday().subscribe({
         next: (items) => this.todayItems.set(items),
         error: () => this.todayItems.set(null),
+      });
+    }
+
+    // Indicateurs de clinique : uniquement pour qui a le droit de les lire.
+    // Un médecin recevrait un 403 — on ne lance pas l'appel.
+    if (role === 'clinic_admin' || role === 'super_admin') {
+      const today = clinicToday();
+      this.statistics.getActivity({ startDate: today, endDate: today }).subscribe({
+        next: (activity) => this.todayActivity.set(activity),
+        error: () => this.todayActivity.set(null),
       });
     }
   }
@@ -184,6 +261,9 @@ export class DashboardPage {
   /** Vrai pour un patient (oriente le contenu vers « ses » rendez-vous). */
   private readonly isPatient = computed(() => this.user()?.role === 'patient');
 
+  /** Vrai pour un médecin : ses indicateurs portent sur sa journée, pas la clinique. */
+  private readonly isDoctor = computed(() => this.user()?.role === 'doctor');
+
   /** Phrase d'accroche sous la salutation, adaptée au rôle. */
   readonly subtitle = computed(() =>
     this.isPatient()
@@ -192,9 +272,13 @@ export class DashboardPage {
   );
 
   /** Vrai tant que la source du rôle courant n'est pas chargée (skeletons). */
-  readonly isLoading = computed(() =>
-    this.isPatient() ? this.myItems() === null : this.todayItems() === null,
-  );
+  readonly isLoading = computed(() => {
+    if (this.isPatient()) return this.myItems() === null;
+    if (this.isDoctor()) return this.todayItems() === null;
+    // Côté administration, deux sources alimentent les trois tuiles : on attend
+    // les deux plutôt que d'afficher une ligne à moitié remplie.
+    return this.todayItems() === null || this.todayActivity() === null;
+  });
 
   /** Répartition des rendez-vous du patient entre à venir et passés. */
   private readonly mineCounts = computed(() => {
@@ -224,10 +308,34 @@ export class DashboardPage {
     }
 
     const items = this.todayItems();
-    if (items === null) return ADMIN_STATS;
-    return ADMIN_STATS.map((stat) =>
-      stat.live === 'today' ? { ...stat, value: String(items.length), soon: false } : stat,
-    );
+    const base = this.isDoctor() ? DOCTOR_STATS : ADMIN_STATS;
+    const activity = this.todayActivity();
+
+    return base.map((stat) => {
+      switch (stat.live) {
+        case 'today':
+          return items === null ? stat : { ...stat, value: String(items.length) };
+        case 'doneToday':
+          return items === null
+            ? stat
+            : { ...stat, value: String(items.filter((it) => it.status === 'completed').length) };
+        case 'remainingToday':
+          return items === null
+            ? stat
+            : {
+                ...stat,
+                value: String(items.filter((it) => UPCOMING_STATUSES.includes(it.status)).length),
+              };
+        case 'doctorsActive':
+          return activity === null ? stat : { ...stat, value: String(activity.byDoctor.length) };
+        case 'occupancy':
+          return activity === null
+            ? stat
+            : { ...stat, value: `${Math.round(activity.summary.occupancyRate)} %` };
+        default:
+          return stat;
+      }
+    });
   });
 
   /**

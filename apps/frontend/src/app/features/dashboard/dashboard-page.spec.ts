@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 
 import { AuthFacade, PublicUser, UserRole } from '@core/auth';
 import { AppointmentFlowService } from '@features/clinic-flow/appointment-flow.service';
+import { StatisticsService } from '@features/admin/statistics/statistics.service';
 import { PatientAppointmentsService } from '@features/patient/patient-appointments.service';
 import { DashboardPage } from './dashboard-page';
 
@@ -53,6 +54,24 @@ describe('DashboardPage', () => {
   const fakeFlow = { listToday: () => of([]) };
   // Idem côté patient : aucun rendez-vous, réponse synchrone, aucun HttpClient.
   const fakePatient = { listMine: () => of([]) };
+  // Activité du jour : deux médecins ouverts, aucun créneau occupé.
+  const fakeStatistics = {
+    getActivity: () =>
+      of({
+        filters: { startDate: '', endDate: '', doctorId: null },
+        summary: {
+          totalAppointments: 0,
+          completedAppointments: 0,
+          cancelledAppointments: 0,
+          noShowAppointments: 0,
+          noShowRate: 0,
+          totalSlots: 12,
+          occupiedSlots: 3,
+          occupancyRate: 25,
+        },
+        byDoctor: [{ doctorId: 'd1' }, { doctorId: 'd2' }],
+      }),
+  };
 
   function setup(user: PublicUser | null) {
     const facade = createFakeFacade(user);
@@ -63,6 +82,7 @@ describe('DashboardPage', () => {
         { provide: AuthFacade, useValue: facade },
         { provide: AppointmentFlowService, useValue: fakeFlow },
         { provide: PatientAppointmentsService, useValue: fakePatient },
+        { provide: StatisticsService, useValue: fakeStatistics },
       ],
     });
     const fixture = TestBed.createComponent(DashboardPage);
@@ -161,17 +181,32 @@ describe('DashboardPage', () => {
     expect(numbers.map((n) => n.textContent?.trim())).toEqual(['0', '0']);
   });
 
-  it('n’invente aucune donnée : les KPI encore sans source restent en « — »', () => {
+  // Les trois tuiles de l'administration portent sur la journée en cours et
+  // sont toutes alimentées : plus aucun placeholder sur cet écran.
+  it('affiche les trois indicateurs réels de la clinique', () => {
     const { fixture } = setup(makeUser({ role: 'clinic_admin', email: 'admin@example.com' }));
     const root = fixture.nativeElement as HTMLElement;
     const values = Array.from(root.querySelectorAll('.dash-kpi__value')).map((n) =>
       n.textContent?.trim(),
     );
 
-    // « RDV du jour » est réel (file vide → 0) ; « Médecins actifs » et « Taux
-    // de remplissage » n'ont toujours pas de source et l'assument.
-    expect(values).toContain('0');
-    expect(values.filter((v) => v === '—').length).toBe(2);
+    // File du jour vide → 0 RDV ; 2 médecins ouverts ; 25 % d'occupation.
+    expect(values).toEqual(['0', '2', '25 %']);
+    // Aucune tuile n'est un placeholder (« Médecins », côté accès rapides,
+    // reste « bientôt » : c'est un écran qui n'existe pas, pas un chiffre).
+    expect(root.querySelectorAll('.dash-kpi .dash-soon').length).toBe(0);
+  });
+
+  it('le médecin voit sa propre journée, pas les chiffres de la clinique', () => {
+    const { fixture } = setup(makeUser({ role: 'doctor', email: 'doctor@example.com' }));
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.textContent).toContain('Consultations terminées');
+    expect(root.textContent).toContain('Patients à venir');
+    // Le nombre de médecins actifs ne le concerne pas, et l'écran Statistiques
+    // lui est fermé côté serveur.
+    expect(root.textContent).not.toContain('Médecins actifs');
+    expect(root.textContent).not.toContain('Taux de remplissage');
   });
 
   it('rend les accès rapides « bientôt » non navigables (aria-disabled, pas de lien)', () => {

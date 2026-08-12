@@ -11,7 +11,8 @@
     </div>
   </header>
 
-  <!-- KPI par rôle : « RDV du jour » réel + cliquable, les autres « bientôt » -->
+  <!-- KPI par rôle, tous alimentés : la journée de la clinique pour la
+       réception, la sienne pour le médecin, ses rendez-vous pour le patient. -->
   <section class="dash-kpis" aria-label="Statistiques">
     @if (isLoading()) {
       @for (s of [0, 1, 2]; track s) {
