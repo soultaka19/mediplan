@@ -95,15 +95,15 @@ devant la salle.
 
 Ne cliquer sur rien.
 
-> **À dire** : « Voici l'espace de la réception. La tuile de gauche est réelle :
-> c'est le nombre de rendez-vous du jour, et elle est cliquable. »
+> **À dire** : « Voici l'espace de la réception. Les trois tuiles portent sur la
+> journée en cours : le nombre de rendez-vous, les médecins qui consultent
+> aujourd'hui, et le taux de remplissage de leurs créneaux. Les deux premières
+> sont cliquables. »
 >
-> **Devancer la question** — deux tuiles portent encore la mention *bientôt* :
-> « Médecins actifs et Taux de remplissage sont des emplacements réservés que
-> nous assumons. L'information existe, mais elle est sur l'écran Statistiques
-> que je vous montre dans un instant. »
+> **Si on demande d'où viennent ces chiffres** : « ils sont calculés en base sur
+> la journée, pas saisis. Un médecin en congé n'est pas compté comme actif. »
 
-⚠️ Ne pas cliquer sur les entrées grisées « bientôt » (Médecins).
+⚠️ Ne pas cliquer sur l'accès rapide grisé « Médecins » : cet écran n'existe pas.
 
 ---
 
@@ -351,11 +351,13 @@ Cliquer l'**icône de lune** dans la barre du haut. Recliquer pour revenir.
 
 1. **Jamais de F5** pendant la démonstration.
 2. **Ne pas taper les dates au clavier** — passer par le calendrier.
-3. **Ne pas cliquer les entrées « bientôt »** (Médecins) : ce sont des
-   emplacements réservés, assumés à l'oral.
-4. **Ne pas promettre le décalage en bloc** (MEDIPLAN-24) : le code existe sur une
+3. **Ne pas cliquer l'accès rapide grisé « Médecins »** : cet écran n'existe pas.
+   C'est le dernier emplacement réservé de l'application, et il est assumé.
+4. **Ne pas supprimer une plage qui porte des rendez-vous** : l'application le
+   refuse, volontairement. Il faut d'abord annuler les rendez-vous.
+5. **Ne pas promettre le décalage en bloc** (MEDIPLAN-24) : le code existe sur une
    branche, il n'est pas intégré. C'est un point d'honnêteté, pas une faiblesse.
-5. **Ne pas lancer le seed** pendant la présentation : il écrase tout.
+6. **Ne pas lancer le seed** pendant la présentation : il écrase tout.
 
 ---
 

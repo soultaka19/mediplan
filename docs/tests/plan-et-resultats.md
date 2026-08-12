@@ -27,9 +27,9 @@ démonstration, selon le scénario écrit dans
 
 ## 2. Ce qui tourne
 
-**199 tests automatisés, tous verts** au 11 août 2026.
+**203 tests automatisés, tous verts** au 12 août 2026.
 
-### Backend — 67 tests, 11 suites
+### Backend — 70 tests, 11 suites
 
 | Suite | Ce qu'elle vérifie |
 |---|---|
@@ -43,7 +43,7 @@ démonstration, selon le scénario écrit dans
 | `notifications.service.spec` | Destinataires, contenu, marquage comme lu |
 | `app.controller.spec` | Sonde de disponibilité |
 
-### Frontend — 132 tests, 28 suites
+### Frontend — 133 tests, 28 suites
 
 Regroupés en trois familles :
 
@@ -75,11 +75,11 @@ déclenchée à chaque push et sur chaque pull request.
 | Étape | Bloquante ? |
 |---|---|
 | Compilation du backend et du frontend | **oui** |
-| Les 199 tests | **oui** |
+| Les 203 tests | **oui** |
 | Validation des gabarits d'infrastructure Bicep | **oui** |
 | Lint et formatage | non — rapportés seulement |
 
-**Une pull request dont la CI est rouge n'est pas fusionnée.** Les 26 pull
+**Une pull request dont la CI est rouge n'est pas fusionnée.** Les 29 pull
 requests du projet sont passées par là.
 
 ### Pourquoi le lint ne bloque pas
@@ -163,7 +163,7 @@ démonstration du 13 août.
 
 ## 5. Bogues rencontrés et corrigés
 
-Six défauts nous ont réellement coûté du temps. Quatre ont un point commun :
+Sept défauts nous ont réellement coûté du temps. Quatre ont un point commun :
 **ils n'existaient pas sur nos postes** ; le dernier n'existait que pour un
 utilisateur que nous n'avions pas encore.
 
@@ -266,6 +266,26 @@ insertion idempotente qui n'écrase jamais un créneau déjà réservé
 **Ce que nous en retenons.** Un état construit « au premier accès » n'est pas
 construit : il est construit *pour celui qui accède le premier*. Tant qu'un seul
 type d'utilisateur passait par là, personne ne pouvait le voir.
+
+### 5.7 — Le créneau qui survivait à sa plage
+
+**Symptôme.** Supprimer une disponibilité renvoyait `204`, mais ses créneaux
+restaient proposés à la réservation — pour une matinée qui n'existait plus.
+
+**Diagnostic.** Aucune clé étrangère ne rattache un créneau à la plage qui l'a
+publié. Le défaut préexistait, mais restait hors d'atteinte tant que les créneaux
+n'étaient créés qu'à l'ouverture du dialogue de la réception. Depuis le correctif
+précédent (§5.6), ils existent toujours — donc toute suppression laissait des
+orphelins, réservables par un patient.
+
+**Correction.** La suppression retire les créneaux **libres** de la plage. Si l'un
+d'eux est déjà réservé, elle est **refusée en 409** : effacer la matinée d'un
+médecin ne doit pas faire disparaître en silence les rendez-vous de ses patients
+(PR [#28](https://github.com/soultaka19/mediplan/pull/28)).
+
+**Ce que nous en retenons.** Corriger un défaut peut en rendre un autre
+atteignable. Celui-ci dormait depuis des semaines ; c'est le correctif de la
+veille qui l'a mis sur le chemin des utilisateurs.
 
 ---
 
