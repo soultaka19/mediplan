@@ -121,7 +121,9 @@ const DOCTOR_STATS: readonly KpiCard[] = [
     routeLabel: 'Flux du jour',
   },
   { icon: 'task_alt', label: 'Consultations terminées', accent: 'teal', live: 'doneToday' },
-  { icon: 'pending_actions', label: 'Patients à venir', accent: 'neutral', live: 'remainingToday' },
+  // « Restants » et non « à venir » : le compte inclut le patient déjà arrivé et
+  // celui en consultation. Ils ne sont plus à venir, mais ils restent à voir.
+  { icon: 'pending_actions', label: 'Patients restants', accent: 'neutral', live: 'remainingToday' },
 ];
 
 /**
