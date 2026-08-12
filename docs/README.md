@@ -7,16 +7,23 @@ Index de la documentation du projet. Le **code applicatif** vit dans `apps/`
 
 ## Les livrables de la remise finale
 
-| Livrable | Document |
-|---|---|
-| **Rapport final de projet** | [`RAPPORT-FINAL.md`](RAPPORT-FINAL.md) · [`.docx`](MediPlan-Rapport-Final.docx) |
-| **Cahier des charges final** | [`cahier-des-charges/`](cahier-des-charges/) — v1.0 initiale, **v2.0 finale** |
-| **Dossier de conception** | [`conception/`](conception/) |
-| **Manuel d'utilisation** | [`guide-utilisation/`](guide-utilisation/) |
-| **Vidéo démonstrative** | [`../MediPlan-Demo.mp4`](../MediPlan-Demo.mp4) — 4 min 05 |
-| **Tests, résultats, corrections** | [`tests/plan-et-resultats.md`](tests/plan-et-resultats.md) |
-| **Contributions individuelles** | [`presentation/CONTRIBUTIONS.md`](presentation/CONTRIBUTIONS.md) |
-| **Instructions de lancement** | [`../README.md`](../README.md) |
+Les documents de remise sont en **PDF**. Le Markdown reste la source et se lit
+directement sur GitHub ; le `.docx` sert aux retouches.
+
+| Livrable | PDF | Source |
+|---|---|---|
+| **Cahier des charges final** | [13 p.](cahier-des-charges/Cahier_des_charges_MediPlan_v2.pdf) | [`.md`](cahier-des-charges/Cahier-des-charges-v2.md) · [`.docx`](cahier-des-charges/Cahier_des_charges_MediPlan_v2.docx) |
+| **Rapport final de projet** | [8 p.](MediPlan-Rapport-Final.pdf) | [`.md`](RAPPORT-FINAL.md) · [`.docx`](MediPlan-Rapport-Final.docx) |
+| **Manuel d'utilisation** | [18 p.](guide-utilisation/MediPlan-Manuel-Utilisation.pdf) | [`.md`](guide-utilisation/README.md) |
+| **Tests, résultats, corrections** | [7 p.](tests/MediPlan-Tests-et-Resultats.pdf) | [`.md`](tests/plan-et-resultats.md) |
+| **Contributions individuelles** | [6 p.](presentation/MediPlan-Contributions.pdf) | [`.md`](presentation/CONTRIBUTIONS.md) |
+| **Dossier de conception** | — | [`conception/`](conception/) — les diagrammes s'affichent sur GitHub |
+| **Vidéo démonstrative** | — | [`../MediPlan-Demo.mp4`](../MediPlan-Demo.mp4) — 4 min 05 |
+| **Instructions de lancement** | — | [`../README.md`](../README.md) |
+
+> La **v1.0** du cahier des charges est également convertie
+> ([22 p.](cahier-des-charges/Cahier_des_charges_MediPlan.pdf)) : elle sert de
+> point de comparaison, la v2.0 fait 13 pages.
 
 ---
 

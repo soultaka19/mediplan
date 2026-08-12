@@ -23,16 +23,19 @@ patient n'est manipulée par la plateforme.
 
 ## 📦 Livrables
 
-| Livrable | Où |
-| --- | --- |
-| 🎬 **Vidéo démonstrative** — 4 min 05 | [`MediPlan-Demo.mp4`](MediPlan-Demo.mp4) |
-| 📘 **Manuel d'utilisation** | [`docs/guide-utilisation/`](docs/guide-utilisation/) |
-| 📄 **Rapport final de projet** | [`docs/RAPPORT-FINAL.md`](docs/RAPPORT-FINAL.md) · [`.docx`](docs/MediPlan-Rapport-Final.docx) |
-| 📋 **Cahier des charges final** | [`docs/cahier-des-charges/`](docs/cahier-des-charges/) — v1.0 initiale et v2.0 finale |
-| 📐 **Dossier de conception** | [`docs/conception/`](docs/conception/) — 7 cas d'utilisation, classes, séquence, ERD |
-| ✅ **Tests, résultats, bogues corrigés** | [`docs/tests/plan-et-resultats.md`](docs/tests/plan-et-resultats.md) |
-| 👥 **Contributions individuelles** | [`docs/presentation/CONTRIBUTIONS.md`](docs/presentation/CONTRIBUTIONS.md) |
-| 🖥️ **Support de présentation** | [`docs/presentation/`](docs/presentation/) |
+Les documents de remise sont en **PDF**. Le Markdown reste la source, lisible
+directement sur GitHub.
+
+| Livrable | PDF | Source |
+| --- | --- | --- |
+| 🎬 **Vidéo démonstrative** — 4 min 05 | [`MediPlan-Demo.mp4`](MediPlan-Demo.mp4) | — |
+| 📋 **Cahier des charges final** | [PDF, 13 p.](docs/cahier-des-charges/Cahier_des_charges_MediPlan_v2.pdf) | [`.md`](docs/cahier-des-charges/Cahier-des-charges-v2.md) · [`.docx`](docs/cahier-des-charges/Cahier_des_charges_MediPlan_v2.docx) |
+| 📄 **Rapport final de projet** | [PDF, 8 p.](docs/MediPlan-Rapport-Final.pdf) | [`.md`](docs/RAPPORT-FINAL.md) · [`.docx`](docs/MediPlan-Rapport-Final.docx) |
+| 📘 **Manuel d'utilisation** | [PDF, 18 p.](docs/guide-utilisation/MediPlan-Manuel-Utilisation.pdf) | [`.md`](docs/guide-utilisation/README.md) |
+| 📐 **Dossier de conception** | — | [`docs/conception/`](docs/conception/) — diagrammes affichés directement sur GitHub |
+| ✅ **Tests, résultats, bogues corrigés** | [PDF, 7 p.](docs/tests/MediPlan-Tests-et-Resultats.pdf) | [`.md`](docs/tests/plan-et-resultats.md) |
+| 👥 **Contributions individuelles** | [PDF, 6 p.](docs/presentation/MediPlan-Contributions.pdf) | [`.md`](docs/presentation/CONTRIBUTIONS.md) |
+| 🖥️ **Support de présentation** | — | [`docs/presentation/`](docs/presentation/) |
 
 Index complet de la documentation : [`docs/README.md`](docs/README.md).
 

@@ -199,7 +199,7 @@ bornés à la clinique.
 | EF-02 | Gestion des cliniques | Must | ⚠️ En base et à l'inscription ; pas d'écran |
 | EF-03 | Gestion des médecins et spécialités | Must | ❌ Non livré |
 | EF-04 | Gestion des disponibilités | Must | ⚠️ Plages datées et congés ; pas de récurrence |
-| EF-05 | Réservation, modification, annulation | Must | ⚠️ Réservation et annulation ✅ ; modification ❌ |
+| EF-05 | Réservation, modification, annulation | Must | ⚠️ Réservation et annulation livrées ; modification non livrée |
 | EF-06 | Flux clinique du jour | Must | ✅ Livré |
 | EF-07 | Notifications internes | Must | ✅ Livré |
 | EF-08 | Tableaux de bord et statistiques | Should | ✅ Livré |
@@ -286,12 +286,12 @@ tournent sous Docker Compose. En ligne :
 
 ```
 Navigateur
-    │  HTTPS
-Frontend Angular servi par nginx     ── Azure Container Apps (ingress public)
-    │  proxy /api/
-API REST NestJS                       ── Azure Container Apps (ingress interne)
-    │
-PostgreSQL infogéré                   ── Neon
+   |  HTTPS
+Frontend Angular servi par nginx   --  Azure Container Apps, ingress public
+   |  proxy /api/
+API REST NestJS                    --  Azure Container Apps, ingress INTERNE
+   |
+PostgreSQL infogere                --  Neon
 ```
 
 Trois décisions n'étaient pas dans la v1.0 :
