@@ -42,19 +42,18 @@ Thumbs.db
 # Companion visuel de brainstorming (local)
 .superpowers/
 
-# Vidéo de démonstration, à la racine pour être trouvée tout de suite le jour de
-# la présentation. Non versionnée : 58 Mo entreraient définitivement dans
-# l'historique du dépôt, et GitHub avertit au-delà de 50 Mo. Pour la publier
-# malgré tout, retirer cette ligne — ou verser une copie allégée :
-#   ffmpeg -i MediPlan-Demo.mp4 -c:v libx264 -crf 26 -preset slow \
-#          -c:a aac -b:a 128k MediPlan-Demo-leger.mp4
-/MediPlan-Demo.mp4
+# MediPlan-Demo.mp4 à la racine EST versionné : la consigne de remise exige que
+# la vidéo démonstrative soit dans le dépôt. C'est un ré-encodage à 9,8 Mo
+# (CRF 23), visuellement identique — le master de 58 Mo reste local, dans
+# docs/presentation/video/out/, et se régénère depuis les sources.
 
 # Captures de travail de l'application : 7 Mo qu'aucun document ne référence.
 # Les captures qui SERVENT un livrable sont versionnées là où il les utilise
-# (docs/conception/images/, docs/reflexion-ux-ui/audit-after/).
+# (docs/guide-utilisation/captures/, docs/conception/images/,
+# docs/reflexion-ux-ui/audit-after/). D'où la barre oblique initiale : elle
+# limite la règle au dossier racine, sinon elle attrape aussi ceux-là.
 /*.png
-captures/
+/captures/
 
 # Fichiers de sauvegarde (jamais versionnés, où qu'ils soient), y compris les
 # sauvegardes de .env (secrets) telles que .env.backup-avant-seed

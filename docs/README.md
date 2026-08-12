@@ -5,19 +5,28 @@ Index de la documentation du projet. Le **code applicatif** vit dans `apps/`
 
 ---
 
-## Les six documents à lire en premier
+## Les livrables de la remise finale
 
-Si vous n'en lisez que six, ce sont ceux-là. Ils suffisent à comprendre ce que le
-projet devait faire, ce qu'il fait, comment il est construit et qui a fait quoi.
+| Livrable | Document |
+|---|---|
+| **Rapport final de projet** | [`RAPPORT-FINAL.md`](RAPPORT-FINAL.md) · [`.docx`](MediPlan-Rapport-Final.docx) |
+| **Cahier des charges final** | [`cahier-des-charges/`](cahier-des-charges/) — v1.0 initiale, **v2.0 finale** |
+| **Dossier de conception** | [`conception/`](conception/) |
+| **Manuel d'utilisation** | [`guide-utilisation/`](guide-utilisation/) |
+| **Vidéo démonstrative** | [`../MediPlan-Demo.mp4`](../MediPlan-Demo.mp4) — 4 min 05 |
+| **Tests, résultats, corrections** | [`tests/plan-et-resultats.md`](tests/plan-et-resultats.md) |
+| **Contributions individuelles** | [`presentation/CONTRIBUTIONS.md`](presentation/CONTRIBUTIONS.md) |
+| **Instructions de lancement** | [`../README.md`](../README.md) |
+
+---
+
+## Si vous n'en lisez que trois
 
 | Document | Ce qu'il répond |
 |---|---|
+| [Rapport final](RAPPORT-FINAL.md) | Comment le projet a été conduit, ce qui a changé, ce qui reste — la synthèse |
 | [Cahier des charges v2.0](cahier-des-charges/Cahier-des-charges-v2.md) | Ce qui était prévu, ce qui a été livré, **et où les deux s'écartent** |
-| [Dossier de conception](conception/README.md) | Les diagrammes UML et l'ERD, avec leurs explications écrites |
-| [Tests et résultats](tests/plan-et-resultats.md) | Ce que nous testons, pourquoi, et ce qui n'est pas couvert |
-| [Contributions individuelles](presentation/CONTRIBUTIONS.md) | Qui a fait quoi, retracé commit par commit |
-| [Déploiement Azure](deployment/azure.md) | La mise en ligne, de bout en bout |
-| [Design system](frontend/design-system.md) | Les jetons visuels — source unique de l'interface |
+| [Manuel d'utilisation](guide-utilisation/) | Comment se servir de l'application, écran par écran |
 
 ---
 
@@ -27,6 +36,7 @@ projet devait faire, ce qu'il fait, comment il est construit et qui a fait quoi.
 |---|---|
 | [`cahier-des-charges/`](cahier-des-charges/) | Le cahier des charges, v1.0 (initiale) et **v2.0 (finale)** — LIV-05 |
 | [`conception/`](conception/) | 7 cas d'utilisation, diagramme de classes, 3 diagrammes de séquence, ERD — LIV-06 |
+| [`guide-utilisation/`](guide-utilisation/) | Manuel d'utilisation, avec captures d'écran |
 | [`tests/`](tests/) | Stratégie de test, les 203 tests, bogues et corrections |
 | [`deployment/`](deployment/) | Mise en ligne sur Azure Container Apps |
 | [`frontend/`](frontend/) | Design system et audit UX/UI |
