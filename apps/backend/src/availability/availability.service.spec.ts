@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,6 +16,7 @@ describe('AvailabilityService', () => {
   let availabilityRepo: jest.Mocked<Repository<Availability>>;
   let userRepo: jest.Mocked<Repository<User>>;
   let slotRepo: jest.Mocked<Repository<AppointmentSlot>>;
+  let slotBuilder: Record<string, jest.Mock>;
 
   const doctorUser = (overrides: Partial<User> = {}): User => ({
     id: 'doctor-1',
@@ -71,14 +72,23 @@ describe('AvailabilityService', () => {
     const userRepoMock = {
       findOne: jest.fn(),
     };
+    // Un seul constructeur de requête, partagé par tous les appels : il rend
+    // les assertions lisibles (on interroge `slotBuilder` directement) sans
+    // masquer l'enchaînement réel des appels.
+    slotBuilder = {
+      insert: jest.fn().mockReturnThis(),
+      values: jest.fn().mockReturnThis(),
+      orIgnore: jest.fn().mockReturnThis(),
+      delete: jest.fn().mockReturnThis(),
+      from: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getCount: jest.fn().mockResolvedValue(0),
+      execute: jest.fn().mockResolvedValue({}),
+    };
     const slotRepoMock = {
       find: jest.fn(),
-      createQueryBuilder: jest.fn(() => ({
-        insert: jest.fn().mockReturnThis(),
-        values: jest.fn().mockReturnThis(),
-        orIgnore: jest.fn().mockReturnThis(),
-        execute: jest.fn().mockResolvedValue({}),
-      })),
+      createQueryBuilder: jest.fn(() => slotBuilder),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -134,14 +144,55 @@ describe('AvailabilityService', () => {
       slotDurationMin: 30,
     });
 
-    const builder = (slotRepo.createQueryBuilder as jest.Mock).mock.results[0].value;
-    const rows = builder.values.mock.calls[0][0] as Array<{ startAt: Date }>;
+    const rows = slotBuilder.values.mock.calls[0][0] as Array<{ startAt: Date }>;
     // Une heure découpée en 30 min = 2 créneaux.
     expect(rows).toHaveLength(2);
     expect(rows[0].startAt).toEqual(new Date('2026-06-24T13:00:00Z'));
     // `orIgnore` : rejouer la matérialisation ne doit jamais écraser un créneau
     // déjà réservé.
-    expect(builder.orIgnore).toHaveBeenCalled();
+    expect(slotBuilder.orIgnore).toHaveBeenCalled();
+  });
+
+  // Les créneaux ne sont rattachés à la plage par aucune clé étrangère :
+  // supprimer l'une sans les autres laissait des créneaux réservables pour une
+  // matinée disparue. Invisible tant que seule la réception réservait.
+  describe('suppression d’une plage', () => {
+    it('supprime aussi les créneaux libres qu’elle avait publiés', async () => {
+      availabilityRepo.findOne.mockResolvedValue(availability());
+      slotBuilder.getCount.mockResolvedValue(0);
+
+      await service.remove(authUser(), 'availability-1');
+
+      expect(slotBuilder.delete).toHaveBeenCalled();
+      // On ne supprime que les créneaux encore libres.
+      const conditions = slotBuilder.andWhere.mock.calls.map((c) => c[0] as string);
+      expect(conditions).toContain('is_booked = false');
+      expect(availabilityRepo.remove).toHaveBeenCalled();
+    });
+
+    it('refuse la suppression si un créneau est déjà réservé', async () => {
+      availabilityRepo.findOne.mockResolvedValue(availability());
+      slotBuilder.getCount.mockResolvedValue(1);
+
+      await expect(service.remove(authUser(), 'availability-1')).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+      // Ni les créneaux ni la plage ne bougent : c'est au médecin d'annuler
+      // d'abord les rendez-vous, explicitement et avec un motif.
+      expect(slotBuilder.delete).not.toHaveBeenCalled();
+      expect(availabilityRepo.remove).not.toHaveBeenCalled();
+    });
+
+    it('une plage de congé se supprime sans toucher aux créneaux', async () => {
+      availabilityRepo.findOne.mockResolvedValue(
+        availability({ type: AvailabilityType.TIME_OFF }),
+      );
+
+      await service.remove(authUser(), 'availability-1');
+
+      expect(slotRepo.createQueryBuilder).not.toHaveBeenCalled();
+      expect(availabilityRepo.remove).toHaveBeenCalled();
+    });
   });
 
   it('une plage de congé ne génère aucun créneau', async () => {
