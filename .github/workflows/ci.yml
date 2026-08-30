@@ -24,15 +24,15 @@ jobs:
 
     steps:
       - name: Récupération du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Installation de pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 11.7.0
 
       - name: Installation de Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           # Version épinglée, identique à .nvmrc : Angular CLI 22 exige
           # Node >= 22.22.3 ou >= 24.15.0, et la CI doit tester la même version
@@ -70,7 +70,7 @@ jobs:
 
     steps:
       - name: Récupération du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Compilation des templates
         # Détecte les erreurs de syntaxe et de typage de l'infrastructure au
