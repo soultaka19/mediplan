@@ -1,8 +1,5 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { AuthResponse } from './models/auth.models';
@@ -33,10 +30,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(withInterceptors([])),
-        provideHttpClientTesting(),
-      ],
+      providers: [provideHttpClient(withInterceptors([])), provideHttpClientTesting()],
     });
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);

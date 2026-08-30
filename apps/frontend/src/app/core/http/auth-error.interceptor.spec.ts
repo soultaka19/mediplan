@@ -1,8 +1,5 @@
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
@@ -44,7 +41,9 @@ describe('authErrorInterceptor', () => {
     tokenStorage.setToken('jwt-token');
 
     http.get('/api/v1/protected').subscribe({ error: () => undefined });
-    httpMock.expectOne('/api/v1/protected').flush(null, { status: 401, statusText: 'Unauthorized' });
+    httpMock
+      .expectOne('/api/v1/protected')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
 
     expect(logoutSpy).toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
@@ -59,7 +58,7 @@ describe('authErrorInterceptor', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
-  it('sur 423 du login : ne déconnecte pas, ne redirige pas, propage l\'erreur', () => {
+  it("sur 423 du login : ne déconnecte pas, ne redirige pas, propage l'erreur", () => {
     const facade = TestBed.inject(AuthFacade);
     const logoutSpy = vi.spyOn(facade, 'logout');
     let propagatedStatus: number | undefined;
@@ -69,12 +68,13 @@ describe('authErrorInterceptor', () => {
         propagatedStatus = (error as { status?: number }).status;
       },
     });
-    httpMock
-      .expectOne('/api/v1/auth/login')
-      .flush(
-        { message: 'Compte temporairement verrouillé suite à trop de tentatives. Réessayez plus tard.' },
-        { status: 423, statusText: 'Locked' },
-      );
+    httpMock.expectOne('/api/v1/auth/login').flush(
+      {
+        message:
+          'Compte temporairement verrouillé suite à trop de tentatives. Réessayez plus tard.',
+      },
+      { status: 423, statusText: 'Locked' },
+    );
 
     expect(logoutSpy).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();

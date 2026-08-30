@@ -47,7 +47,9 @@
           matSuffix
           type="button"
           data-testid="login-password-toggle"
-          [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+          [attr.aria-label]="
+            showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+          "
           [attr.aria-pressed]="showPassword()"
           (click)="togglePassword()"
         >

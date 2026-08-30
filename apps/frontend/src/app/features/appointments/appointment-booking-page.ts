@@ -12,10 +12,7 @@ import { finalize } from 'rxjs/operators';
 
 import { PublicUser } from '@core/auth';
 import { UserService } from '@features/admin/users/user.service';
-import {
-  Availability,
-  MaterializedSlot,
-} from '@features/availabilities/availability.models';
+import { Availability, MaterializedSlot } from '@features/availabilities/availability.models';
 import { AvailabilityService } from '@features/availabilities/availability.service';
 import { authErrorMessage } from '@shared/http/http-error-message';
 import { Alert, EmptyState, ErrorState, NotificationService } from '@shared/ui';

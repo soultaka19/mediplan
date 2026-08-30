@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   HostListener,
   computed,
   inject,
@@ -81,6 +82,7 @@ export class LayoutShell {
   private readonly themeService = inject(ThemeService);
   private readonly dialog = inject(MatDialog);
   private readonly notificationCenter = inject(NotificationCenterService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /** Utilisateur courant (signal lecture seule) pour le menu utilisateur. */
   readonly user = this.auth.currentUser;
@@ -298,10 +300,29 @@ export class LayoutShell {
     void this.router.navigate(['/login']);
   }
 
-  /** Ferme le menu utilisateur sur tout clic hors de son conteneur. */
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    if (this.userMenuOpen()) this.closeUserMenu();
+  /**
+   * Ferme le menu utilisateur sur tout clic hors de son conteneur.
+   *
+   * La fermeture est décidée ici par un test de contenance, et non par un
+   * `stopPropagation` posé sur le panneau : ce dernier obligeait à déclarer un
+   * gestionnaire de clic sur un `<div role="menu">` non focalisable, que les
+   * règles d'accessibilité signalaient à juste titre. Le panneau redevient un
+   * conteneur passif, et tout élément interactif ajouté à l'intérieur continue
+   * de fonctionner sans avoir à penser à la propagation.
+   */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.userMenuOpen()) return;
+
+    const target = event.target;
+    if (
+      target instanceof Node &&
+      this.host.nativeElement.querySelector('.mp-usermenu')?.contains(target)
+    ) {
+      return;
+    }
+
+    this.closeUserMenu();
   }
 
   /**

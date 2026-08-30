@@ -24,7 +24,12 @@
             <input matInput type="date" formControlName="to" data-testid="export-to" />
           </mat-form-field>
 
-          <button matButton="filled" type="submit" [disabled]="exporting()" data-testid="export-csv">
+          <button
+            matButton="filled"
+            type="submit"
+            [disabled]="exporting()"
+            data-testid="export-csv"
+          >
             <mat-icon aria-hidden="true">download</mat-icon>
             Exporter CSV
           </button>
@@ -73,12 +78,17 @@
         <section class="flux-group">
           <div class="flux-group__head">
             <h2 class="flux-group__title">Présents</h2>
-            <span class="flux-group__count flux-group__count--teal mp-tnum">{{ activeRows().length }}</span>
+            <span class="flux-group__count flux-group__count--teal mp-tnum">{{
+              activeRows().length
+            }}</span>
             <span class="flux-group__rule"></span>
           </div>
           <div class="flux-list">
             @for (r of activeRows(); track r.item.id) {
-              <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r, variant: 'active' }" />
+              <ng-container
+                [ngTemplateOutlet]="rowTpl"
+                [ngTemplateOutletContext]="{ r, variant: 'active' }"
+              />
             }
           </div>
         </section>
@@ -88,12 +98,17 @@
         <section class="flux-group">
           <div class="flux-group__head">
             <h2 class="flux-group__title">À venir</h2>
-            <span class="flux-group__count flux-group__count--blue mp-tnum">{{ upcomingRows().length }}</span>
+            <span class="flux-group__count flux-group__count--blue mp-tnum">{{
+              upcomingRows().length
+            }}</span>
             <span class="flux-group__rule"></span>
           </div>
           <div class="flux-list">
             @for (r of upcomingRows(); track r.item.id) {
-              <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r, variant: 'upcoming' }" />
+              <ng-container
+                [ngTemplateOutlet]="rowTpl"
+                [ngTemplateOutletContext]="{ r, variant: 'upcoming' }"
+              />
             }
           </div>
         </section>
@@ -108,7 +123,10 @@
           </div>
           <div class="flux-list">
             @for (r of doneRows(); track r.item.id) {
-              <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r, variant: 'done' }" />
+              <ng-container
+                [ngTemplateOutlet]="rowTpl"
+                [ngTemplateOutletContext]="{ r, variant: 'done' }"
+              />
             }
           </div>
         </section>

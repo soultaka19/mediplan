@@ -144,7 +144,8 @@ describe('AvailabilityService', () => {
       slotDurationMin: 30,
     });
 
-    const rows = slotBuilder.values.mock.calls[0][0] as Array<{ startAt: Date }>;
+    const valuesCalls = slotBuilder.values.mock.calls as unknown[][];
+    const rows = valuesCalls[0][0] as Array<{ startAt: Date }>;
     // Une heure découpée en 30 min = 2 créneaux.
     expect(rows).toHaveLength(2);
     expect(rows[0].startAt).toEqual(new Date('2026-06-24T13:00:00Z'));
@@ -165,7 +166,8 @@ describe('AvailabilityService', () => {
 
       expect(slotBuilder.delete).toHaveBeenCalled();
       // On ne supprime que les créneaux encore libres.
-      const conditions = slotBuilder.andWhere.mock.calls.map((c) => c[0] as string);
+      const andWhereCalls = slotBuilder.andWhere.mock.calls as unknown[][];
+      const conditions = andWhereCalls.map((c) => c[0] as string);
       expect(conditions).toContain('is_booked = false');
       expect(availabilityRepo.remove).toHaveBeenCalled();
     });

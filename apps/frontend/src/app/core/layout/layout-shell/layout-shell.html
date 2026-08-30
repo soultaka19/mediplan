@@ -80,7 +80,9 @@
           (click)="markNotificationAsRead(notification)"
           data-testid="shell-notification-item"
         >
-          <mat-icon>{{ notification.readAt ? 'notifications_none' : 'notifications_active' }}</mat-icon>
+          <mat-icon>{{
+            notification.readAt ? 'notifications_none' : 'notifications_active'
+          }}</mat-icon>
           <span class="mp-notification__content">
             <span class="mp-notification__title">{{ notification.title }}</span>
             <span class="mp-notification__message">{{ notification.message }}</span>
@@ -122,7 +124,7 @@
     </button>
 
     @if (userMenuOpen()) {
-      <div class="mp-usermenu__panel" role="menu" (click)="$event.stopPropagation()">
+      <div class="mp-usermenu__panel" role="menu">
         <div class="mp-usermenu__header">
           <div class="mp-usermenu__header-name" data-testid="shell-user-name">
             {{ displayName() }}
@@ -167,7 +169,11 @@
 <div class="mp-body">
   <!-- Rail desktop (en flux, largeur animée) -->
   @if (!isMobile()) {
-    <nav class="mp-rail" [class.mp-rail--collapsed]="railCollapsed()" aria-label="Navigation principale">
+    <nav
+      class="mp-rail"
+      [class.mp-rail--collapsed]="railCollapsed()"
+      aria-label="Navigation principale"
+    >
       <ul class="mp-rail__list">
         @for (item of navItems(); track item.label) {
           <li>
@@ -214,7 +220,10 @@
         (click)="toggleRail()"
         [attr.aria-label]="railToggleLabel()"
       >
-        <mat-icon class="mp-rail__collapse-caret" [class.mp-rail__collapse-caret--flipped]="railCollapsed()">
+        <mat-icon
+          class="mp-rail__collapse-caret"
+          [class.mp-rail__collapse-caret--flipped]="railCollapsed()"
+        >
           chevron_left
         </mat-icon>
         @if (showLabels()) {
@@ -226,7 +235,15 @@
 
   <!-- Overlay de navigation mobile -->
   @if (isMobile() && mobileNavOpen()) {
-    <div class="mp-nav-backdrop" (click)="closeMobileNav()"></div>
+    <!--
+      Voile décoratif : raccourci souris « cliquer à côté pour fermer ». Le
+      chemin clavier existe déjà et ne passe pas par lui (Échap est géré par
+      onKeydown, et le rail garde son bouton de fermeture). Le rendre focalisable
+      n'ajouterait qu'un arrêt de tabulation plein écran sans action propre : il
+      est donc masqué aux technologies d'assistance, et la règle est levée ici en
+      connaissance de cause.
+    -->
+    <div class="mp-nav-backdrop" aria-hidden="true" (click)="closeMobileNav()"></div>
     <nav class="mp-rail mp-rail--overlay" aria-label="Navigation principale">
       <ul class="mp-rail__list">
         @for (item of navItems(); track item.label) {

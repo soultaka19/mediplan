@@ -1,8 +1,5 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { AuthFacade } from './auth.facade';
@@ -44,10 +41,7 @@ describe('AuthFacade', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(withInterceptors([])),
-        provideHttpClientTesting(),
-      ],
+      providers: [provideHttpClient(withInterceptors([])), provideHttpClientTesting()],
     });
     facade = TestBed.inject(AuthFacade);
     httpMock = TestBed.inject(HttpTestingController);
@@ -98,7 +92,9 @@ describe('AuthFacade', () => {
     facade.login({ email: 'patient@example.com', password: 'Str0ng!Pass' }).subscribe();
     httpMock.expectOne('/api/v1/auth/login').flush(fakeAuthResponse());
     // /users/me échoue : on garde l'utilisateur issu de la réponse de login.
-    httpMock.expectOne('/api/v1/users/me').flush('boom', { status: 500, statusText: 'Server Error' });
+    httpMock
+      .expectOne('/api/v1/users/me')
+      .flush('boom', { status: 500, statusText: 'Server Error' });
 
     expect(facade.isAuthenticated()).toBe(true);
     expect(facade.currentUser()?.id).toBe('u1');

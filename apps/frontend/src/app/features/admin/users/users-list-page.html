@@ -82,14 +82,20 @@
           <div class="mp-table__grid users-grid mp-table__row" data-testid="users-row">
             <div class="users-cell__name">
               <app-avatar [name]="r.name" [email]="r.user.email ?? ''" size="sm" />
-              <span class="users-cell__name-text" [class.rdv-cell--placeholder]="r.namePlaceholder" [title]="r.name">
+              <span
+                class="users-cell__name-text"
+                [class.rdv-cell--placeholder]="r.namePlaceholder"
+                [title]="r.name"
+              >
                 {{ r.name }}
               </span>
             </div>
             <div class="users-cell__email" [class.rdv-cell--placeholder]="r.emailPlaceholder">
               {{ r.email }}
             </div>
-            <div><span class="mp-role-badge">{{ r.role }}</span></div>
+            <div>
+              <span class="mp-role-badge">{{ r.role }}</span>
+            </div>
             <div><app-status-chip [model]="r.status" /></div>
           </div>
         }
@@ -99,16 +105,28 @@
         <div class="mp-table__empty" data-testid="users-no-results">
           <div class="mp-table__empty-title">Aucun résultat</div>
           <div class="mp-table__empty-text">Aucun utilisateur ne correspond à ces filtres.</div>
-          <button type="button" class="mp-btn-outline" (click)="clearFilters()">Effacer les filtres</button>
+          <button type="button" class="mp-btn-outline" (click)="clearFilters()">
+            Effacer les filtres
+          </button>
         </div>
       } @else {
         <div class="mp-table__foot">
           <span class="mp-tnum">{{ rangeLabel() }}</span>
           <div class="mp-pager">
-            <button type="button" aria-label="Page précédente" (click)="prevPage()" [disabled]="!canPrev()">
+            <button
+              type="button"
+              aria-label="Page précédente"
+              (click)="prevPage()"
+              [disabled]="!canPrev()"
+            >
               <mat-icon>chevron_left</mat-icon>
             </button>
-            <button type="button" aria-label="Page suivante" (click)="nextPage()" [disabled]="!canNext()">
+            <button
+              type="button"
+              aria-label="Page suivante"
+              (click)="nextPage()"
+              [disabled]="!canNext()"
+            >
               <mat-icon>chevron_right</mat-icon>
             </button>
           </div>

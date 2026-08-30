@@ -15,9 +15,22 @@ import { AppointmentStatus } from './appointment-status.enum';
 import { Appointment } from './appointment.entity';
 import { AppointmentsService } from './appointments.service';
 
+/**
+ * Seule surcharge de `DataSource.transaction` utilisée par le service.
+ *
+ * `jest.Mocked<Pick<DataSource, 'transaction'>>` ne convient pas ici :
+ * `transaction` cumule plusieurs surcharges, et la résolution retombe sur celle
+ * dont le callback est typé `any`. Chaque `mockImplementationOnce` renvoyait
+ * alors une valeur `any`. Nommer la signature réellement employée rend les
+ * doublures typées de bout en bout.
+ */
+type TransactionRunner = (
+  callback: (manager: EntityManager) => Promise<unknown>,
+) => Promise<unknown>;
+
 describe('AppointmentsService notifications', () => {
   let service: AppointmentsService;
-  let dataSource: jest.Mocked<Pick<DataSource, 'transaction'>>;
+  let dataSource: { transaction: jest.MockedFunction<TransactionRunner> };
   let usersService: jest.Mocked<Pick<UsersService, 'createLightPatientWith'>>;
   let notificationsService: jest.Mocked<
     Pick<
@@ -243,7 +256,8 @@ describe('AppointmentsService notifications', () => {
       await service.createBySelf(patientUser(), { slotId: 'slot-1', reason: 'Maux de tête' });
 
       // Le patient réservé est celui du jeton — jamais une valeur du corps.
-      const created = (manager.create as jest.Mock).mock.calls[0][1] as Partial<Appointment>;
+      const createCalls = (manager.create as jest.Mock).mock.calls as unknown[][];
+      const created = createCalls[0][1] as Partial<Appointment>;
       expect(created.patientId).toBe('patient-1');
       expect(created.createdById).toBe('patient-1');
       expect(bookable.isBooked).toBe(true);

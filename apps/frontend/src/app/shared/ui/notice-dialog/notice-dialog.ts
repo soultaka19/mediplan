@@ -41,7 +41,13 @@ export interface NoticeDialogData {
         <p class="notice__message">{{ data.message }}</p>
       </mat-dialog-content>
       <mat-dialog-actions align="end">
-        <button matButton="filled" type="button" [mat-dialog-close]="true" cdkFocusInitial data-testid="notice-close">
+        <button
+          matButton="filled"
+          type="button"
+          [mat-dialog-close]="true"
+          cdkFocusInitial
+          data-testid="notice-close"
+        >
           {{ data.closeLabel ?? 'OK' }}
         </button>
       </mat-dialog-actions>

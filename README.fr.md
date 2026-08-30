@@ -12,13 +12,13 @@ Projet intégrateur — Programmation informatique — Collège La Cité — Ses
 **`https://ca-mediplan-frontend.ashytree-9ad5012f.canadacentral.azurecontainerapps.io`**
 
 > ⏱️ Le premier accès prend **10 à 15 secondes** : les conteneurs sont en
-> *scale-to-zero* et doivent se réveiller. Ensuite, la navigation est instantanée.
+> _scale-to-zero_ et doivent se réveiller. Ensuite, la navigation est instantanée.
 
-| Rôle | Identifiant | Mot de passe |
-| --- | --- | --- |
-| Réception | `admin.demo@mediplan.test` | `Adm1n!Secret` |
-| Médecin | `doctor.demo@mediplan.test` | `Doct0r!Secret` | 
-| Patient | `patient.demo@mediplan.test` | `Pat1ent!Secret` |
+| Rôle      | Identifiant                  | Mot de passe     |
+| --------- | ---------------------------- | ---------------- |
+| Réception | `admin.demo@mediplan.test`   | `Adm1n!Secret`   |
+| Médecin   | `doctor.demo@mediplan.test`  | `Doct0r!Secret`  |
+| Patient   | `patient.demo@mediplan.test` | `Pat1ent!Secret` |
 
 Comptes de démonstration, **données entièrement fictives**. Aucune donnée réelle de
 patient n'est manipulée par la plateforme.
@@ -28,16 +28,16 @@ patient n'est manipulée par la plateforme.
 Les documents de remise sont en **PDF**. Le Markdown reste la source, lisible
 directement sur GitHub.
 
-| Livrable | PDF | Source |
-| --- | --- | --- |
-| 🎬 **Vidéo démonstrative** — 4 min 05 | [`MediPlan-Demo.mp4`](MediPlan-Demo.mp4) | — |
-| 📋 **Cahier des charges final** | [PDF, 13 p.](docs/cahier-des-charges/Cahier_des_charges_MediPlan_v2.pdf) | [`.md`](docs/cahier-des-charges/Cahier-des-charges-v2.md) · [`.docx`](docs/cahier-des-charges/Cahier_des_charges_MediPlan_v2.docx) |
-| 📄 **Rapport final de projet** | [PDF, 8 p.](docs/MediPlan-Rapport-Final.pdf) | [`.md`](docs/RAPPORT-FINAL.md) · [`.docx`](docs/MediPlan-Rapport-Final.docx) |
-| 📘 **Manuel d'utilisation** | [PDF, 18 p.](docs/guide-utilisation/MediPlan-Manuel-Utilisation.pdf) | [`.md`](docs/guide-utilisation/README.md) |
-| 📐 **Dossier de conception** | — | [`docs/conception/`](docs/conception/) — diagrammes affichés directement sur GitHub |
-| ✅ **Tests, résultats, bogues corrigés** | [PDF, 7 p.](docs/tests/MediPlan-Tests-et-Resultats.pdf) | [`.md`](docs/tests/plan-et-resultats.md) |
-| 👥 **Contributions individuelles** | [PDF, 6 p.](docs/presentation/MediPlan-Contributions.pdf) | [`.md`](docs/presentation/CONTRIBUTIONS.md) |
-| 🖥️ **Support de présentation** | — | [`docs/presentation/`](docs/presentation/) |
+| Livrable                                 | PDF                                                                      | Source                                                                                                                             |
+| ---------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 🎬 **Vidéo démonstrative** — 4 min 05    | [`MediPlan-Demo.mp4`](MediPlan-Demo.mp4)                                 | —                                                                                                                                  |
+| 📋 **Cahier des charges final**          | [PDF, 13 p.](docs/cahier-des-charges/Cahier_des_charges_MediPlan_v2.pdf) | [`.md`](docs/cahier-des-charges/Cahier-des-charges-v2.md) · [`.docx`](docs/cahier-des-charges/Cahier_des_charges_MediPlan_v2.docx) |
+| 📄 **Rapport final de projet**           | [PDF, 8 p.](docs/MediPlan-Rapport-Final.pdf)                             | [`.md`](docs/RAPPORT-FINAL.md) · [`.docx`](docs/MediPlan-Rapport-Final.docx)                                                       |
+| 📘 **Manuel d'utilisation**              | [PDF, 18 p.](docs/guide-utilisation/MediPlan-Manuel-Utilisation.pdf)     | [`.md`](docs/guide-utilisation/README.md)                                                                                          |
+| 📐 **Dossier de conception**             | —                                                                        | [`docs/conception/`](docs/conception/) — diagrammes affichés directement sur GitHub                                                |
+| ✅ **Tests, résultats, bogues corrigés** | [PDF, 7 p.](docs/tests/MediPlan-Tests-et-Resultats.pdf)                  | [`.md`](docs/tests/plan-et-resultats.md)                                                                                           |
+| 👥 **Contributions individuelles**       | [PDF, 6 p.](docs/presentation/MediPlan-Contributions.pdf)                | [`.md`](docs/presentation/CONTRIBUTIONS.md)                                                                                        |
+| 🖥️ **Support de présentation**           | —                                                                        | [`docs/presentation/`](docs/presentation/)                                                                                         |
 
 Index complet de la documentation : [`docs/README.md`](docs/README.md).
 
@@ -50,24 +50,24 @@ Excel) par un agenda unique, partagé entre la réception et les médecins.
 
 Quatre rôles interagissent avec la plateforme :
 
-| Rôle                           | Ce qu'il fait                                                            |
-| ------------------------------ | ------------------------------------------------------------------------ |
-| **Administrateur de clinique** | *L'utilisateur principal.* Disponibilités, réservations, flux du jour, statistiques, utilisateurs |
-| **Médecin**                    | Consulte son tableau de bord, ses disponibilités et le flux du jour      |
-| **Patient**                    | Réserve un rendez-vous en libre-service et consulte les siens            |
-| **Super administrateur**       | Supervise l'ensemble des cliniques                                       |
+| Rôle                           | Ce qu'il fait                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Administrateur de clinique** | _L'utilisateur principal._ Disponibilités, réservations, flux du jour, statistiques, utilisateurs |
+| **Médecin**                    | Consulte son tableau de bord, ses disponibilités et le flux du jour                               |
+| **Patient**                    | Réserve un rendez-vous en libre-service et consulte les siens                                     |
+| **Super administrateur**       | Supervise l'ensemble des cliniques                                                                |
 
 Chaque utilisateur ne voit que les données de **sa** clinique — une règle appliquée
 par le serveur, pas par l'affichage.
 
 ## Stack technique
 
-| Couche          | Technologie                                                |
-| --------------- | ---------------------------------------------------------- |
-| Frontend        | Angular 22 (standalone, Signals) + Angular Material 3 + Tailwind 4 |
-| Backend         | NestJS 11 (API REST `api/v1`) + TypeORM + JWT/Passport     |
-| Base de données | PostgreSQL — schéma piloté uniquement par migrations versionnées |
-| Déploiement     | Docker Compose (local) · Azure Container Apps + Neon (en ligne) |
+| Couche          | Technologie                                                             |
+| --------------- | ----------------------------------------------------------------------- |
+| Frontend        | Angular 22 (standalone, Signals) + Angular Material 3 + Tailwind 4      |
+| Backend         | NestJS 11 (API REST `api/v1`) + TypeORM + JWT/Passport                  |
+| Base de données | PostgreSQL — schéma piloté uniquement par migrations versionnées        |
+| Déploiement     | Docker Compose (local) · Azure Container Apps + Neon (en ligne)         |
 | Qualité         | Jest (72) et Vitest (133) — 205 tests, ESLint, Prettier, GitHub Actions |
 
 ## Structure du dépôt
@@ -156,7 +156,7 @@ L'application est déployée sur **Azure Container Apps**, avec une base Postgre
 infogérée hébergée chez Neon.
 
 > **Coût : ~0 $/mois.** Le projet tourne sur un crédit étudiant de 100 $ non
-> renouvelable : les deux conteneurs sont en *scale-to-zero* (rien ne tourne, donc
+> renouvelable : les deux conteneurs sont en _scale-to-zero_ (rien ne tourne, donc
 > rien n'est facturé au repos) et leur consommation reste sous la franchise
 > mensuelle gratuite de Container Apps. Détail des coûts et justification de
 > chaque choix : [`infra/README.md`](infra/README.md).
@@ -215,14 +215,14 @@ commenté à voix haute par les trois membres de l'équipe.
 
 ### Les gestes essentiels, en résumé
 
-| Je veux… | Où |
-| --- | --- |
-| Ouvrir des créneaux pour un médecin | **Disponibilités** → *Ajouter une plage* — les créneaux se génèrent seuls |
-| Réserver pour un patient au téléphone | Bouton **Nouveau rendez-vous** — médecin, créneau, patient |
-| Suivre la journée en cours | **Flux du jour** — Réservé → Arrivé → En consultation → Terminé |
-| Annuler un rendez-vous | **Flux du jour** → bouton ⋯ → *Annuler* — le motif est obligatoire |
-| Mesurer l'activité | **Statistiques** — volume, no-show, occupation |
-| Récupérer les rendez-vous dans un tableur | **Flux du jour** → *Exporter CSV* |
+| Je veux…                                  | Où                                                                        |
+| ----------------------------------------- | ------------------------------------------------------------------------- |
+| Ouvrir des créneaux pour un médecin       | **Disponibilités** → _Ajouter une plage_ — les créneaux se génèrent seuls |
+| Réserver pour un patient au téléphone     | Bouton **Nouveau rendez-vous** — médecin, créneau, patient                |
+| Suivre la journée en cours                | **Flux du jour** — Réservé → Arrivé → En consultation → Terminé           |
+| Annuler un rendez-vous                    | **Flux du jour** → bouton ⋯ → _Annuler_ — le motif est obligatoire        |
+| Mesurer l'activité                        | **Statistiques** — volume, no-show, occupation                            |
+| Récupérer les rendez-vous dans un tableur | **Flux du jour** → _Exporter CSV_                                         |
 
 ## Dossier de conception
 

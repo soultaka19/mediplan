@@ -1,11 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import {
-  MatDialogModule,
-  MatDialogRef,
-  MAT_DIALOG_DATA,
-} from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
@@ -33,7 +29,10 @@ export interface CancelDialogData {
   template: `
     <h2 mat-dialog-title>Annuler le rendez-vous</h2>
     <mat-dialog-content>
-      <p>Annulation du rendez-vous de <strong>{{ data.patientName }}</strong>.</p>
+      <p>
+        Annulation du rendez-vous de <strong>{{ data.patientName }}</strong
+        >.
+      </p>
       <form [formGroup]="form" (ngSubmit)="confirm()">
         <mat-form-field appearance="outline" class="cancel-dialog__field">
           <mat-label>Motif de l'annulation</mat-label>

@@ -105,7 +105,8 @@ export class UsersListPage {
   readonly canNext = computed(() => (this.page() + 1) * PAGE_SIZE < this.totalCount());
 
   readonly isEmptyFiltered = computed(
-    () => !this.loading() && !this.error() && this.users().length > 0 && this.filtered().length === 0,
+    () =>
+      !this.loading() && !this.error() && this.users().length > 0 && this.filtered().length === 0,
   );
   readonly hasRows = computed(() => !this.loading() && !this.error() && this.filtered().length > 0);
 

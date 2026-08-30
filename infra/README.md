@@ -12,17 +12,17 @@ indémontrable. Chaque choix ci-dessous est d'abord un choix de coût.
 
 ## Ressources et coûts
 
-| Ressource | SKU / palier | Coût si actif en continu | Coût réel attendu | Pourquoi ce palier |
-|---|---|---|---|---|
-| Groupe de ressources | — | 0 $ | **0 $** | Conteneur logique, jamais facturé |
-| Log Analytics | PerGB2018 | 2,76 $/Go au-delà de 5 Go/mois | **0 $** | Exigé par l'environnement Container Apps. Les 5 premiers Go/mois sont gratuits ; ce projet en produit quelques dizaines de Mo |
-| Environnement Container Apps | Consumption | 0 $ (pas de coût fixe) | **0 $** | Aucune réservation de capacité : on paie la seconde consommée. Un App Service Plan facturerait même application éteinte |
-| App `backend` | 0,5 vCPU / 1 GiB | ~25 $/mois | **0 $** | Plus petit couple valide du plan Consumption. `minReplicas: 0` |
-| App `frontend` | 0,25 vCPU / 0,5 GiB | ~12 $/mois | **0 $** | nginx ne fait que servir et relayer : moitié moins que le backend |
-| Job `seed` | 0,5 vCPU / 1 GiB | — | **0 $** | Déclenché à la main, quelques dizaines de secondes par exécution |
-| Base PostgreSQL | Neon, hors Azure | — | **0 $** | Voir ci-dessous |
-| Registre d'images | ghcr.io, hors Azure | — | **0 $** | Voir ci-dessous |
-| | | | **≈ 0 $/mois** | |
+| Ressource                    | SKU / palier        | Coût si actif en continu       | Coût réel attendu | Pourquoi ce palier                                                                                                            |
+| ---------------------------- | ------------------- | ------------------------------ | ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Groupe de ressources         | —                   | 0 $                            | **0 $**           | Conteneur logique, jamais facturé                                                                                             |
+| Log Analytics                | PerGB2018           | 2,76 $/Go au-delà de 5 Go/mois | **0 $**           | Exigé par l'environnement Container Apps. Les 5 premiers Go/mois sont gratuits ; ce projet en produit quelques dizaines de Mo |
+| Environnement Container Apps | Consumption         | 0 $ (pas de coût fixe)         | **0 $**           | Aucune réservation de capacité : on paie la seconde consommée. Un App Service Plan facturerait même application éteinte       |
+| App `backend`                | 0,5 vCPU / 1 GiB    | ~25 $/mois                     | **0 $**           | Plus petit couple valide du plan Consumption. `minReplicas: 0`                                                                |
+| App `frontend`               | 0,25 vCPU / 0,5 GiB | ~12 $/mois                     | **0 $**           | nginx ne fait que servir et relayer : moitié moins que le backend                                                             |
+| Job `seed`                   | 0,5 vCPU / 1 GiB    | —                              | **0 $**           | Déclenché à la main, quelques dizaines de secondes par exécution                                                              |
+| Base PostgreSQL              | Neon, hors Azure    | —                              | **0 $**           | Voir ci-dessous                                                                                                               |
+| Registre d'images            | ghcr.io, hors Azure | —                              | **0 $**           | Voir ci-dessous                                                                                                               |
+|                              |                     |                                | **≈ 0 $/mois**    |                                                                                                                               |
 
 ### La franchise gratuite, clé du montage
 
@@ -45,7 +45,7 @@ en continu coûte **~108 $/mois** au plus petit palier réellement proposé en
 Même arrêtée, son stockage et ses sauvegardes coûtent ~7,50 $/mois. Neon offre
 un palier gratuit avec mise en veille automatique et sauvegardes.
 
-*Contrepartie assumée — résidence des données* : la base est hébergée chez Neon
+_Contrepartie assumée — résidence des données_ : la base est hébergée chez Neon
 en **`us-east-2` (Ohio, États-Unis)**, hors Azure et hors Canada. Neon n'offre
 aucune région canadienne : les régions disponibles sont N. Virginia, Ohio,
 Oregon, Francfort, Londres, Singapour, Sydney et São Paulo.
@@ -122,7 +122,7 @@ Aucun secret n'est versionné. `databaseUrl` et `jwtSecret` sont des paramètres
 sortie de `what-if`.
 
 Ils sont lus depuis **`.env.azure`** (ignoré par git) par `scripts/deploy.sh`,
-puis stockés comme *secrets natifs Container Apps* — chiffrés au repos et
+puis stockés comme _secrets natifs Container Apps_ — chiffrés au repos et
 injectés par référence dans les conteneurs. Un Key Vault offrirait rotation et
 audit, pour ~0,03 $/mois plus la complexité d'une identité managée ; les secrets
 natifs suffisent au besoin de ce projet.

@@ -40,7 +40,10 @@
           [class.mp-chip-filter--on]="isStatusSelected(c.status)"
           (click)="toggleStatus(c.status)"
         >
-          <span class="mp-chip-filter__dot" [style.background]="'var(--mp-status-' + c.chip.tone + '-fg)'"></span>
+          <span
+            class="mp-chip-filter__dot"
+            [style.background]="'var(--mp-status-' + c.chip.tone + '-fg)'"
+          ></span>
           {{ c.label }}
         </button>
       }
@@ -94,7 +97,11 @@
             </div>
             <div class="rdv-cell__doctor">{{ r.doctor }}</div>
             <div><app-status-chip [model]="r.chip" /></div>
-            <div class="rdv-cell__motif" [class.rdv-cell--placeholder]="r.motifMuted" [title]="r.motif">
+            <div
+              class="rdv-cell__motif"
+              [class.rdv-cell--placeholder]="r.motifMuted"
+              [title]="r.motif"
+            >
               {{ r.motif }}
             </div>
           </div>
@@ -105,8 +112,12 @@
     @if (isEmptyFiltered()) {
       <div class="mp-table__empty">
         <div class="mp-table__empty-title">Aucun résultat pour ces filtres</div>
-        <div class="mp-table__empty-text">Essayez un autre terme ou retirez les filtres de statut.</div>
-        <button type="button" class="mp-btn-outline" (click)="clearFilters()">Effacer les filtres</button>
+        <div class="mp-table__empty-text">
+          Essayez un autre terme ou retirez les filtres de statut.
+        </div>
+        <button type="button" class="mp-btn-outline" (click)="clearFilters()">
+          Effacer les filtres
+        </button>
       </div>
     } @else if (isEmptyAll()) {
       <div class="mp-table__empty">
@@ -124,10 +135,20 @@
       <div class="mp-table__foot">
         <span class="mp-tnum">{{ rangeLabel() }}</span>
         <div class="mp-pager">
-          <button type="button" aria-label="Page précédente" (click)="prevPage()" [disabled]="!canPrev()">
+          <button
+            type="button"
+            aria-label="Page précédente"
+            (click)="prevPage()"
+            [disabled]="!canPrev()"
+          >
             <mat-icon>chevron_left</mat-icon>
           </button>
-          <button type="button" aria-label="Page suivante" (click)="nextPage()" [disabled]="!canNext()">
+          <button
+            type="button"
+            aria-label="Page suivante"
+            (click)="nextPage()"
+            [disabled]="!canNext()"
+          >
             <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
@@ -138,7 +159,12 @@
 
 <!-- Panneau de détail -->
 @if (selected(); as item) {
-  <div class="mp-panel-backdrop" (click)="closeDetail()"></div>
+  <!--
+    Voile décoratif : raccourci souris uniquement. Le panneau se ferme au clavier
+    par Échap (onEscape) et par son bouton « Fermer » ; ce voile n'a donc aucune
+    action qui lui soit propre et reste masqué aux technologies d'assistance.
+  -->
+  <div class="mp-panel-backdrop" aria-hidden="true" (click)="closeDetail()"></div>
   <aside class="mp-panel" role="dialog" aria-label="Détail du rendez-vous">
     <div class="mp-panel__head">
       <div>

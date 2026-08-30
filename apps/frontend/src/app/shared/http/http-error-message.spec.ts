@@ -3,11 +3,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { authErrorMessage } from './http-error-message';
 
 describe('authErrorMessage', () => {
-  it('423 avec message API : renvoie le message de l\'API', () => {
+  it("423 avec message API : renvoie le message de l'API", () => {
     const error = new HttpErrorResponse({
       status: 423,
       error: {
-        message: 'Compte temporairement verrouillé suite à trop de tentatives. Réessayez plus tard.',
+        message:
+          'Compte temporairement verrouillé suite à trop de tentatives. Réessayez plus tard.',
       },
     });
 

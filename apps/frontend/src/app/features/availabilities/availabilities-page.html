@@ -4,7 +4,12 @@
       <h1 class="dispo__title">Disponibilités</h1>
       <p class="dispo__subtitle">Planifiez les plages réservables et les congés.</p>
     </div>
-    <button type="button" class="mp-btn-primary" (click)="openPanel()" data-testid="availability-open">
+    <button
+      type="button"
+      class="mp-btn-primary"
+      (click)="openPanel()"
+      data-testid="availability-open"
+    >
       <mat-icon aria-hidden="true">add</mat-icon>
       Ajouter une plage
     </button>
@@ -40,8 +45,15 @@
     <div class="dispo-list">
       @for (g of doctorGroups(); track g.doctorId) {
         <section class="dispo-group">
-          <button type="button" class="dispo-group__head" (click)="toggleGroup(g.doctorId)" [attr.aria-expanded]="g.open">
-            <mat-icon class="dispo-group__caret" [class.dispo-group__caret--open]="g.open">chevron_right</mat-icon>
+          <button
+            type="button"
+            class="dispo-group__head"
+            (click)="toggleGroup(g.doctorId)"
+            [attr.aria-expanded]="g.open"
+          >
+            <mat-icon class="dispo-group__caret" [class.dispo-group__caret--open]="g.open"
+              >chevron_right</mat-icon
+            >
             <span class="dispo-group__avatar">{{ g.initials }}</span>
             <span class="dispo-group__name">{{ g.name }}</span>
             <span class="dispo-group__summary mp-tnum">{{ g.summary }}</span>
@@ -64,7 +76,11 @@
                     <div class="dispo-cell__hours">{{ r.hours }}</div>
                   </div>
                   <div class="dispo-cell__slot mp-tnum">{{ r.slot }}</div>
-                  <div class="dispo-cell__note" [class.rdv-cell--placeholder]="r.notePlaceholder" [title]="r.note">
+                  <div
+                    class="dispo-cell__note"
+                    [class.rdv-cell--placeholder]="r.notePlaceholder"
+                    [title]="r.note"
+                  >
                     {{ r.note }}
                   </div>
                   <div class="dispo-actions">
@@ -115,7 +131,12 @@
 
 <!-- Panneau latéral : ajout d'une plage -->
 @if (panelOpen()) {
-  <div class="mp-panel-backdrop" (click)="closePanel()"></div>
+  <!--
+    Voile décoratif : raccourci souris uniquement. Le panneau se ferme au clavier
+    par Échap (onEscape) et par son bouton « Fermer » ; ce voile n'a donc aucune
+    action qui lui soit propre et reste masqué aux technologies d'assistance.
+  -->
+  <div class="mp-panel-backdrop" aria-hidden="true" (click)="closePanel()"></div>
   <aside class="mp-panel" role="dialog" aria-label="Ajouter une plage">
     <div class="mp-panel__head">
       <div class="mp-panel__title">Ajouter une plage</div>
@@ -149,8 +170,19 @@
       <div class="dispo-form__row">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Du</mat-label>
-          <input matInput [matDatepicker]="startDatePicker" [min]="minDate" formControlName="startDate" placeholder="jj/mm/aaaa" data-testid="availability-start-date" />
-          <mat-datepicker-toggle matIconSuffix [for]="startDatePicker" aria-label="Ouvrir le calendrier" />
+          <input
+            matInput
+            [matDatepicker]="startDatePicker"
+            [min]="minDate"
+            formControlName="startDate"
+            placeholder="jj/mm/aaaa"
+            data-testid="availability-start-date"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="startDatePicker"
+            aria-label="Ouvrir le calendrier"
+          />
           <mat-datepicker #startDatePicker />
           @if (form.controls.startDate.touched && form.controls.startDate.invalid) {
             <mat-error>Requis.</mat-error>
@@ -159,12 +191,25 @@
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Au</mat-label>
-          <input matInput [matDatepicker]="endDatePicker" [min]="form.controls.startDate.value ?? minDate" formControlName="endDate" placeholder="jj/mm/aaaa" data-testid="availability-end-date" />
-          <mat-datepicker-toggle matIconSuffix [for]="endDatePicker" aria-label="Ouvrir le calendrier" />
+          <input
+            matInput
+            [matDatepicker]="endDatePicker"
+            [min]="form.controls.startDate.value ?? minDate"
+            formControlName="endDate"
+            placeholder="jj/mm/aaaa"
+            data-testid="availability-end-date"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="endDatePicker"
+            aria-label="Ouvrir le calendrier"
+          />
           <mat-datepicker #endDatePicker />
           @if (form.controls.endDate.touched && form.controls.endDate.hasError('required')) {
             <mat-error>Requis.</mat-error>
-          } @else if (form.controls.endDate.touched && form.controls.endDate.hasError('endDateBeforeStart')) {
+          } @else if (
+            form.controls.endDate.touched && form.controls.endDate.hasError('endDateBeforeStart')
+          ) {
             <mat-error>La fin précède le début.</mat-error>
           }
         </mat-form-field>
@@ -173,8 +218,17 @@
       <div class="dispo-form__row">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Heure de début</mat-label>
-          <input matInput [matTimepicker]="startPicker" formControlName="startTime" data-testid="availability-start" />
-          <mat-timepicker-toggle matIconSuffix [for]="startPicker" aria-label="Ouvrir les options d'heure" />
+          <input
+            matInput
+            [matTimepicker]="startPicker"
+            formControlName="startTime"
+            data-testid="availability-start"
+          />
+          <mat-timepicker-toggle
+            matIconSuffix
+            [for]="startPicker"
+            aria-label="Ouvrir les options d'heure"
+          />
           <mat-timepicker #startPicker interval="30min" />
           @if (form.controls.startTime.touched && form.controls.startTime.invalid) {
             <mat-error>Requis.</mat-error>
@@ -183,12 +237,23 @@
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Heure de fin</mat-label>
-          <input matInput [matTimepicker]="endPicker" formControlName="endTime" data-testid="availability-end" />
-          <mat-timepicker-toggle matIconSuffix [for]="endPicker" aria-label="Ouvrir les options d'heure" />
+          <input
+            matInput
+            [matTimepicker]="endPicker"
+            formControlName="endTime"
+            data-testid="availability-end"
+          />
+          <mat-timepicker-toggle
+            matIconSuffix
+            [for]="endPicker"
+            aria-label="Ouvrir les options d'heure"
+          />
           <mat-timepicker #endPicker interval="30min" />
           @if (form.controls.endTime.touched && form.controls.endTime.hasError('required')) {
             <mat-error>Requis.</mat-error>
-          } @else if (form.controls.endTime.touched && form.controls.endTime.hasError('endBeforeStart')) {
+          } @else if (
+            form.controls.endTime.touched && form.controls.endTime.hasError('endBeforeStart')
+          ) {
             <mat-error>La fin doit suivre le début.</mat-error>
           }
         </mat-form-field>
@@ -201,7 +266,12 @@
         </p>
       }
 
-      <button type="button" class="dispo-form__adv-toggle" (click)="toggleAdvanced()" [attr.aria-expanded]="showAdvanced()">
+      <button
+        type="button"
+        class="dispo-form__adv-toggle"
+        (click)="toggleAdvanced()"
+        [attr.aria-expanded]="showAdvanced()"
+      >
         <mat-icon [class.dispo-group__caret--open]="showAdvanced()">chevron_right</mat-icon>
         Options (type, durée, note)
       </button>

@@ -2,10 +2,7 @@ import { userFromAccessToken } from './access-token';
 
 /** Encode un objet en segment base64url (sans padding), comme un JWT. */
 function base64Url(value: object): string {
-  return btoa(JSON.stringify(value))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  return btoa(JSON.stringify(value)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 /** Construit un JWT non signé (signature factice) à partir d'un payload. */

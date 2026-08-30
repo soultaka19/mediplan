@@ -31,17 +31,11 @@
             [routerLink]="stat.route"
             data-testid="dashboard-kpi-link"
           >
-            <ng-container
-              [ngTemplateOutlet]="kpiBody"
-              [ngTemplateOutletContext]="{ stat }"
-            />
+            <ng-container [ngTemplateOutlet]="kpiBody" [ngTemplateOutletContext]="{ stat }" />
           </a>
         } @else {
           <div class="dash-kpi" [class.dash-kpi--teal]="stat.accent === 'teal'">
-            <ng-container
-              [ngTemplateOutlet]="kpiBody"
-              [ngTemplateOutletContext]="{ stat }"
-            />
+            <ng-container [ngTemplateOutlet]="kpiBody" [ngTemplateOutletContext]="{ stat }" />
           </div>
         }
       }
@@ -103,7 +97,9 @@
         />
       </div>
     } @else {
-      <div class="dash-card dash-next--skeleton"><span class="dash-skel dash-skel--wide"></span></div>
+      <div class="dash-card dash-next--skeleton">
+        <span class="dash-skel dash-skel--wide"></span>
+      </div>
     }
   </section>
 

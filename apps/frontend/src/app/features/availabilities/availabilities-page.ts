@@ -248,7 +248,9 @@ export class AvailabilitiesPage {
       validators: [Validators.required, endDateNotBeforeStart],
     }),
     startTime: this.fb.control<Date | null>(null, { validators: [Validators.required] }),
-    endTime: this.fb.control<Date | null>(null, { validators: [Validators.required, endAfterStart] }),
+    endTime: this.fb.control<Date | null>(null, {
+      validators: [Validators.required, endAfterStart],
+    }),
     slotDurationMin: this.fb.control(30, {
       validators: [Validators.required, Validators.min(5), Validators.max(240)],
     }),
@@ -366,15 +368,19 @@ export class AvailabilitiesPage {
         : 0;
 
     if (type === 'time_off') {
-      return days > 0 ? `Congé sur ${days} jour${days > 1 ? 's' : ''} — aucun créneau généré.` : null;
+      return days > 0
+        ? `Congé sur ${days} jour${days > 1 ? 's' : ''} — aucun créneau généré.`
+        : null;
     }
 
     if (!days || !startTime || !endTime || !slotDurationMin) return null;
     const span = minutesOfDay(endTime) - minutesOfDay(startTime);
     if (span <= 0) return null;
     const perDay = Math.floor(span / slotDurationMin);
-    if (perDay <= 0) return `La plage horaire est plus courte qu'un créneau de ${slotDurationMin} min.`;
-    if (days === 1) return `≈ ${perDay} créneau${perDay > 1 ? 'x' : ''} de ${slotDurationMin} min réservables.`;
+    if (perDay <= 0)
+      return `La plage horaire est plus courte qu'un créneau de ${slotDurationMin} min.`;
+    if (days === 1)
+      return `≈ ${perDay} créneau${perDay > 1 ? 'x' : ''} de ${slotDurationMin} min réservables.`;
     return `≈ ${days} jours × ${perDay} = ${perDay * days} créneaux de ${slotDurationMin} min.`;
   }
 
@@ -407,7 +413,9 @@ export class AvailabilitiesPage {
         if (existing.doctorId !== targetDoctorId) return false;
         const existingStart = new Date(existing.startAt);
         if (dayIndex(existingStart) !== dayIndex(day)) return false;
-        return minutesOfDay(existingStart) < endMin && startMin < minutesOfDay(new Date(existing.endAt));
+        return (
+          minutesOfDay(existingStart) < endMin && startMin < minutesOfDay(new Date(existing.endAt))
+        );
       });
 
     const daysToCreate = days.filter((day) => !alreadyCovered(day));
@@ -487,17 +495,23 @@ export class AvailabilitiesPage {
     const first = days[0];
     const last = days[days.length - 1];
     const dateText =
-      days.length > 1 ? `du ${dateFmt.format(first)} au ${dateFmt.format(last)}` : `le ${dateFmt.format(first)}`;
+      days.length > 1
+        ? `du ${dateFmt.format(first)} au ${dateFmt.format(last)}`
+        : `le ${dateFmt.format(first)}`;
 
     const lines: string[] = [];
     if (value.type === 'time_off') {
       lines.push(`${who} — congé ${dateText}.`);
     } else {
-      lines.push(`${who} — ${dateText}, de ${timeFmt(value.startTime!)} à ${timeFmt(value.endTime!)}.`);
+      lines.push(
+        `${who} — ${dateText}, de ${timeFmt(value.startTime!)} à ${timeFmt(value.endTime!)}.`,
+      );
       lines.push(`Pas de réservation : ${value.slotDurationMin} min par créneau.`);
     }
     if (skipped > 0) {
-      lines.push(`${skipped} jour${skipped > 1 ? 's' : ''} déjà défini${skipped > 1 ? 's' : ''} : ignoré${skipped > 1 ? 's' : ''}.`);
+      lines.push(
+        `${skipped} jour${skipped > 1 ? 's' : ''} déjà défini${skipped > 1 ? 's' : ''} : ignoré${skipped > 1 ? 's' : ''}.`,
+      );
     }
     return { title, message: lines.join('\n') };
   }

@@ -1,11 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import {
-  ActivatedRouteSnapshot,
-  Router,
-  RouterStateSnapshot,
-  UrlTree,
-} from '@angular/router';
+import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 
 import { AuthFacade } from '../auth.facade';
 import { PublicUser } from '../models/auth.models';

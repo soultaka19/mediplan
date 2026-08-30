@@ -5,15 +5,16 @@ académique** (Collège la Cité, printemps 2026) — pas un produit en producti
 
 ## Stack
 
-Monorepo **Turborepo + pnpm** (`pnpm@11.7.0`, Node ≥ 20).
+Monorepo **Turborepo + pnpm** (`pnpm@11.7.0`, Node ≥ 22.22.3 — exigence
+d'Angular CLI 22, voir `.nvmrc`).
 
-| | |
-|---|---|
-| `apps/backend` | NestJS 11, TypeORM, PostgreSQL, JWT/Passport, bcrypt |
-| `apps/frontend` | Angular 22 standalone, Angular Material, Tailwind 4 |
-| `docker/` | Dockerfiles multi-étapes (backend, frontend nginx) |
-| `infra/` | Bicep — infrastructure Azure |
-| `scripts/` | `deploy.sh`, `teardown.sh` |
+|                 |                                                      |
+| --------------- | ---------------------------------------------------- |
+| `apps/backend`  | NestJS 11, TypeORM, PostgreSQL, JWT/Passport, bcrypt |
+| `apps/frontend` | Angular 22 standalone, Angular Material, Tailwind 4  |
+| `docker/`       | Dockerfiles multi-étapes (backend, frontend nginx)   |
+| `infra/`        | Bicep — infrastructure Azure                         |
+| `scripts/`      | `deploy.sh`, `teardown.sh`                           |
 
 ## Commandes
 
@@ -76,17 +77,32 @@ uniquement par le frontend. C'est ce qui supprime tout besoin de CORS.
 Apps route selon cet en-tête, et l'erreur produit un 404 sur tous les appels
 `/api/` — invisible en local, où Docker Compose ne route pas par `Host`.
 
-## Dette connue
+## Qualité
 
-- **41 fichiers** non conformes à Prettier (mesuré avec `--end-of-line auto`,
-  qui neutralise le bruit CRLF des postes Windows)
-- **8 erreurs eslint** dans le frontend : éléments cliquables non focalisables
-  au clavier (`click-events-have-key-events`, `interactive-supports-focus`)
-- **18 erreurs eslint** dans le backend, toutes dans des fichiers `*.spec.ts`
-  (typage des doublures de test)
+`pnpm lint`, `pnpm test`, `pnpm build` et `pnpm format:check` passent tous les
+quatre. La dette de lint et de formatage qui était documentée ici a été résorbée
+le 29 août 2026 ; ces commandes peuvent donc redevenir bloquantes en CI.
 
-La CI les rapporte sans bloquer : les rendre bloquantes donnerait une CI rouge en
-permanence, donc ignorée. Compilation et tests, eux, bloquent.
+Trois points de configuration valent d'être connus, car ils expliquent des choix
+qui paraissent arbitraires en les lisant :
+
+- **`endOfLine: "auto"`** dans `.prettierrc.json`, et non `"lf"`. `.gitattributes`
+  normalise déjà en LF dans l'index, tandis que les postes Windows checkoutent en
+  CRLF : avec `"lf"`, `format:check` signalait les **271** fichiers du dépôt sur
+  toute machine Windows (contre 37 écarts réels), ce qui le rendait inutilisable.
+- **`@typescript-eslint/unbound-method` désactivée dans les `*.spec.ts`** :
+  `expect(repo.remove).toHaveBeenCalled()` n'appelle jamais la méthode, il en
+  inspecte la doublure. C'est le faux positif documenté par typescript-eslint,
+  qui publie `jest/unbound-method` pour ce cas précis. La règle reste active dans
+  le code de production.
+- **Les voiles d'arrière-plan portent `aria-hidden="true"`** : ce sont des
+  raccourcis souris (« cliquer à côté pour fermer ») qui doublent un chemin
+  clavier déjà présent (Échap + bouton « Fermer »). Les rendre focalisables
+  n'ajouterait qu'un arrêt de tabulation plein écran sans action propre.
+
+Reste ouvert : bundle initial de **819 kB** (budget Angular fixé à 500 kB), dû
+pour l'essentiel à la police d'icônes Material et aux familles de polices
+chargées. Le build avertit sans échouer.
 
 ## Suivi
 

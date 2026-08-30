@@ -123,7 +123,12 @@ const DOCTOR_STATS: readonly KpiCard[] = [
   { icon: 'task_alt', label: 'Consultations terminées', accent: 'teal', live: 'doneToday' },
   // « Restants » et non « à venir » : le compte inclut le patient déjà arrivé et
   // celui en consultation. Ils ne sont plus à venir, mais ils restent à voir.
-  { icon: 'pending_actions', label: 'Patients restants', accent: 'neutral', live: 'remainingToday' },
+  {
+    icon: 'pending_actions',
+    label: 'Patients restants',
+    accent: 'neutral',
+    live: 'remainingToday',
+  },
 ];
 
 /**
@@ -141,7 +146,12 @@ const PATIENT_ACTIONS: readonly QuickAction[] = [
 
 /** Accès rapides de l'administration et du médecin. */
 const ADMIN_ACTIONS: readonly QuickAction[] = [
-  { icon: 'group', label: 'Utilisateurs', route: '/admin/users', roles: ['clinic_admin', 'super_admin'] },
+  {
+    icon: 'group',
+    label: 'Utilisateurs',
+    route: '/admin/users',
+    roles: ['clinic_admin', 'super_admin'],
+  },
   { icon: 'event_note', label: 'Disponibilités', route: '/availabilities' },
   { icon: 'medical_services', label: 'Médecins' },
 ];

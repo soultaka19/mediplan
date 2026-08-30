@@ -55,7 +55,13 @@ describe('UsersListPage', () => {
   it('rend le tableau et une ligne par utilisateur en cas de succès', () => {
     const users = [
       makeUser(),
-      makeUser({ id: 'u2', email: 'doc@example.com', firstName: 'Alan', lastName: 'Turing', role: 'doctor' }),
+      makeUser({
+        id: 'u2',
+        email: 'doc@example.com',
+        firstName: 'Alan',
+        lastName: 'Turing',
+        role: 'doctor',
+      }),
     ];
     const { fixture } = setup(vi.fn(() => of(users)));
     const root = fixture.nativeElement as HTMLElement;

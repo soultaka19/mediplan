@@ -6,16 +6,17 @@ Ce document explique **comment cloner le projet et configurer proprement son env
 
 ## 1. Prérequis (outils à installer)
 
-| Outil | Version | Pourquoi / comment |
-| ----- | ------- | ------------------ |
-| **Git** | récent | Cloner et versionner. |
-| **Node.js** | **22.22+** (LTS) ou **24.15+** | Requis par Angular 22. Conseillé via [nvm](https://github.com/nvm-sh/nvm) (macOS/Linux) ou [nvm-windows](https://github.com/coreybutler/nvm-windows). |
-| **pnpm** | **11.7.0** | Gestionnaire de paquets du monorepo. **Active-le via Corepack** (fourni avec Node) plutôt que `npm i -g` : voir §2. |
-| **Docker Desktop** | récent (Compose v2) | Lancer PostgreSQL (et, en option, toute la stack). |
+| Outil              | Version                        | Pourquoi / comment                                                                                                                                    |
+| ------------------ | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Git**            | récent                         | Cloner et versionner.                                                                                                                                 |
+| **Node.js**        | **22.22+** (LTS) ou **24.15+** | Requis par Angular 22. Conseillé via [nvm](https://github.com/nvm-sh/nvm) (macOS/Linux) ou [nvm-windows](https://github.com/coreybutler/nvm-windows). |
+| **pnpm**           | **11.7.0**                     | Gestionnaire de paquets du monorepo. **Active-le via Corepack** (fourni avec Node) plutôt que `npm i -g` : voir §2.                                   |
+| **Docker Desktop** | récent (Compose v2)            | Lancer PostgreSQL (et, en option, toute la stack).                                                                                                    |
 
 > ⚠️ Le champ `engines` indique Node ≥ 20, mais **Angular 22 exige Node ≥ 22.22 / ≥ 24.15** : utilise bien une de ces versions, sinon `ng` échouera.
 
 ### Outils recommandés (facultatif mais conseillé)
+
 - **VS Code** avec les extensions : **Angular Language Service**, **ESLint**, **Prettier**, **EditorConfig**. Un dossier `apps/frontend/.vscode/` fournit déjà des réglages.
 - Un client PostgreSQL (DBeaver, TablePlus, ou `psql`) pour inspecter la base.
 
@@ -47,16 +48,17 @@ cp .env.example .env        # Windows PowerShell : Copy-Item .env.example .env
 
 Le fichier `.env` (copié depuis `.env.example`) alimente le backend **et** Docker Compose. Des valeurs de dev par défaut existent, **mais le `JWT_SECRET` doit être renseigné avec un vrai secret**.
 
-| Variable | Rôle | Note |
-| -------- | ---- | ---- |
-| `DB_HOST` | Hôte PostgreSQL | `127.0.0.1` hors Docker ; `postgres` dans Compose (géré automatiquement). Sous Windows, préférer `127.0.0.1` à `localhost` (cf. §9). |
-| `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` | Connexion BD | Cohérents avec le service `postgres`. |
-| `JWT_SECRET` | Clé de signature des JWT | **≥ 32 caractères**, aléatoire, différent par environnement. Le backend refuse de démarrer si le secret est absent ou plus court. Attention : la longueur est le seul contrôle — le gabarit de `.env.example` la respecte et serait accepté tel quel, il **doit** être remplacé par une valeur générée. |
-| `JWT_EXPIRES_IN` | Durée de validité du jeton | ex. `60m`. |
-| `BCRYPT_ROUNDS` | Coût du hachage des mots de passe | `12` (décision sécurité). |
-| `BACKEND_PORT` / `FRONTEND_PORT` | Ports applicatifs | `3000` / `4200`. |
+| Variable                                          | Rôle                              | Note                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DB_HOST`                                         | Hôte PostgreSQL                   | `127.0.0.1` hors Docker ; `postgres` dans Compose (géré automatiquement). Sous Windows, préférer `127.0.0.1` à `localhost` (cf. §9).                                                                                                                                                                    |
+| `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` | Connexion BD                      | Cohérents avec le service `postgres`.                                                                                                                                                                                                                                                                   |
+| `JWT_SECRET`                                      | Clé de signature des JWT          | **≥ 32 caractères**, aléatoire, différent par environnement. Le backend refuse de démarrer si le secret est absent ou plus court. Attention : la longueur est le seul contrôle — le gabarit de `.env.example` la respecte et serait accepté tel quel, il **doit** être remplacé par une valeur générée. |
+| `JWT_EXPIRES_IN`                                  | Durée de validité du jeton        | ex. `60m`.                                                                                                                                                                                                                                                                                              |
+| `BCRYPT_ROUNDS`                                   | Coût du hachage des mots de passe | `12` (décision sécurité).                                                                                                                                                                                                                                                                               |
+| `BACKEND_PORT` / `FRONTEND_PORT`                  | Ports applicatifs                 | `3000` / `4200`.                                                                                                                                                                                                                                                                                        |
 
 Générer un `JWT_SECRET` solide :
+
 ```bash
 # macOS / Linux / Git Bash
 openssl rand -base64 48
@@ -96,12 +98,12 @@ Ouvre **http://localhost:4200**. Le frontend appelle des URLs **relatives** `/ap
 docker compose up -d --build
 ```
 
-| Service | URL |
-| ------- | --- |
-| Frontend (nginx) | http://localhost:4200 |
-| API backend | http://localhost:4200/api/v1 (proxy nginx) ou http://localhost:3000/api/v1 |
-| Santé backend | http://localhost:3000/health |
-| PostgreSQL | localhost:5432 |
+| Service          | URL                                                                        |
+| ---------------- | -------------------------------------------------------------------------- |
+| Frontend (nginx) | http://localhost:4200                                                      |
+| API backend      | http://localhost:4200/api/v1 (proxy nginx) ou http://localhost:3000/api/v1 |
+| Santé backend    | http://localhost:3000/health                                               |
+| PostgreSQL       | localhost:5432                                                             |
 
 ```bash
 docker compose ps          # état
@@ -114,11 +116,13 @@ docker compose down        # arrêter (le volume de données est conservé)
 ## 5. Vérifier son environnement (smoke test)
 
 Une fois le backend lancé, tester l'inscription d'un patient :
+
 ```bash
 curl -X POST http://localhost:3000/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"patient.test@mediplan.com","password":"Mediplan2026!","firstName":"Awa","lastName":"Traore"}'
 ```
+
 Une réponse `201` avec `accessToken` confirme que backend + BD + migrations fonctionnent.
 
 > Politique mot de passe : **≥ 8 caractères** et **≥ 3 des 4 classes** (minuscule, majuscule, chiffre, spécial).
@@ -164,16 +168,16 @@ pnpm build                                 # Build de production (backend + fron
 
 ## 9. Dépannage courant
 
-| Symptôme | Cause probable / solution |
-| -------- | ------------------------- |
-| Le backend ne démarre pas, erreur sur le secret | `JWT_SECRET` absent ou < 32 caractères dans `.env`. Le gabarit de `.env.example` passe le contrôle de longueur : le remplacer par un secret généré. |
-| `ECONNREFUSED` / erreurs BD au démarrage backend | Postgres pas lancé (`docker compose up -d postgres`) ou migrations non appliquées (`pnpm --filter backend migration:run`). |
+| Symptôme                                                                      | Cause probable / solution                                                                                                                                                                                                                         |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Le backend ne démarre pas, erreur sur le secret                               | `JWT_SECRET` absent ou < 32 caractères dans `.env`. Le gabarit de `.env.example` passe le contrôle de longueur : le remplacer par un secret généré.                                                                                               |
+| `ECONNREFUSED` / erreurs BD au démarrage backend                              | Postgres pas lancé (`docker compose up -d postgres`) ou migrations non appliquées (`pnpm --filter backend migration:run`).                                                                                                                        |
 | `ECONNRESET` sur la BD **sous Windows**, alors que le conteneur est `healthy` | `localhost` résout d'abord en IPv6 (`::1`), où `wslrelay.exe` intercepte le port publié par Docker. Mettre `DB_HOST=127.0.0.1` dans `.env`. Diagnostic : `Get-NetTCPConnection -LocalPort <port> -State Listen` révèle deux processus à l'écoute. |
-| Erreurs de tables manquantes | Migrations non exécutées — relancer `migration:run`. |
-| `ng` / build échoue avec une erreur de version Node | Node trop ancien — passer à 22.22+ ou 24.15+ (cf. §1). |
-| `pnpm` introuvable ou mauvaise version | `corepack enable && corepack prepare pnpm@11.7.0 --activate`. |
-| Port 3000/4200/5432 déjà utilisé | Arrêter le service qui l'occupe, ou changer le port dans `.env`. |
-| 401 inattendu côté frontend | Jeton expiré/invalide — l'app purge et redirige vers `/login` ; se reconnecter. |
+| Erreurs de tables manquantes                                                  | Migrations non exécutées — relancer `migration:run`.                                                                                                                                                                                              |
+| `ng` / build échoue avec une erreur de version Node                           | Node trop ancien — passer à 22.22+ ou 24.15+ (cf. §1).                                                                                                                                                                                            |
+| `pnpm` introuvable ou mauvaise version                                        | `corepack enable && corepack prepare pnpm@11.7.0 --activate`.                                                                                                                                                                                     |
+| Port 3000/4200/5432 déjà utilisé                                              | Arrêter le service qui l'occupe, ou changer le port dans `.env`.                                                                                                                                                                                  |
+| 401 inattendu côté frontend                                                   | Jeton expiré/invalide — l'app purge et redirige vers `/login` ; se reconnecter.                                                                                                                                                                   |
 
 ---
 

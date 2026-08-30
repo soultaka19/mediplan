@@ -149,7 +149,9 @@ export class ClinicFlowPage {
     this.rows().filter((r) => ACTIVE_STATUSES.includes(r.item.status)),
   );
   readonly upcomingRows = computed(() => this.rows().filter((r) => r.item.status === 'booked'));
-  readonly doneRows = computed(() => this.rows().filter((r) => DONE_STATUSES.includes(r.item.status)));
+  readonly doneRows = computed(() =>
+    this.rows().filter((r) => DONE_STATUSES.includes(r.item.status)),
+  );
 
   readonly hasAny = computed(() => this.rows().length > 0);
   readonly isEmpty = computed(() => !this.loading() && this.error() === null && !this.hasAny());

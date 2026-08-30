@@ -106,7 +106,9 @@ describe('DashboardPage', () => {
   });
 
   it('ne déverse pas l’e-mail complet dans le grand titre sans nom (partie locale)', () => {
-    const { fixture } = setup(makeUser({ firstName: null, lastName: null, email: 'admin@clinique.ca' }));
+    const { fixture } = setup(
+      makeUser({ firstName: null, lastName: null, email: 'admin@clinique.ca' }),
+    );
     const root = fixture.nativeElement as HTMLElement;
     const welcome = byTestId(root, 'dashboard-welcome').textContent ?? '';
 

@@ -158,7 +158,9 @@ describe('NotificationsService', () => {
           clinicId: 'clinic-1',
           type: NotificationType.APPOINTMENT_CANCELLED,
           title: 'Rendez-vous annulé',
-          message: expect.stringContaining('Motif : test notif.'),
+          // `stringContaining` est typé `any` : on le rétablit en `string`, type
+          // réel du champ comparé.
+          message: expect.stringContaining('Motif : test notif.') as string,
         }),
         expect.objectContaining({ recipientId: 'clinic-admin-1' }),
         expect.objectContaining({ recipientId: 'doctor-2' }),

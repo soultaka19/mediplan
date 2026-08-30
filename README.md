@@ -6,13 +6,13 @@ Capstone project — Computer Programming, Collège La Cité, Spring 2026.
 > 🇫🇷 La version française d'origine (livrables académiques, guide d'utilisation, dossier de conception) est conservée dans [`README.fr.md`](README.fr.md).
 
 **Live application:** https://ca-mediplan-frontend.ashytree-9ad5012f.canadacentral.azurecontainerapps.io
-*First request takes 10–15 s: both containers are scaled to zero and need to wake up.*
+_First request takes 10–15 s: both containers are scaled to zero and need to wake up._
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Reception | `admin.demo@mediplan.test` | `Adm1n!Secret` |
-| Doctor | `doctor.demo@mediplan.test` | `Doct0r!Secret` |
-| Patient | `patient.demo@mediplan.test` | `Pat1ent!Secret` |
+| Role      | Email                        | Password         |
+| --------- | ---------------------------- | ---------------- |
+| Reception | `admin.demo@mediplan.test`   | `Adm1n!Secret`   |
+| Doctor    | `doctor.demo@mediplan.test`  | `Doct0r!Secret`  |
+| Patient   | `patient.demo@mediplan.test` | `Pat1ent!Secret` |
 
 Demonstration accounts, **entirely fictional data**. No real patient information is handled by the platform.
 
@@ -29,7 +29,7 @@ Small clinics coordinate appointments across tools that do not talk to each othe
 One PostgreSQL-backed application where:
 
 - a doctor's **availability window** automatically materialises into individual slots of a configurable duration;
-- the **reception desk** books on behalf of a caller, and a **patient** books the same slots in self-service — both paths go through the *same* transaction, the *same* pessimistic lock and the *same* partial unique index, so the anti-double-booking guarantee does not depend on the channel;
+- the **reception desk** books on behalf of a caller, and a **patient** books the same slots in self-service — both paths go through the _same_ transaction, the _same_ pessimistic lock and the _same_ partial unique index, so the anti-double-booking guarantee does not depend on the channel;
 - the **day flow** tracks each appointment through Booked → Arrived → In consultation → Completed, with cancellation requiring a reason (which is what makes the slot reusable);
 - **statistics** (volume, no-show rate, occupancy) and a **CSV export** turn the agenda into something a clinic manager can act on.
 
@@ -78,14 +78,14 @@ Because the browser only ever sees one origin, no CORS configuration is needed a
 
 ## Tech Stack
 
-| Layer | Technology |
-| --- | --- |
-| Frontend | Angular 22 (standalone, Signals), Angular Material 3, Tailwind CSS 4 |
-| Backend | NestJS 11, TypeORM, Passport JWT, bcrypt, class-validator |
-| Database | PostgreSQL — schema driven exclusively by versioned migrations |
-| Build | Turborepo + pnpm workspaces |
+| Layer          | Technology                                                                              |
+| -------------- | --------------------------------------------------------------------------------------- |
+| Frontend       | Angular 22 (standalone, Signals), Angular Material 3, Tailwind CSS 4                    |
+| Backend        | NestJS 11, TypeORM, Passport JWT, bcrypt, class-validator                               |
+| Database       | PostgreSQL — schema driven exclusively by versioned migrations                          |
+| Build          | Turborepo + pnpm workspaces                                                             |
 | Infrastructure | Azure Container Apps (scale-to-zero), Neon PostgreSQL, GitHub Container Registry, Bicep |
-| Quality | Jest (72 tests), Vitest (133 tests), ESLint, Prettier, GitHub Actions |
+| Quality        | Jest (72 tests), Vitest (133 tests), ESLint, Prettier, GitHub Actions                   |
 
 ## Technical Highlights
 
@@ -97,7 +97,7 @@ Because the browser only ever sees one origin, no CORS configuration is needed a
 
 ## Challenges & Solutions
 
-**A bug that only existed in production.** Once deployed, every API call returned 404 while everything worked locally. Searching the code, the routes and the configuration found nothing, because the problem was not there. Changing method — looking for what *differed* between the two environments rather than what was broken — located it in the routing layer: the nginx proxy forwarded the browser's `Host` header, and Azure Container Apps routes on that header, whereas Docker Compose locally does not route that way at all. The fix is one line (`proxy_set_header Host $proxy_host`), the lesson is that a working development environment proves nothing about production. The same shape of problem appeared twice more: Windows line endings preventing a container entrypoint from starting, and clinic opening hours shifted by four hours because the container runs in UTC.
+**A bug that only existed in production.** Once deployed, every API call returned 404 while everything worked locally. Searching the code, the routes and the configuration found nothing, because the problem was not there. Changing method — looking for what _differed_ between the two environments rather than what was broken — located it in the routing layer: the nginx proxy forwarded the browser's `Host` header, and Azure Container Apps routes on that header, whereas Docker Compose locally does not route that way at all. The fix is one line (`proxy_set_header Host $proxy_host`), the lesson is that a working development environment proves nothing about production. The same shape of problem appeared twice more: Windows line endings preventing a container entrypoint from starting, and clinic opening hours shifted by four hours because the container runs in UTC.
 
 **Cancellation versus uniqueness.** The first anti-double-booking constraint was a plain unique index, which made cancelled slots permanently unbookable. Replacing it with a partial unique index that excludes cancelled rows is what made the cancellation feature possible at all.
 
@@ -116,13 +116,13 @@ New to the project? [`CONTRIBUTING.md`](CONTRIBUTING.md) covers prerequisites, t
 
 Copy `.env.example` to `.env` (git-ignored) and fill it in. Every variable is documented inline in that file. The essentials:
 
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` *or* `DB_HOST`/`DB_PORT`/`DB_NAME`/`DB_USER`/`DB_PASSWORD` | Database connection. `DATABASE_URL` takes precedence and is the form managed hosts hand you. |
-| `DB_SSL` | `false` locally, **`true`** against any managed database. |
-| `JWT_SECRET` | ≥ 32 random characters, different per environment. The backend refuses to start without it — but only its *length* is checked, so the placeholder in `.env.example` must be replaced. |
-| `JWT_EXPIRES_IN`, `BCRYPT_ROUNDS`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCK_DURATION_MINUTES`, `PASSWORD_RESET_TOKEN_TTL_MINUTES` | Security policy. |
-| `BACKEND_PORT`, `FRONTEND_PORT` | Local ports. |
+| Variable                                                                                                                   | Purpose                                                                                                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL` _or_ `DB_HOST`/`DB_PORT`/`DB_NAME`/`DB_USER`/`DB_PASSWORD`                                                  | Database connection. `DATABASE_URL` takes precedence and is the form managed hosts hand you.                                                                                          |
+| `DB_SSL`                                                                                                                   | `false` locally, **`true`** against any managed database.                                                                                                                             |
+| `JWT_SECRET`                                                                                                               | ≥ 32 random characters, different per environment. The backend refuses to start without it — but only its _length_ is checked, so the placeholder in `.env.example` must be replaced. |
+| `JWT_EXPIRES_IN`, `BCRYPT_ROUNDS`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCK_DURATION_MINUTES`, `PASSWORD_RESET_TOKEN_TTL_MINUTES` | Security policy.                                                                                                                                                                      |
+| `BACKEND_PORT`, `FRONTEND_PORT`                                                                                            | Local ports.                                                                                                                                                                          |
 
 Cloud-only variables (`RUN_MIGRATIONS_ON_BOOT`, `ALLOW_DEMO_SEED`, `BACKEND_ORIGIN`) are injected as Container Apps secrets, never placed in the local `.env`. No secret is ever committed.
 
@@ -141,12 +141,12 @@ With Docker (one command, requires Docker Desktop or Engine + Compose v2):
 docker compose up -d --build
 ```
 
-| Service | URL |
-| --- | --- |
-| Frontend (nginx) | http://localhost:4200 |
-| Backend API | http://localhost:4200/api/v1 (proxied) or http://localhost:3000/api/v1 |
-| Backend health | http://localhost:3000/health |
-| PostgreSQL | localhost:5432 |
+| Service          | URL                                                                    |
+| ---------------- | ---------------------------------------------------------------------- |
+| Frontend (nginx) | http://localhost:4200                                                  |
+| Backend API      | http://localhost:4200/api/v1 (proxied) or http://localhost:3000/api/v1 |
+| Backend health   | http://localhost:3000/health                                           |
+| PostgreSQL       | localhost:5432                                                         |
 
 Database:
 
@@ -170,7 +170,7 @@ The test plan, results and the list of bugs found and fixed are in [`docs/tests/
 pnpm build
 ```
 
-Backend output in `apps/backend/dist/`, frontend in `apps/frontend/dist/frontend/browser/` — the path the nginx image copies. The frontend production bundle is 819 kB raw / 174 kB transferred, above the 500 kB warning budget (icon font, see *Future Improvements*).
+Backend output in `apps/backend/dist/`, frontend in `apps/frontend/dist/frontend/browser/` — the path the nginx image copies. The frontend production bundle is 819 kB raw / 174 kB transferred, above the 500 kB warning budget (icon font, see _Future Improvements_).
 
 Deployment to Azure:
 

@@ -66,7 +66,9 @@ describe('AuthService', () => {
       increment: jest.fn(),
     };
 
-    clinicsMock = { existsActive: jest.fn().mockResolvedValue(true) };
+    // Doublure paramétrée : `jest.fn()` nu produit un `Mock<any, any>`, que le
+    // typage strict refuse d'affecter au `Mock<Promise<boolean>, [string]>` déclaré.
+    clinicsMock = { existsActive: jest.fn<Promise<boolean>, [string]>().mockResolvedValue(true) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

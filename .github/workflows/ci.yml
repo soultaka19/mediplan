@@ -45,23 +45,17 @@ jobs:
         # manifestes, plutôt que de résoudre silencieusement d'autres versions.
         run: pnpm install --frozen-lockfile
 
-      # Formatage et analyse statique sont RAPPORTÉS mais ne bloquent pas.
+      # Formatage et analyse statique BLOQUENT désormais.
       #
-      # Le dépôt porte une dette antérieure à cette CI : 41 fichiers non
-      # conformes à Prettier, 8 erreurs eslint dans le frontend (éléments
-      # cliquables non focalisables au clavier) et 18 dans le backend, toutes
-      # dans des fichiers de test. Les corriger touche le comportement de
-      # l'interface et mérite son propre travail, revu à part.
-      #
-      # Les rendre bloquantes rendrait la CI rouge en permanence, donc ignorée.
-      # Les afficher garde la dette visible et permet de la résorber au fil de
-      # l'eau, puis de retirer ces `continue-on-error`.
-      - name: Vérification du formatage (informatif)
-        continue-on-error: true
+      # Ces deux étapes ont longtemps porté un `continue-on-error` : le dépôt
+      # traînait 271 fichiers signalés par Prettier (dont 37 écarts réels, le
+      # reste étant du bruit CRLF dû à `endOfLine: "lf"`) et 26 erreurs eslint.
+      # La dette a été résorbée le 29 août 2026 — les rendre bloquantes ne
+      # produit plus une CI rouge en permanence, donc ignorée, mais un garde-fou.
+      - name: Vérification du formatage
         run: pnpm format:check
 
-      - name: Analyse statique (informatif)
-        continue-on-error: true
+      - name: Analyse statique
         run: pnpm lint
 
       - name: Compilation
