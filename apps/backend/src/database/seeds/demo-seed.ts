@@ -37,7 +37,8 @@ import { buildDataSourceOptions } from '../data-source-options';
  * sauf autorisation explicite par ALLOW_DEMO_SEED=true (environnement vitrine).
  */
 
-loadEnv({ path: join(__dirname, '..', '..', '..', '..', '..', '.env') });
+// `quiet` : dotenv 17 affiche sinon une bannière publicitaire à chaque exécution.
+loadEnv({ path: join(__dirname, '..', '..', '..', '..', '..', '.env'), quiet: true });
 
 /** Autorisation explicite de semer malgré NODE_ENV=production (voir `run`). */
 const ALLOW_DEMO_SEED = process.env.ALLOW_DEMO_SEED?.trim().toLowerCase() === 'true';
@@ -101,31 +102,71 @@ export const DEMO_ACCOUNTS = [
  * e-mail de contact, comme au comptoir. Noms volontairement réalistes.
  */
 const DEMO_PATIENTS = [
-  { id: uuid('55555555', 1), firstName: 'Émilie', lastName: 'Gagnon', email: 'emilie.gagnon@example.com' },
+  {
+    id: uuid('55555555', 1),
+    firstName: 'Émilie',
+    lastName: 'Gagnon',
+    email: 'emilie.gagnon@example.com',
+  },
   { id: uuid('55555555', 2), firstName: 'Nathan', lastName: 'Roy', email: null },
   { id: uuid('55555555', 3), firstName: 'Léa', lastName: 'Bouchard', email: null },
-  { id: uuid('55555555', 4), firstName: 'Olivier', lastName: 'Côté', email: 'olivier.cote@example.com' },
+  {
+    id: uuid('55555555', 4),
+    firstName: 'Olivier',
+    lastName: 'Côté',
+    email: 'olivier.cote@example.com',
+  },
   { id: uuid('55555555', 5), firstName: 'Fatima', lastName: 'Benali', email: null },
   { id: uuid('55555555', 6), firstName: 'Chloé', lastName: 'Dubois', email: null },
   { id: uuid('55555555', 7), firstName: 'Hugo', lastName: 'Martin', email: null },
   { id: uuid('55555555', 8), firstName: 'Liam', lastName: "O'Connor", email: null },
-  { id: uuid('55555555', 9), firstName: 'Sophie', lastName: 'Nadeau', email: 'sophie.nadeau@example.com' },
+  {
+    id: uuid('55555555', 9),
+    firstName: 'Sophie',
+    lastName: 'Nadeau',
+    email: 'sophie.nadeau@example.com',
+  },
   { id: uuid('55555555', 10), firstName: 'William', lastName: 'Gagné', email: null },
   // Patients supplémentaires : alimentent l'historique et le planning à venir,
   // pour que la liste des patients et la recherche au comptoir soient crédibles.
-  { id: uuid('55555555', 11), firstName: 'Amélie', lastName: 'Lévesque', email: 'amelie.levesque@example.com' },
+  {
+    id: uuid('55555555', 11),
+    firstName: 'Amélie',
+    lastName: 'Lévesque',
+    email: 'amelie.levesque@example.com',
+  },
   { id: uuid('55555555', 12), firstName: 'Jacob', lastName: 'Fortin', email: null },
   { id: uuid('55555555', 13), firstName: 'Noémie', lastName: 'Pelletier', email: null },
-  { id: uuid('55555555', 14), firstName: 'Antoine', lastName: 'Girard', email: 'antoine.girard@example.com' },
+  {
+    id: uuid('55555555', 14),
+    firstName: 'Antoine',
+    lastName: 'Girard',
+    email: 'antoine.girard@example.com',
+  },
   { id: uuid('55555555', 15), firstName: 'Yasmine', lastName: 'Haddad', email: null },
   { id: uuid('55555555', 16), firstName: 'Thomas', lastName: 'Beaulieu', email: null },
-  { id: uuid('55555555', 17), firstName: 'Camille', lastName: 'Ouellet', email: 'camille.ouellet@example.com' },
+  {
+    id: uuid('55555555', 17),
+    firstName: 'Camille',
+    lastName: 'Ouellet',
+    email: 'camille.ouellet@example.com',
+  },
   { id: uuid('55555555', 18), firstName: 'Raphaël', lastName: 'Mercier', email: null },
   { id: uuid('55555555', 19), firstName: 'Jade', lastName: 'Boucher', email: null },
-  { id: uuid('55555555', 20), firstName: 'Samuel', lastName: 'Desjardins', email: 'samuel.desjardins@example.com' },
+  {
+    id: uuid('55555555', 20),
+    firstName: 'Samuel',
+    lastName: 'Desjardins',
+    email: 'samuel.desjardins@example.com',
+  },
   { id: uuid('55555555', 21), firstName: 'Maya', lastName: 'Sirois', email: null },
   { id: uuid('55555555', 22), firstName: 'Étienne', lastName: 'Lapointe', email: null },
-  { id: uuid('55555555', 23), firstName: 'Priya', lastName: 'Sharma', email: 'priya.sharma@example.com' },
+  {
+    id: uuid('55555555', 23),
+    firstName: 'Priya',
+    lastName: 'Sharma',
+    email: 'priya.sharma@example.com',
+  },
   { id: uuid('55555555', 24), firstName: 'Gabriel', lastName: 'Morin', email: null },
 ] as const;
 
@@ -320,7 +361,7 @@ const AVAILABILITIES: readonly AvailabilityConfig[] = [
     end: todayAt(18),
     slotDurationMin: 30,
     type: AvailabilityType.TIME_OFF,
-    note: "Congé — après-midi",
+    note: 'Congé — après-midi',
   },
   {
     id: AVAIL.lefebvreDemain,

@@ -1,242 +1,207 @@
 # MediPlan
 
-**Plateforme web de gestion des rendez-vous médicaux**
-Projet intégrateur — Programmation informatique — Collège La Cité — Session Printemps 2026
+**Medical appointment scheduling platform for small and mid-sized clinics.**
+Capstone project — Computer Programming, Collège La Cité, Spring 2026.
 
----
+> 🇫🇷 La version française d'origine (livrables académiques, guide d'utilisation, dossier de conception) est conservée dans [`README.fr.md`](README.fr.md).
 
-## 🚀 L'application en ligne
+**Live application:** https://ca-mediplan-frontend.ashytree-9ad5012f.canadacentral.azurecontainerapps.io
+*First request takes 10–15 s: both containers are scaled to zero and need to wake up.*
 
-**`https://ca-mediplan-frontend.ashytree-9ad5012f.canadacentral.azurecontainerapps.io`**
-
-> ⏱️ Le premier accès prend **10 à 15 secondes** : les conteneurs sont en
-> *scale-to-zero* et doivent se réveiller. Ensuite, la navigation est instantanée.
-
-| Rôle | Identifiant | Mot de passe |
+| Role | Email | Password |
 | --- | --- | --- |
-| Réception | `admin.demo@mediplan.test` | `Adm1n!Secret` |
-| Médecin | `doctor.demo@mediplan.test` | `Doct0r!Secret` | 
+| Reception | `admin.demo@mediplan.test` | `Adm1n!Secret` |
+| Doctor | `doctor.demo@mediplan.test` | `Doct0r!Secret` |
 | Patient | `patient.demo@mediplan.test` | `Pat1ent!Secret` |
 
-Comptes de démonstration, **données entièrement fictives**. Aucune donnée réelle de
-patient n'est manipulée par la plateforme.
+Demonstration accounts, **entirely fictional data**. No real patient information is handled by the platform.
 
-## 📦 Livrables
+## Overview
 
-Les documents de remise sont en **PDF**. Le Markdown reste la source, lisible
-directement sur GitHub.
+MediPlan replaces the heterogeneous tools a small clinic typically runs on — phone calls, paper agendas, spreadsheets — with a single shared calendar used by the reception desk, the doctors and the patients themselves. It is a four-role, multi-clinic web application: availabilities generate bookable slots, appointments move through a day-flow workflow, and every query is scoped to the caller's clinic **on the server**, not in the UI.
 
-| Livrable | PDF | Source |
-| --- | --- | --- |
-| 🎬 **Vidéo démonstrative** — 4 min 05 | [`MediPlan-Demo.mp4`](MediPlan-Demo.mp4) | — |
-| 📋 **Cahier des charges final** | [PDF, 13 p.](docs/cahier-des-charges/Cahier_des_charges_MediPlan_v2.pdf) | [`.md`](docs/cahier-des-charges/Cahier-des-charges-v2.md) · [`.docx`](docs/cahier-des-charges/Cahier_des_charges_MediPlan_v2.docx) |
-| 📄 **Rapport final de projet** | [PDF, 8 p.](docs/MediPlan-Rapport-Final.pdf) | [`.md`](docs/RAPPORT-FINAL.md) · [`.docx`](docs/MediPlan-Rapport-Final.docx) |
-| 📘 **Manuel d'utilisation** | [PDF, 18 p.](docs/guide-utilisation/MediPlan-Manuel-Utilisation.pdf) | [`.md`](docs/guide-utilisation/README.md) |
-| 📐 **Dossier de conception** | — | [`docs/conception/`](docs/conception/) — diagrammes affichés directement sur GitHub |
-| ✅ **Tests, résultats, bogues corrigés** | [PDF, 7 p.](docs/tests/MediPlan-Tests-et-Resultats.pdf) | [`.md`](docs/tests/plan-et-resultats.md) |
-| 👥 **Contributions individuelles** | [PDF, 6 p.](docs/presentation/MediPlan-Contributions.pdf) | [`.md`](docs/presentation/CONTRIBUTIONS.md) |
-| 🖥️ **Support de présentation** | — | [`docs/presentation/`](docs/presentation/) |
+## Problem
 
-Index complet de la documentation : [`docs/README.md`](docs/README.md).
+Small clinics coordinate appointments across tools that do not talk to each other. The reception desk holds the authoritative agenda; doctors do not see their own day without asking; patients cannot book anything themselves; and nothing prevents the same slot from being sold twice when two people write at the same time. Cancellations are verbal, so the freed slot is rarely reused, and there is no measurement of no-shows or occupancy.
 
-## Présentation
+## Solution
 
-MediPlan est une plateforme web qui centralise la prise et l'annulation de
-rendez-vous médicaux pour des cliniques de petite et moyenne taille. Elle remplace
-les outils hétérogènes actuels (appels téléphoniques, agendas papier, fichiers
-Excel) par un agenda unique, partagé entre la réception et les médecins.
+One PostgreSQL-backed application where:
 
-Quatre rôles interagissent avec la plateforme :
+- a doctor's **availability window** automatically materialises into individual slots of a configurable duration;
+- the **reception desk** books on behalf of a caller, and a **patient** books the same slots in self-service — both paths go through the *same* transaction, the *same* pessimistic lock and the *same* partial unique index, so the anti-double-booking guarantee does not depend on the channel;
+- the **day flow** tracks each appointment through Booked → Arrived → In consultation → Completed, with cancellation requiring a reason (which is what makes the slot reusable);
+- **statistics** (volume, no-show rate, occupancy) and a **CSV export** turn the agenda into something a clinic manager can act on.
 
-| Rôle                           | Ce qu'il fait                                                            |
-| ------------------------------ | ------------------------------------------------------------------------ |
-| **Administrateur de clinique** | *L'utilisateur principal.* Disponibilités, réservations, flux du jour, statistiques, utilisateurs |
-| **Médecin**                    | Consulte son tableau de bord, ses disponibilités et le flux du jour      |
-| **Patient**                    | Réserve un rendez-vous en libre-service et consulte les siens            |
-| **Super administrateur**       | Supervise l'ensemble des cliniques                                       |
+## Key Features
 
-Chaque utilisateur ne voit que les données de **sa** clinique — une règle appliquée
-par le serveur, pas par l'affichage.
+- Authentication: registration, JWT login, bcrypt hashing (cost 12), account lockout after repeated failures, password reset by single-use hashed token
+- Four roles — super administrator, clinic administrator, doctor, patient — with server-enforced clinic scoping
+- Doctor availability windows with automatic slot generation
+- Reception booking and patient self-service booking, both concurrency-safe
+- Day flow with status transitions and mandatory cancellation reason
+- Notifications, statistics dashboard (volume, no-show, occupancy), CSV export
+- Public clinic directory, dark mode, responsive Angular Material 3 interface
+- Idempotent demonstration dataset (`pnpm --filter backend seed:demo`)
 
-## Stack technique
+## My Role
 
-| Couche          | Technologie                                                |
-| --------------- | ---------------------------------------------------------- |
-| Frontend        | Angular 22 (standalone, Signals) + Angular Material 3 + Tailwind 4 |
-| Backend         | NestJS 11 (API REST `api/v1`) + TypeORM + JWT/Passport     |
-| Base de données | PostgreSQL — schéma piloté uniquement par migrations versionnées |
-| Déploiement     | Docker Compose (local) · Azure Container Apps + Neon (en ligne) |
-| Qualité         | Jest (203 tests), ESLint, Prettier, GitHub Actions          |
+Team of three (Souleymane Diallo, Zakaria Lahouiri, Larbi Saib). My scope, traced commit by commit in [`docs/presentation/CONTRIBUTIONS.md`](docs/presentation/CONTRIBUTIONS.md): project lead, technical foundation and delivery — Turborepo/pnpm monorepo, Docker Compose, GitHub Actions CI; the whole authentication and authorisation layer (JWT, bcrypt, lockout, password reset, four-role access control with clinic scope); the frontend shell and design system; patient self-service booking; appointment cancellation; the partial unique index that makes cancellation possible without permanently burning the slot; the Azure deployment described entirely in Bicep; and the final integration of my teammates' branches. 72 of the 84 merged commits on `main` are mine. Zakaria delivered availabilities, day flow and notifications; Larbi delivered appointments, the patient entity and statistics.
 
-## Structure du dépôt
-
-Monorepo géré avec **Turborepo + pnpm workspaces** :
+## Architecture
 
 ```
-.
-├── apps/
-│   ├── backend/    ← API NestJS (TypeScript, TypeORM, PostgreSQL)
-│   └── frontend/   ← Application Angular (Angular Material, standalone components)
-├── packages/       ← Paquets partagés (vide pour l'instant)
-├── MediPlan-Demo.mp4 ← Vidéo démonstrative (4 min 05)
-├── docs/           ← Toute la documentation — voir docs/README.md
-│   ├── RAPPORT-FINAL.md    ← Rapport final de projet (+ .docx)
-│   ├── guide-utilisation/  ← Manuel d'utilisation, avec captures d'écran
-│   ├── cahier-des-charges/ ← v1.0 (initiale) et v2.0 (finale, LIV-05)
-│   ├── conception/ ← Diagrammes UML, ERD, explications écrites (LIV-06)
-│   ├── tests/      ← Stratégie de test, résultats, bogues corrigés
-│   ├── deployment/ ← Mise en ligne sur Azure
-│   ├── frontend/   ← Design system et audit UX/UI
-│   ├── presentation/ ← Présentation finale du 13 août 2026
-│   └── archives/   ← Documents périmés, conservés pour l'historique
-├── infra/          ← Infrastructure Azure décrite en Bicep
-├── scripts/        ← deploy.sh, teardown.sh
-├── package.json    ← Scripts racine (délégués à Turbo)
-├── pnpm-workspace.yaml
-├── turbo.json      ← Pipelines de tâches (build/lint/test/dev)
-├── docker-compose.yml ← Orchestration locale (postgres + backend + frontend)
-├── docker/         ← Dockerfiles (backend, frontend) + config nginx
-├── .env.example    ← Modèle de configuration (copier en .env)
-└── README.md
+apps/backend    NestJS 11 — modular (auth, user, clinic, availability,
+                appointment, notification, statistics, health)
+                controller → service → TypeORM repository, DTOs validated
+                by class-validator, global exception filter
+apps/frontend   Angular 22 standalone + Signals — core / features / shared,
+                lazy-loaded routes, Angular Material 3 + Tailwind 4
+packages/       shared packages (currently empty)
+infra/          Azure infrastructure as Bicep templates
+docker/         multi-stage Dockerfiles (backend, frontend + nginx)
 ```
 
-## Démarrage (développement local)
-
-> 📖 **Nouveau sur le projet ?** Suivez le [**Guide du collaborateur** (`CONTRIBUTING.md`)](CONTRIBUTING.md) : prérequis détaillés, outils, configuration de l'environnement, migrations, workflow Git et dépannage.
-
-> Prérequis : **Node.js ≥ 22.22 (ou ≥ 24.15)** — requis par Angular 22 — et **pnpm** (via Corepack : `corepack enable`, sinon `npm i -g pnpm`).
-
-```bash
-# 1. Installer les dépendances de tout le monorepo
-pnpm install
-
-# 2. Copier la configuration et renseigner les valeurs
-cp .env.example .env
-
-# 3. Lancer les apps en développement (toutes via Turbo)
-pnpm dev
-
-# Autres commandes utiles
-pnpm build         # build de toutes les apps
-pnpm lint          # lint de tout le monorepo
-pnpm test          # tests
-pnpm format        # formatage Prettier
-```
-
-## Démarrage avec Docker (« une commande »)
-
-> Prérequis : **Docker Desktop** (ou Docker Engine + Compose v2).
-
-```bash
-# Copier la configuration (des valeurs de dev par défaut existent sinon)
-cp .env.example .env
-
-# Construire et lancer postgres + backend + frontend
-docker compose up -d --build
-```
-
-| Service          | URL                                                                    |
-| ---------------- | ---------------------------------------------------------------------- |
-| Frontend (nginx) | http://localhost:4200                                                  |
-| API backend      | http://localhost:4200/api/v1 (proxy) — ou http://localhost:3000/api/v1 |
-| Santé backend    | http://localhost:3000/health                                           |
-| PostgreSQL       | localhost:5432                                                         |
-
-```bash
-docker compose ps        # état des conteneurs
-docker compose logs -f   # journaux
-docker compose down      # arrêter (le volume de données est conservé)
-```
-
-## Déploiement (Azure)
-
-L'application est déployée sur **Azure Container Apps**, avec une base PostgreSQL
-infogérée hébergée chez Neon.
-
-> **Coût : ~0 $/mois.** Le projet tourne sur un crédit étudiant de 100 $ non
-> renouvelable : les deux conteneurs sont en *scale-to-zero* (rien ne tourne, donc
-> rien n'est facturé au repos) et leur consommation reste sous la franchise
-> mensuelle gratuite de Container Apps. Détail des coûts et justification de
-> chaque choix : [`infra/README.md`](infra/README.md).
+Production topology — the backend has **no public address**:
 
 ```
 Internet (HTTPS)
     │
-ca-mediplan-frontend   ingress externe · nginx + Angular · minReplicas 0
-    │  proxy /api/ (réseau privé)
-ca-mediplan-backend    ingress interne · NestJS · minReplicas 0
-    │  TLS obligatoire
-PostgreSQL (Neon)      hors Azure, palier gratuit
+ca-mediplan-frontend   external ingress · nginx + Angular · minReplicas 0
+    │  proxies /api/ over the private network
+ca-mediplan-backend    internal ingress · NestJS · minReplicas 0
+    │  TLS required
+PostgreSQL (Neon)      managed, free tier
 ```
 
-Le backend **n'a aucune adresse publique** : il n'est joignable que par le
-frontend. L'API est donc hors d'atteinte directe depuis Internet, et le navigateur
-ne voyant qu'une seule origine, aucune configuration CORS n'est nécessaire.
+Because the browser only ever sees one origin, no CORS configuration is needed at all.
 
-### Déployer
+## Tech Stack
 
-> Prérequis : **Azure CLI** connecté (`az login`), et un fichier `.env.azure` à la
-> racine (ignoré par git) contenant `DATABASE_URL` et `JWT_SECRET`.
+| Layer | Technology |
+| --- | --- |
+| Frontend | Angular 22 (standalone, Signals), Angular Material 3, Tailwind CSS 4 |
+| Backend | NestJS 11, TypeORM, Passport JWT, bcrypt, class-validator |
+| Database | PostgreSQL — schema driven exclusively by versioned migrations |
+| Build | Turborepo + pnpm workspaces |
+| Infrastructure | Azure Container Apps (scale-to-zero), Neon PostgreSQL, GitHub Container Registry, Bicep |
+| Quality | Jest (72 tests), Vitest (133 tests), ESLint, Prettier, GitHub Actions |
+
+## Technical Highlights
+
+- **Concurrency-safe booking.** A partial unique index (`uq_appointment_active_slot`, excluding cancelled rows) plus a `pessimistic_write` lock inside the booking transaction. The partial predicate is the point: a plain unique constraint would keep a cancelled slot blocked forever.
+- **Server-side tenancy.** Clinic scope comes from the JWT, never from the request body; a patient booking cannot name another patient, and a doctor querying another doctor's appointment gets 404 rather than 403 (no existence leak).
+- **Migration-only schema.** `synchronize: false`, `migrationsRun: false`, entities and migrations listed explicitly in `data-source-options.ts` rather than resolved by directory glob — deterministic across ts-node, `dist` and Jest.
+- **One connection builder.** `buildDataSourceOptions()` is shared by the NestJS runtime, the migration CLI and the seed script, and accepts either `DATABASE_URL` or separate `DB_*` variables.
+- **Infrastructure as code.** No Azure resource is created by hand; `./scripts/deploy.sh --what-if` previews every deployment before it is applied. Running cost is kept at roughly $0/month on a non-renewable student credit through scale-to-zero.
+
+## Challenges & Solutions
+
+**A bug that only existed in production.** Once deployed, every API call returned 404 while everything worked locally. Searching the code, the routes and the configuration found nothing, because the problem was not there. Changing method — looking for what *differed* between the two environments rather than what was broken — located it in the routing layer: the nginx proxy forwarded the browser's `Host` header, and Azure Container Apps routes on that header, whereas Docker Compose locally does not route that way at all. The fix is one line (`proxy_set_header Host $proxy_host`), the lesson is that a working development environment proves nothing about production. The same shape of problem appeared twice more: Windows line endings preventing a container entrypoint from starting, and clinic opening hours shifted by four hours because the container runs in UTC.
+
+**Cancellation versus uniqueness.** The first anti-double-booking constraint was a plain unique index, which made cancelled slots permanently unbookable. Replacing it with a partial unique index that excludes cancelled rows is what made the cancellation feature possible at all.
+
+## Installation
+
+Prerequisites: **Node.js ≥ 22.22.3 (or ≥ 24.15)** — required by Angular 22 — and **pnpm** (`corepack enable`, otherwise `npm i -g pnpm@11.7.0`). An `.nvmrc` is provided.
 
 ```bash
-# Prévisualiser les changements sans rien appliquer
-./scripts/deploy.sh --what-if
-
-# Déployer (réaffiche le plan, puis demande confirmation)
-./scripts/deploy.sh
-
-# Peupler le jeu de démonstration — ÉCRASE les données existantes
-az containerapp job start --name caj-mediplan-seed --resource-group rg-projet-dev
-
-# Tout supprimer
-./scripts/teardown.sh
+pnpm install
+cp .env.example .env    # then fill in the values
 ```
 
-Toute l'infrastructure est décrite en **Bicep** dans [`infra/`](infra/) : aucune
-ressource n'est créée à la main, et chaque déploiement est prévisualisé avant
-d'être appliqué. Le guide complet — première mise en ligne, dépannage, comptes de
-démonstration — est dans
-[`docs/deployment/azure.md`](docs/deployment/azure.md).
+New to the project? [`CONTRIBUTING.md`](CONTRIBUTING.md) covers prerequisites, tooling, migrations, the Git workflow and troubleshooting in detail.
 
-## Utiliser l'application
+## Environment Variables
 
-Une fois lancée — en ligne, avec Docker ou en développement — l'application
-s'utilise dans un navigateur, sans rien installer de plus.
+Copy `.env.example` to `.env` (git-ignored) and fill it in. Every variable is documented inline in that file. The essentials:
 
-📘 **[Manuel d'utilisation](docs/guide-utilisation/)** — écran par écran, rôle par
-rôle : se connecter, publier une plage de disponibilité, réserver pour un patient
-au téléphone, suivre le flux du jour, annuler, consulter les statistiques. Avec
-captures d'écran, et une section « en cas de problème ».
-
-🎬 **[Vidéo démonstrative](MediPlan-Demo.mp4)** (4 min 05) — le même parcours,
-commenté à voix haute par les trois membres de l'équipe.
-
-### Les gestes essentiels, en résumé
-
-| Je veux… | Où |
+| Variable | Purpose |
 | --- | --- |
-| Ouvrir des créneaux pour un médecin | **Disponibilités** → *Ajouter une plage* — les créneaux se génèrent seuls |
-| Réserver pour un patient au téléphone | Bouton **Nouveau rendez-vous** — médecin, créneau, patient |
-| Suivre la journée en cours | **Flux du jour** — Réservé → Arrivé → En consultation → Terminé |
-| Annuler un rendez-vous | **Flux du jour** → bouton ⋯ → *Annuler* — le motif est obligatoire |
-| Mesurer l'activité | **Statistiques** — volume, no-show, occupation |
-| Récupérer les rendez-vous dans un tableur | **Flux du jour** → *Exporter CSV* |
+| `DATABASE_URL` *or* `DB_HOST`/`DB_PORT`/`DB_NAME`/`DB_USER`/`DB_PASSWORD` | Database connection. `DATABASE_URL` takes precedence and is the form managed hosts hand you. |
+| `DB_SSL` | `false` locally, **`true`** against any managed database. |
+| `JWT_SECRET` | ≥ 32 random characters, different per environment. The backend refuses to start without it — but only its *length* is checked, so the placeholder in `.env.example` must be replaced. |
+| `JWT_EXPIRES_IN`, `BCRYPT_ROUNDS`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCK_DURATION_MINUTES`, `PASSWORD_RESET_TOKEN_TTL_MINUTES` | Security policy. |
+| `BACKEND_PORT`, `FRONTEND_PORT` | Local ports. |
 
-## Dossier de conception
+Cloud-only variables (`RUN_MIGRATIONS_ON_BOOT`, `ALLOW_DEMO_SEED`, `BACKEND_ORIGIN`) are injected as Container Apps secrets, never placed in the local `.env`. No secret is ever committed.
 
-Le dossier de conception se trouve dans [`docs/conception/`](docs/conception/) :
-7 diagrammes de cas d'utilisation, diagramme de classes, 3 diagrammes de séquence,
-diagramme entité-association, et une explication écrite pour chacun.
+## Running the Project
 
-## Suivi de projet
+```bash
+pnpm dev      # backend + frontend through Turbo
+pnpm build
+pnpm lint
+pnpm format
+```
 
-La planification (épiques, user stories, tâches, statuts et responsables) est tenue
-à jour dans **Jira** — projet `MEDIPLAN`. Le déroulé du projet, ce qui a changé en
-cours de route et le bilan sont dans le
-[**rapport final**](docs/RAPPORT-FINAL.md).
+With Docker (one command, requires Docker Desktop or Engine + Compose v2):
 
-## Équipe
+```bash
+docker compose up -d --build
+```
 
-- Souleymane DIALLO
-- Zakaria Lahouiri
-- Larbi Saib
+| Service | URL |
+| --- | --- |
+| Frontend (nginx) | http://localhost:4200 |
+| Backend API | http://localhost:4200/api/v1 (proxied) or http://localhost:3000/api/v1 |
+| Backend health | http://localhost:3000/health |
+| PostgreSQL | localhost:5432 |
+
+Database:
+
+```bash
+pnpm --filter backend migration:run    # apply migrations
+pnpm --filter backend seed:demo        # demonstration dataset (overwrites it)
+```
+
+## Testing
+
+```bash
+pnpm test                              # 205 tests: 72 Jest (backend) + 133 Vitest (frontend)
+pnpm --filter backend test:e2e         # 8 end-to-end tests, needs a running database
+```
+
+The test plan, results and the list of bugs found and fixed are in [`docs/tests/`](docs/tests/).
+
+## Production Build
+
+```bash
+pnpm build
+```
+
+Backend output in `apps/backend/dist/`, frontend in `apps/frontend/dist/frontend/browser/` — the path the nginx image copies. The frontend production bundle is 819 kB raw / 174 kB transferred, above the 500 kB warning budget (icon font, see *Future Improvements*).
+
+Deployment to Azure:
+
+```bash
+./scripts/deploy.sh --what-if   # preview, changes nothing
+./scripts/deploy.sh             # re-displays the plan, then asks for confirmation
+./scripts/teardown.sh           # remove everything
+```
+
+The complete guide — first deployment, troubleshooting, demo accounts — is in [`docs/deployment/azure.md`](docs/deployment/azure.md); cost and SKU choices in [`infra/README.md`](infra/README.md).
+
+## Screenshots
+
+Screen-by-screen walkthrough with screenshots, by role: [`docs/guide-utilisation/`](docs/guide-utilisation/) (French).
+
+## Live Demo
+
+- Application: https://ca-mediplan-frontend.ashytree-9ad5012f.canadacentral.azurecontainerapps.io
+- Video walkthrough (4 min 05, French): [`MediPlan-Demo.mp4`](MediPlan-Demo.mp4)
+
+## Future Improvements
+
+Known limitations, stated honestly:
+
+- **JWT in `localStorage`** with no refresh token and no revocation list; a deactivated account keeps access until the token expires (≤ 60 min). Moving to an httpOnly cookie and re-reading the account status on each request are the next security steps.
+- **Accessibility:** 8 ESLint errors remain on clickable elements that are not keyboard-focusable; 18 backend lint errors remain, all in test files (typing of test doubles).
+- **Formatting debt:** 41 files are not Prettier-compliant. Lint and format are reported by CI without blocking; compilation and tests block.
+- **Bundle size:** the Material Symbols icon font alone weighs 3.9 MB and four font families are bundled; subsetting the icon font and keeping a single family would bring the initial bundle back under budget.
+- **Migrations on boot** with up to two replicas rely on TypeORM's `migrations` table and its transaction rather than an application-level lock.
+- No API documentation is generated (no Swagger/OpenAPI), and there is no request logging or metrics export.
+
+---
+
+Project tracking (epics, user stories, statuses, owners) is kept in Jira, project `MEDIPLAN`. The full account of how the project unfolded, what changed along the way and the retrospective is in the [final report](docs/RAPPORT-FINAL.md) (French).

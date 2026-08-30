@@ -51,7 +51,7 @@ Le fichier `.env` (copié depuis `.env.example`) alimente le backend **et** Dock
 | -------- | ---- | ---- |
 | `DB_HOST` | Hôte PostgreSQL | `127.0.0.1` hors Docker ; `postgres` dans Compose (géré automatiquement). Sous Windows, préférer `127.0.0.1` à `localhost` (cf. §9). |
 | `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` | Connexion BD | Cohérents avec le service `postgres`. |
-| `JWT_SECRET` | Clé de signature des JWT | **≥ 32 caractères**, aléatoire, différent par environnement. Le backend refuse de démarrer sinon. |
+| `JWT_SECRET` | Clé de signature des JWT | **≥ 32 caractères**, aléatoire, différent par environnement. Le backend refuse de démarrer si le secret est absent ou plus court. Attention : la longueur est le seul contrôle — le gabarit de `.env.example` la respecte et serait accepté tel quel, il **doit** être remplacé par une valeur générée. |
 | `JWT_EXPIRES_IN` | Durée de validité du jeton | ex. `60m`. |
 | `BCRYPT_ROUNDS` | Coût du hachage des mots de passe | `12` (décision sécurité). |
 | `BACKEND_PORT` / `FRONTEND_PORT` | Ports applicatifs | `3000` / `4200`. |
@@ -166,7 +166,7 @@ pnpm build                                 # Build de production (backend + fron
 
 | Symptôme | Cause probable / solution |
 | -------- | ------------------------- |
-| Le backend ne démarre pas, erreur sur le secret | `JWT_SECRET` absent ou < 32 caractères dans `.env`. |
+| Le backend ne démarre pas, erreur sur le secret | `JWT_SECRET` absent ou < 32 caractères dans `.env`. Le gabarit de `.env.example` passe le contrôle de longueur : le remplacer par un secret généré. |
 | `ECONNREFUSED` / erreurs BD au démarrage backend | Postgres pas lancé (`docker compose up -d postgres`) ou migrations non appliquées (`pnpm --filter backend migration:run`). |
 | `ECONNRESET` sur la BD **sous Windows**, alors que le conteneur est `healthy` | `localhost` résout d'abord en IPv6 (`::1`), où `wslrelay.exe` intercepte le port publié par Docker. Mettre `DB_HOST=127.0.0.1` dans `.env`. Diagnostic : `Get-NetTCPConnection -LocalPort <port> -State Listen` révèle deux processus à l'écoute. |
 | Erreurs de tables manquantes | Migrations non exécutées — relancer `migration:run`. |

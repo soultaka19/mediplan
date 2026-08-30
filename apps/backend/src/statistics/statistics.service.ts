@@ -105,14 +105,8 @@ export class StatisticsService {
       .addSelect('doctor.last_name', 'doctorLastName')
       .addSelect('doctor.email', 'doctorEmail')
       .addSelect('COUNT(appointment.id)', 'totalAppointments')
-      .addSelect(
-        'COUNT(*) FILTER (WHERE appointment.status = :completed)',
-        'completedAppointments',
-      )
-      .addSelect(
-        'COUNT(*) FILTER (WHERE appointment.status = :cancelled)',
-        'cancelledAppointments',
-      )
+      .addSelect('COUNT(*) FILTER (WHERE appointment.status = :completed)', 'completedAppointments')
+      .addSelect('COUNT(*) FILTER (WHERE appointment.status = :cancelled)', 'cancelledAppointments')
       .addSelect('COUNT(*) FILTER (WHERE appointment.status = :absent)', 'noShowAppointments')
       .where('slot.start_at >= :start', { start: period.start })
       .andWhere('slot.start_at < :end', { end: period.end })
@@ -237,7 +231,9 @@ export class StatisticsService {
 
   private resolvePeriod(query: StatisticsQueryDto): Period {
     const end = query.endDate ? this.parseDate(query.endDate, true) : new Date();
-    const start = query.startDate ? this.parseDate(query.startDate, false) : this.daysBefore(end, 30);
+    const start = query.startDate
+      ? this.parseDate(query.startDate, false)
+      : this.daysBefore(end, 30);
 
     if (start.getTime() >= end.getTime()) {
       throw new BadRequestException('La date de debut doit etre avant la date de fin.');

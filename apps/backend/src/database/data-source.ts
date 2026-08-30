@@ -12,6 +12,8 @@ import { buildDataSourceOptions } from './data-source-options';
  * Au runtime NestJS, ces mêmes options sont reconstruites via ConfigService
  * (voir database.module.ts) — la CLI, elle, lit directement process.env.
  */
-loadEnv({ path: join(__dirname, '..', '..', '..', '..', '.env') });
+// `quiet` : dotenv 17 affiche sinon une bannière (« injected env… tip: … »)
+// à chaque commande de migration.
+loadEnv({ path: join(__dirname, '..', '..', '..', '..', '.env'), quiet: true });
 
 export default new DataSource(buildDataSourceOptions(process.env));

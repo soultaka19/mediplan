@@ -594,7 +594,7 @@ export class AppointmentsService {
       this.formatDateTime(appointment.createdAt),
     ]);
 
-    return `\uFEFF${[headers, ...rows].map((row) => row.map(this.csvCell).join(',')).join('\r\n')}\r\n`;
+    return `\uFEFF${[headers, ...rows].map((row) => row.map((cell) => this.csvCell(cell)).join(',')).join('\r\n')}\r\n`;
   }
 
   private csvCell(value: string): string {

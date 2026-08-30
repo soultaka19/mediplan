@@ -1,4 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { AuthResponse } from './dto/auth-response.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -16,8 +17,14 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
  *
  * La validation des entrées est assurée par le ValidationPipe global
  * (`whitelist`, `forbidNonWhitelisted`, `transform`) appliqué aux DTO.
+ *
+ * Limite de débit : 20 requêtes par minute et par adresse IP, pour chacun de
+ * ces endpoints (429 au-delà, plus strict que la limite globale). Complète le
+ * verrouillage de compte, qui est par compte et non par IP : il freine la force
+ * brute et les verrouillages en masse, que rien ne ralentissait auparavant.
  */
 @Controller('auth')
+@Throttle({ default: { limit: 20, ttl: 60_000 } })
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

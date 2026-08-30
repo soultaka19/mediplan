@@ -5,7 +5,7 @@
   "description": "MediPlan — plateforme web de gestion de rendez-vous médicaux (monorepo Turborepo + pnpm)",
   "packageManager": "pnpm@11.7.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.22.3 <23 || >=24.15.0"
   },
   "scripts": {
     "build": "turbo run build",

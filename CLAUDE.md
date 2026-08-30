@@ -20,7 +20,7 @@ Monorepo **Turborepo + pnpm** (`pnpm@11.7.0`, Node ≥ 20).
 ```bash
 pnpm install                      # à la racine
 pnpm dev                          # backend + frontend
-pnpm test                         # tests (backend : 48 tests)
+pnpm test                         # tests (backend : 72 Jest · frontend : 133 Vitest)
 pnpm build
 
 docker compose up -d --build      # pile complète locale
@@ -78,9 +78,12 @@ Apps route selon cet en-tête, et l'erreur produit un 404 sur tous les appels
 
 ## Dette connue
 
-- **233 fichiers** jamais passés à Prettier
-- **9 erreurs eslint** dans le frontend (accessibilité clavier, une variable
-  inutilisée)
+- **41 fichiers** non conformes à Prettier (mesuré avec `--end-of-line auto`,
+  qui neutralise le bruit CRLF des postes Windows)
+- **8 erreurs eslint** dans le frontend : éléments cliquables non focalisables
+  au clavier (`click-events-have-key-events`, `interactive-supports-focus`)
+- **18 erreurs eslint** dans le backend, toutes dans des fichiers `*.spec.ts`
+  (typage des doublures de test)
 
 La CI les rapporte sans bloquer : les rendre bloquantes donnerait une CI rouge en
 permanence, donc ignorée. Compilation et tests, eux, bloquent.

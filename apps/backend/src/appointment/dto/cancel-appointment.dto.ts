@@ -9,7 +9,7 @@ import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
  * `trim` avant validation pour rejeter les saisies d'espaces uniquement.
  */
 export class CancelAppointmentDto {
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @IsNotEmpty({ message: "Le motif d'annulation est obligatoire." })
   @MaxLength(500)

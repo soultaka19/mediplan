@@ -184,9 +184,7 @@ describe('AvailabilityService', () => {
     });
 
     it('une plage de congé se supprime sans toucher aux créneaux', async () => {
-      availabilityRepo.findOne.mockResolvedValue(
-        availability({ type: AvailabilityType.TIME_OFF }),
-      );
+      availabilityRepo.findOne.mockResolvedValue(availability({ type: AvailabilityType.TIME_OFF }));
 
       await service.remove(authUser(), 'availability-1');
 

@@ -8,7 +8,11 @@ import { UserModule } from '../user/user.module';
 import { NotificationsModule } from '../notification/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Appointment, AppointmentSlot]), UserModule, NotificationsModule],
+  imports: [
+    TypeOrmModule.forFeature([Appointment, AppointmentSlot]),
+    UserModule,
+    NotificationsModule,
+  ],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],
 })
