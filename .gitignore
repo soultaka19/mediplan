@@ -18,6 +18,9 @@ coverage/
 # de production…). Alimente les scripts de /scripts, n'est JAMAIS versionné.
 .env.azure
 .env.azure.*
+# Secrets de deploiement sur le VPS : le depot y est clone JUSTE A COTE du
+# fichier, un `git add -A` distrait suffirait a le publier.
+deploy/*.env
 
 # Logs
 *.log
