@@ -1,0 +1,45 @@
+# MediPlan sur le socle partage — migration depuis Azure Container Apps.
+#
+# Ne contient QUE l'API NestJS : le front Angular est servi par Vercel depuis
+# l'edge de Montreal, PostgreSQL et Caddy sont mutualises entre les projets.
+# Le conteneur nginx du frontend (docker/frontend) n'a plus lieu d'etre ici :
+# Vercel joue ce role, et sa reecriture remplace le proxy nginx.
+#
+# Le service s'appelle `mediplan-api`, jamais `api` : le reseau `socle` est
+# partage entre les sept projets et Docker y publie un alias par nom de service.
+
+name: mediplan
+
+services:
+  mediplan-api:
+    build:
+      # Contexte a la racine du depot : le Dockerfile copie pnpm-lock.yaml,
+      # pnpm-workspace.yaml et les manifestes des deux applications.
+      context: ..
+      dockerfile: docker/backend/Dockerfile
+    image: mediplan-api:socle
+    restart: unless-stopped
+    env_file:
+      - ./mediplan.env
+    environment:
+      NODE_ENV: production
+      BACKEND_PORT: "3000"
+      # Migrations TypeORM au demarrage. Sûr : chaque migration est
+      # transactionnelle et la table `migrations` empeche tout rejeu.
+      RUN_MIGRATIONS_ON_BOOT: "true"
+    networks: [socle]
+    # Aucun port publie : Caddy joint le conteneur par le reseau interne.
+    healthcheck:
+      # /health est hors du prefixe api/v1 et verifie reellement PostgreSQL
+      # (SELECT 1) : une base injoignable rend 503, pas 200.
+      test:
+        ["CMD", "node", "-e",
+         "require('http').get('http://127.0.0.1:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+networks:
+  socle:
+    external: true
