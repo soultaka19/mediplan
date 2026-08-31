@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { Request } from 'express';
 
@@ -28,13 +28,19 @@ import { Request } from 'express';
  */
 @Injectable()
 export class ClientIpThrottlerGuard extends ThrottlerGuard {
+  // TRACE TEMPORAIRE — a retirer une fois la limitation verifiee en production.
+  private readonly journal = new Logger(ClientIpThrottlerGuard.name);
+
   protected getTracker(req: Record<string, unknown>): Promise<string> {
     const requete = req as unknown as Request;
     const entete = requete.headers?.['x-forwarded-for'];
 
     const brut = Array.isArray(entete) ? entete[0] : entete;
     const premier = brut?.split(',')[0]?.trim();
+    const cle = premier || requete.ip || 'inconnu';
 
-    return Promise.resolve(premier || requete.ip || 'inconnu');
+    this.journal.warn(`TRACE cle=${cle} xff=${JSON.stringify(entete)} reqIp=${requete.ip}`);
+
+    return Promise.resolve(cle);
   }
 }
