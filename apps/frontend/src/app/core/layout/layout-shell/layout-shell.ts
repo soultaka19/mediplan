@@ -36,6 +36,7 @@ import { NotificationCenterService } from '@features/notifications/notification-
 import { Avatar, roleLabel } from '@shared/ui';
 import { resolveDisplayName } from '@shared/user/display-name';
 import { NAV_ITEMS, visibleNavItems } from '../nav-items';
+import { DemoBanner } from '../demo-banner/demo-banner';
 
 /** Rôles autorisés à réserver un rendez-vous depuis la topbar (comme l'onglet dédié). */
 const BOOKING_ROLES = ['clinic_admin', 'super_admin'] as const;
@@ -71,6 +72,7 @@ const RAIL_STORAGE_KEY = 'mp-rail-collapsed';
     MatMenuModule,
     MatDividerModule,
     Avatar,
+    DemoBanner,
   ],
   templateUrl: './layout-shell.html',
   styleUrl: './layout-shell.scss',

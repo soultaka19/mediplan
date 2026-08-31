@@ -24,10 +24,15 @@ export class ClinicsService {
    * sa clinique AVANT d'avoir un compte, donc avant d'avoir un jeton. On
    * n'expose que le nom et l'adresse — aucune donnée d'exploitation (horaires
    * internes, effectifs, identifiants de praticiens).
+   *
+   * Les cliniques de démonstration sont exclues : ce sont des bacs à sable
+   * jetables appartenant chacun à un visiteur. Les laisser ici encombrerait le
+   * sélecteur d'inscription et révélerait à chaque visiteur l'existence des
+   * espaces des autres.
    */
   async findAllPublic(): Promise<PublicClinicResponse[]> {
     const clinics = await this.clinicRepository.find({
-      where: { isActive: true },
+      where: { isActive: true, isDemo: false },
       order: { name: 'ASC' },
       select: { id: true, name: true, address: true },
     });

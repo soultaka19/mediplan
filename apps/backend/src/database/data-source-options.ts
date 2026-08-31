@@ -13,6 +13,7 @@ import { CreateAvailability1781674897614 } from './migrations/1781674897614-Crea
 import { AddAppointmentReceptionBooking1781674897615 } from './migrations/1781674897615-AddAppointmentReceptionBooking';
 import { AddSlotUniqueDoctorStart1781674897616 } from './migrations/1781674897616-AddSlotUniqueDoctorStart';
 import { CreateNotification1781674897617 } from './migrations/1781674897617-CreateNotification';
+import { AddClinicDemoSandbox1781674897618 } from './migrations/1781674897618-AddClinicDemoSandbox';
 
 /**
  * Construit les options TypeORM partagées entre :
@@ -116,6 +117,7 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
       AddAppointmentReceptionBooking1781674897615,
       AddSlotUniqueDoctorStart1781674897616,
       CreateNotification1781674897617,
+      AddClinicDemoSandbox1781674897618,
     ],
 
     namingStrategy: new SnakeNamingStrategy(),

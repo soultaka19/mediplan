@@ -38,6 +38,20 @@ export class Clinic {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  /**
+   * Clinique de démonstration, créée à la volée pour un visiteur du portfolio.
+   * Elle est supprimée automatiquement passé `expiresAt`.
+   */
+  @Column({ type: 'boolean', default: false })
+  isDemo: boolean;
+
+  /**
+   * Expiration d'un bac à sable. NULL pour une clinique réelle, qui n'expire
+   * jamais — c'est ce qui garantit qu'une purge ne peut pas l'emporter.
+   */
+  @Column({ type: 'timestamptz', nullable: true })
+  expiresAt: Date | null;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 

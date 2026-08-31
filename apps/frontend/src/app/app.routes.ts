@@ -17,6 +17,14 @@ import { authGuard, guestGuard, roleGuard } from '@core/auth';
  * sous la protection de l'`authGuard` parent.
  */
 export const routes: Routes = [
+  // Démonstration publique : crée un bac à sable jetable et y entre
+  // directement. Aucune garde — c'est justement le point d'entrée de
+  // quelqu'un qui n'a pas de compte, et `guestGuard` renverrait un visiteur
+  // déjà en démonstration vers le tableau de bord.
+  {
+    path: 'demo',
+    loadComponent: () => import('@features/demo/demo-entry-page').then((m) => m.DemoEntryPage),
+  },
   {
     path: '',
     loadComponent: () => import('@core/layout').then((m) => m.AuthLayout),

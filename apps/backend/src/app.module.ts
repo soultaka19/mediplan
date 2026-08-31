@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DemoModule } from './demo/demo.module';
 import { HealthController } from './health/health.controller';
 import { DatabaseModule } from './database/database.module';
 import { ClinicModule } from './clinic/clinic.module';
@@ -42,6 +43,7 @@ import { NotificationsModule } from './notification/notifications.module';
     AppointmentsModule,
     StatisticsModule,
     NotificationsModule,
+    DemoModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
