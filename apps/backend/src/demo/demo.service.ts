@@ -102,8 +102,11 @@ export class DemoService {
       clinicName: `Clinique de démonstration ${suffix}`,
       sandboxExpiresAt: expiresAt.toISOString(),
       sharedPassword: password,
+      // Un compte par rôle : le sélecteur du bandeau sert à montrer le contrôle
+      // d'accès, pas à parcourir l'annuaire. Le second médecin et les autres
+      // patients existent pour remplir l'agenda, pas pour être incarnés.
       accounts: accounts
-        .filter((a) => a.role !== UserRole.PATIENT || a.featured)
+        .filter((a) => a.featured)
         .map(({ email, role, firstName, lastName }) => ({
           email,
           role,
